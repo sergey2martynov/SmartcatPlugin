@@ -100,7 +100,6 @@
     <Compile Include="Models\Smartcat\GetDirectoryList\GetDataDirectoriesResponse.cs" />
     <Compile Include="Models\Smartcat\GetFileList\GetDataItemsResponse.cs" />
     <Compile Include="Panels\CustomPanel.cs" />
-    <Compile Include="Services\ItemLocalizationService.cs" />
     <Compile Include="sitecore modules\shell\BusketModal.aspx.cs">
       <DependentUpon>BusketModal.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
