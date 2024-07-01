@@ -83,11 +83,13 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="API\RegisterRoutesBase.cs" />
     <Compile Include="Commands\ShowBasketCommand.cs" />
-    <Compile Include="Constants\Constants.cs" />
-    <Compile Include="Controllers\RegisterPageRoutes.cs" />
-    <Compile Include="API\SessionRouteHandler.cs" />
+    <Compile Include="Constants\ConstantsIds.cs" />
+    <Compile Include="Constants\ConstantItemTypes.cs" />
+    <Compile Include="Controllers\ServicesConfigurator.cs" />
+    <Compile Include="Extensions\ContentSearchExtension.cs" />
+    <Compile Include="Models\Smartcat\GetFileList\DataItem.cs" />
+    <Compile Include="Models\Smartcat\GetFileList\GetDataItemsRequest.cs" />
     <Compile Include="Extensions\SitecoreExtensions.cs" />
     <Compile Include="Models\ItemField.cs" />
     <Compile Include="Models\ItemModel.cs" />
@@ -96,7 +98,9 @@
     <Compile Include="Models\Smartcat\GetDirectoryList\DataDirectory.cs" />
     <Compile Include="Models\Smartcat\GetDirectoryList\GetDataDirectoriesRequest.cs" />
     <Compile Include="Models\Smartcat\GetDirectoryList\GetDataDirectoriesResponse.cs" />
+    <Compile Include="Models\Smartcat\GetFileList\GetDataItemsResponse.cs" />
     <Compile Include="Panels\CustomPanel.cs" />
+    <Compile Include="Services\ItemLocalizationService.cs" />
     <Compile Include="sitecore modules\shell\BusketModal.aspx.cs">
       <DependentUpon>BusketModal.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -105,6 +109,7 @@
       <DependentUpon>BusketModal.aspx</DependentUpon>
     </Compile>
     <Compile Include="Controllers\PageController.cs" />
+    <Compile Include="Extensions\ItemExtensions.cs" />
   </ItemGroup>
   <ItemGroup />
   <PropertyGroup>

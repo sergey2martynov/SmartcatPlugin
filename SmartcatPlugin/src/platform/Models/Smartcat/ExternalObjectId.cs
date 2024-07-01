@@ -9,5 +9,7 @@ namespace SmartcatPlugin.Models.Smartcat
 
         [JsonProperty("externalType")]
         public string ExternalType { get; set; }
+
+        public static ExternalObjectId Empty = new ExternalObjectId();
     }
 }

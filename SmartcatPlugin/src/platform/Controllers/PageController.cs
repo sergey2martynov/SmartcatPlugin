@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
@@ -7,25 +6,21 @@ using System.Web.Http;
 using Newtonsoft.Json;
 using Sitecore.Data;
 using Sitecore.Data.Items;
-using Sitecore.Services.Core;
 using SmartcatPlugin.Constants;
+using SmartcatPlugin.Extensions;
 using SmartcatPlugin.Models;
-using SmartcatPlugin.Models.Smartcat;
 using SmartcatPlugin.Models.Smartcat.GetDirectoryList;
+using SmartcatPlugin.Models.Smartcat.GetFileList;
+using SmartcatPlugin.Services;
 
 namespace SmartcatPlugin.Controllers
 {
-    [ServicesController]
+    [RoutePrefix("smartcat")]
     public class PageController : ApiController
     {
         private readonly Database _masterDb = Database.GetDatabase("master");
 
-        [HttpGet]
-        public HttpResponseMessage Index()
-        {
-            return Request.CreateResponse(HttpStatusCode.OK);
-        }
-
+        [Route("home")]
         [HttpGet]
         public HttpResponseMessage GetHome()
         {
@@ -58,13 +53,13 @@ namespace SmartcatPlugin.Controllers
             return response;
         }
 
-        [HttpPost]
         [Route("directory-list")]
-        public HttpResponseMessage GetDirectoryList([FromBody] GetDataDirectoriesRequest request)
+        [HttpPost]
+        public IHttpActionResult GetDirectoryList([FromBody] GetDataDirectoriesRequest request)
         {
             Item rootItem;
 
-            if (request.ParentDirectoryId.ExternalId == "root")
+            if (request.ParentDirectoryId.ExternalId.ToLower() == ConstantIds.Root)
             {
                 rootItem = _masterDb.GetItem("/sitecore/content/");
             }
@@ -76,57 +71,53 @@ namespace SmartcatPlugin.Controllers
 
             if (rootItem == null)
             {
-                var badResponse = new HttpResponseMessage(HttpStatusCode.NotFound) //todo create method
-                {
-                    Content = new StringContent("Directory not found"),
-                    ReasonPhrase = "Directory Not Found"
-                };
-
-                return badResponse;
+                return NotFound();
             }
-
-            var childrenItems = rootItem.Children.ToList();
 
             var getDataDirectoriesResponse = new GetDataDirectoriesResponse
             {
                 NextBatchKey = null,
-                Directories = GetChildDirectories(childrenItems)
+                Directories = rootItem.GetChildDirectories()
             };
 
-            var json = JsonConvert.SerializeObject(getDataDirectoriesResponse);
-            var response = new HttpResponseMessage(HttpStatusCode.OK)
-            {
-                Content = new StringContent(json, Encoding.UTF8, "application/json")
-            };
-
-            return response;
+            return Json(getDataDirectoriesResponse);
         }
 
-        private List<DataDirectory> GetChildDirectories(List<Item> childList)
+        [Route("file-list")]
+        [HttpPost]
+        public IHttpActionResult GetPageList([FromBody] GetDataItemsRequest request)
         {
-            if (childList == null || !childList.Any())
+            Item rootItem;
+
+            if (request.ParentDirectoryId.ExternalType != ConstantItemTypes.Folder)
             {
-                return new List<DataDirectory>();
+                return Json(GetDataItemsResponse.Empty);
             }
 
-            var directories = new List<DataDirectory>();
-
-            foreach (var item in childList)
+            if (request.ParentDirectoryId.ExternalId.ToLower() == ConstantIds.Root)
             {
-                if (item.TemplateID == ConstantIds.FolderTemplateID) //todo make base template finder
-                {
-                    directories.Add(new DataDirectory
-                    {
-                        Id = new ExternalObjectId { ExternalId = item.ID.ToString(), ExternalType = "Folder" },
-                        Name = item.Name,
-                        CanLoadChildDirectories = true,
-                        CanLoadChildItems = true,
-                        ChildDirectories = GetChildDirectories(item.Children.ToList())
-                    });
-                }
+                rootItem = _masterDb.GetItem("/sitecore/content/");
+            }
+            else
+            {
+                var id = new ID(request.ParentDirectoryId.ExternalId);
+                rootItem = _masterDb.GetItem(id);
             }
 
-            return directories;
+            if (rootItem == null)
+            {
+                return NotFound();
+            }
+
+            var service = new ItemLocalizationService();
+
+            var getDataItemsResponse = new GetDataItemsResponse
+            {
+                NextBatchKey = null,
+                Items = rootItem.GetChildPages(request.SearchQuery, _masterDb)
+            };
+
+            return Json(getDataItemsResponse);
         }
     }
 }
