@@ -88,6 +88,8 @@
     <Compile Include="Constants\ConstantItemTypes.cs" />
     <Compile Include="Controllers\ServicesConfigurator.cs" />
     <Compile Include="Extensions\ContentSearchExtension.cs" />
+    <Compile Include="Models\Smartcat\GetFileContent\FileContentRequest.cs" />
+    <Compile Include="Models\Smartcat\GetFileContent\FileContentResponse.cs" />
     <Compile Include="Models\Smartcat\GetFileList\DataItem.cs" />
     <Compile Include="Models\Smartcat\GetFileList\GetDataItemsRequest.cs" />
     <Compile Include="Extensions\SitecoreExtensions.cs" />
@@ -99,6 +101,7 @@
     <Compile Include="Models\Smartcat\GetDirectoryList\GetDataDirectoriesRequest.cs" />
     <Compile Include="Models\Smartcat\GetDirectoryList\GetDataDirectoriesResponse.cs" />
     <Compile Include="Models\Smartcat\GetFileList\GetDataItemsResponse.cs" />
+    <Compile Include="Models\Smartcat\LocJsonContent.cs" />
     <Compile Include="Panels\CustomPanel.cs" />
     <Compile Include="sitecore modules\shell\BusketModal.aspx.cs">
       <DependentUpon>BusketModal.aspx</DependentUpon>
@@ -109,6 +112,7 @@
     </Compile>
     <Compile Include="Controllers\PageController.cs" />
     <Compile Include="Extensions\ItemExtensions.cs" />
+    <Compile Include="Tools\StringSplitter.cs" />
   </ItemGroup>
   <ItemGroup />
   <PropertyGroup>

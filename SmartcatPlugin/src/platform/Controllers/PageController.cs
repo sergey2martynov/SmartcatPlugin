@@ -1,17 +1,14 @@
-﻿using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Web.Http;
-using Newtonsoft.Json;
 using Sitecore.Data;
 using Sitecore.Data.Items;
+using Sitecore.Globalization;
 using SmartcatPlugin.Constants;
 using SmartcatPlugin.Extensions;
-using SmartcatPlugin.Models;
+using SmartcatPlugin.Models.Smartcat;
 using SmartcatPlugin.Models.Smartcat.GetDirectoryList;
+using SmartcatPlugin.Models.Smartcat.GetFileContent;
 using SmartcatPlugin.Models.Smartcat.GetFileList;
-using SmartcatPlugin.Services;
 
 namespace SmartcatPlugin.Controllers
 {
@@ -19,39 +16,6 @@ namespace SmartcatPlugin.Controllers
     public class PageController : ApiController
     {
         private readonly Database _masterDb = Database.GetDatabase("master");
-
-        [Route("home")]
-        [HttpGet]
-        public HttpResponseMessage GetHome()
-        {
-            Database database = Sitecore.Configuration.Factory.GetDatabase("master");
-            Item rootItem = database.GetItem("/sitecore/content/home");
-
-            if (rootItem == null)
-            {
-                return new HttpResponseMessage(HttpStatusCode.NotFound);
-            }
-
-            var page = new PageModel()
-            {
-                Id = rootItem.ID,
-                Name = rootItem.Name,
-                Url = rootItem.Uri,
-                Fields = rootItem.Fields.Select(f => new ItemField()
-                {
-                    Name = f.Name,
-                    Value = f.Value
-                })
-            };
-
-            var json = JsonConvert.SerializeObject(page);
-            var response = new HttpResponseMessage(HttpStatusCode.OK)
-            {
-                Content = new StringContent(json, Encoding.UTF8, "application/json")
-            };
-
-            return response;
-        }
 
         [Route("directory-list")]
         [HttpPost]
@@ -109,8 +73,6 @@ namespace SmartcatPlugin.Controllers
                 return NotFound();
             }
 
-            var service = new ItemLocalizationService();
-
             var getDataItemsResponse = new GetDataItemsResponse
             {
                 NextBatchKey = null,
@@ -118,6 +80,23 @@ namespace SmartcatPlugin.Controllers
             };
 
             return Json(getDataItemsResponse);
+        }
+
+        [Route("file-content")]
+        [HttpPost]
+        public IHttpActionResult GetFileContent([FromBody] FileContentRequest request)
+        {
+            var id = new ID(request.ItemId.ExternalId);
+            var item = _masterDb.GetItem(id, Language.Parse(request.SourceLocale));
+
+            if (!item.IsHaveLayout())
+            {
+                return Json(new Dictionary<string, LocJsonContent>());
+            }
+
+            var result = item.GetItemContent(_masterDb, request);
+
+            return Json(result);
         }
     }
 }

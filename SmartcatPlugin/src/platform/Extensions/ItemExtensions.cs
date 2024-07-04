@@ -6,7 +6,9 @@ using Sitecore.Globalization;
 using SmartcatPlugin.Constants;
 using SmartcatPlugin.Models.Smartcat;
 using SmartcatPlugin.Models.Smartcat.GetDirectoryList;
+using SmartcatPlugin.Models.Smartcat.GetFileContent;
 using SmartcatPlugin.Models.Smartcat.GetFileList;
+using SmartcatPlugin.Tools;
 
 namespace SmartcatPlugin.Extensions
 {
@@ -25,8 +27,7 @@ namespace SmartcatPlugin.Extensions
 
             foreach (var childItem in childList)
             {
-                if (childItem.TemplateID == ConstantIds.FolderTemplate 
-                    || !childItem.IsHaveLayout() && childItem.HasChildren)                  //todo make base template finder
+                if (childItem.IsFolder())            //todo make base template finder
                 {
                     directories.Add(new DataDirectory
                     {
@@ -56,6 +57,11 @@ namespace SmartcatPlugin.Extensions
         public static List<DataItem> GetChildPages(this Item parentItem, string searchQuery, Database masterDb)
         {
             var childList = parentItem.Children.ToList();
+
+            //todo one query to db
+            /*var allChildren = parentItem.Axes.GetDescendants()
+                .Where(item => string.IsNullOrEmpty(request.SearchQuery) || item.Name.Contains(request.SearchQuery))
+                .ToList()*/
 
             if (!childList.Any())
             {
@@ -107,6 +113,68 @@ namespace SmartcatPlugin.Extensions
             }
 
             return locales;
+        }
+
+        public static Dictionary<string, LocJsonContent> GetItemContent(this Item item, Database masterDb, FileContentRequest request)
+        {
+            if (item == null || masterDb == null || request == null)
+            {
+                return new Dictionary<string, LocJsonContent>();
+            }
+
+            var parentItemLanguage = item.Language;
+            var allChildren = item.Axes.GetDescendants()
+                .Where(childItem => childItem.Language.Equals(parentItemLanguage) 
+                                    && (childItem.IsHaveLayout() || !childItem.IsFolder()))
+                .GroupBy(childItem => childItem.ID)
+                .Select(group => group.OrderByDescending(childItem => childItem.Version.Number).First())
+                .ToList();
+
+            var targetLanguages = request.TargetLocales
+                .Select(Language.Parse)
+                .ToList();
+
+            var locJsonDictionary = new Dictionary<string, LocJsonContent>();
+
+            var units = new List<Unit>();
+
+            foreach (var children in allChildren)
+            {
+                var fields = item.Fields
+                    .Where(f => !f.Name.StartsWith("_") && f.HasValue);
+
+                foreach (var field in fields)
+                {
+                    var unit = new Unit
+                    {
+                        Key = children.Paths.Path + "/" + field.Key,
+                        Properties = new UnitProperties(),
+                        Source = StringSplitter.SplitStringWithNewlines(field.Value)
+                    };
+
+                    units.Add(unit);
+                }
+            }
+
+            var locJsonContent = new LocJsonContent { Units = units };
+
+            foreach (var targetLanguage in targetLanguages)
+            {
+                locJsonDictionary.Add(targetLanguage.Name, locJsonContent);
+            }
+
+            return locJsonDictionary;
+        }
+
+        private static bool IsFolder(this Item item)
+        {
+            if (item.TemplateID == ConstantIds.FolderTemplate
+                || !item.IsHaveLayout() && item.HasChildren)
+            {
+                return true;
+            }
+
+            return false;
         }
     }
 }
