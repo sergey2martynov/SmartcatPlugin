@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Sitecore.Data;
 using Sitecore.Data.Items;
 using Sitecore.Globalization;
@@ -115,20 +116,16 @@ namespace SmartcatPlugin.Extensions
             return locales;
         }
 
-        public static Dictionary<string, LocJsonContent> GetItemContent(this Item item, Database masterDb, FileContentRequest request)
+        public static Dictionary<string, LocJsonContent> GetPageContent(this Item parentPage, Database masterDb, FileContentRequest request)
         {
-            if (item == null || masterDb == null || request == null)
+            if (parentPage == null || masterDb == null || request == null)
             {
                 return new Dictionary<string, LocJsonContent>();
             }
 
-            var parentItemLanguage = item.Language;
-            var allChildren = item.Axes.GetDescendants()
-                .Where(childItem => childItem.Language.Equals(parentItemLanguage) 
-                                    && (childItem.IsHaveLayout() || !childItem.IsFolder()))
-                .GroupBy(childItem => childItem.ID)
-                .Select(group => group.OrderByDescending(childItem => childItem.Version.Number).First())
-                .ToList();
+            var allChildren = parentPage.GetAllChildrenPages();
+
+            allChildren.Insert(0, parentPage);
 
             var targetLanguages = request.TargetLocales
                 .Select(Language.Parse)
@@ -140,16 +137,17 @@ namespace SmartcatPlugin.Extensions
 
             foreach (var children in allChildren)
             {
-                var fields = item.Fields
+                var fields = children.Fields
                     .Where(f => !f.Name.StartsWith("_") && f.HasValue);
 
                 foreach (var field in fields)
                 {
                     var unit = new Unit
                     {
-                        Key = children.Paths.Path + "/" + field.Key,
+                        Key = children.GetPathWithIds(parentPage) + "/" + field.Key,
                         Properties = new UnitProperties(),
-                        Source = StringSplitter.SplitStringWithNewlines(field.Value)
+                        Source = StringSplitter.SplitStringWithNewlines(field.Value),
+                        Target = new List<string>()
                     };
 
                     units.Add(unit);
@@ -164,6 +162,45 @@ namespace SmartcatPlugin.Extensions
             }
 
             return locJsonDictionary;
+        }
+
+        public static List<Item> GetAllChildrenPages(this Item item)
+        {
+            var allChildren = item.Axes.GetDescendants()
+                .Where(childItem => childItem.Language.Equals(item.Language)
+                                    && (childItem.IsHaveLayout() || !childItem.IsFolder()))
+                .GroupBy(childItem => childItem.ID)
+                .Select(group => group.OrderByDescending(childItem => childItem.Version.Number).First())
+                .ToList();
+
+            return allChildren;
+        }
+
+        public static string GetPathWithIds(this Item childrenPage, Item parentPage)
+        {
+            if (childrenPage == null)
+            {
+                return string.Empty;
+            }
+
+            var pathWithIds = new StringBuilder();
+            var currentItem = childrenPage;
+
+            if (childrenPage == parentPage)
+            {
+                pathWithIds.Insert(0, $"/{currentItem.ID}");
+                return pathWithIds.ToString();
+            }
+
+            while (currentItem != null && currentItem.ID != parentPage.ID)
+            {
+                pathWithIds.Insert(0, $"/{currentItem.ID}");
+                currentItem = currentItem.Parent;
+            }
+
+            pathWithIds.Insert(0, $"{parentPage.ID}");
+
+            return pathWithIds.ToString();
         }
 
         private static bool IsFolder(this Item item)

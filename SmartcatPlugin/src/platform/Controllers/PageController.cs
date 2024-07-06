@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Web.Http;
 using Sitecore.Data;
 using Sitecore.Data.Items;
+using Sitecore.Data.Masters;
 using Sitecore.Globalization;
 using SmartcatPlugin.Constants;
 using SmartcatPlugin.Extensions;
@@ -9,6 +11,8 @@ using SmartcatPlugin.Models.Smartcat;
 using SmartcatPlugin.Models.Smartcat.GetDirectoryList;
 using SmartcatPlugin.Models.Smartcat.GetFileContent;
 using SmartcatPlugin.Models.Smartcat.GetFileList;
+using SmartcatPlugin.Models.Smartcat.ImportTranslation;
+using SmartcatPlugin.Tools;
 
 namespace SmartcatPlugin.Controllers
 {
@@ -94,9 +98,47 @@ namespace SmartcatPlugin.Controllers
                 return Json(new Dictionary<string, LocJsonContent>());
             }
 
-            var result = item.GetItemContent(_masterDb, request);
+            var result = item.GetPageContent(_masterDb, request);
 
             return Json(result);
+        }
+
+        [Route("import-translation")]
+        [HttpPost]
+        public IHttpActionResult ImportTranslation([FromBody] TranslationImportRequest request)
+        {
+            var pageId = new ID(request.ItemId.ExternalId);
+            var item = _masterDb.GetItem(pageId);
+
+            foreach (var locale in request.LocaleContent)
+            {
+                Language newLanguage = Language.Parse(locale.Key);
+                var locJson = locale.Value;
+
+                foreach (var unit in locJson.Units)
+                {
+                    var itemIdFieldName = IdFieldExtractor.ExtractIdAndField(unit.Key);
+                    var childrenPageId = new ID(itemIdFieldName.Id);
+
+                    Item newLanguageItem = _masterDb.GetItem(childrenPageId, newLanguage);
+
+                    if (newLanguageItem.Versions.Count == 0)
+                    {
+                        //newLanguageItem = newLanguageItem.Versions.AddVersion();
+                    }
+                    
+                    using (new Sitecore.SecurityModel.SecurityDisabler())
+                    {
+                        newLanguageItem.Editing.BeginEdit();
+
+                        newLanguageItem.Fields[itemIdFieldName.Field].Value = string.Join(string.Empty, unit.Target);
+
+                        newLanguageItem.Editing.EndEdit();
+                    }
+                }
+            }
+
+            return Ok();
         }
     }
 }

@@ -22,6 +22,7 @@ namespace SmartcatPlugin.Models.Smartcat
         public string Key { get; set; }
         public UnitProperties Properties { get; set; }
         public List<string> Source { get; set; }
+        public List<string> Target { get; set; }
     }
 
     public class UnitProperties
