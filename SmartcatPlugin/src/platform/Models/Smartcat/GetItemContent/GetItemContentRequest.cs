@@ -1,6 +1,6 @@
-﻿namespace SmartcatPlugin.Models.Smartcat.GetFileContent
+﻿namespace SmartcatPlugin.Models.Smartcat.GetItemContent
 {
-    public class FileContentRequest
+    public class GetItemContentRequest
     {
         public ExternalObjectId ItemId { get; set; }
         public string SourceLocale { get; set; }

@@ -1,6 +1,6 @@
-﻿namespace SmartcatPlugin.Models.Smartcat.GetFileList
+﻿namespace SmartcatPlugin.Models.Smartcat.GetItemList
 {
-    public class GetDataItemsRequest
+    public class GetItemsListRequest
     {
         public string BatchKey { get; set; }
         public ExternalObjectId ParentDirectoryId { get; set; }

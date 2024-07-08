@@ -6,9 +6,9 @@ using Sitecore.Data.Items;
 using Sitecore.Globalization;
 using SmartcatPlugin.Constants;
 using SmartcatPlugin.Models.Smartcat;
-using SmartcatPlugin.Models.Smartcat.GetDirectoryList;
-using SmartcatPlugin.Models.Smartcat.GetFileContent;
-using SmartcatPlugin.Models.Smartcat.GetFileList;
+using SmartcatPlugin.Models.Smartcat.GetFolderList;
+using SmartcatPlugin.Models.Smartcat.GetItemContent;
+using SmartcatPlugin.Models.Smartcat.GetItemList;
 using SmartcatPlugin.Tools;
 
 namespace SmartcatPlugin.Extensions
@@ -116,7 +116,7 @@ namespace SmartcatPlugin.Extensions
             return locales;
         }
 
-        public static Dictionary<string, LocJsonContent> GetPageContent(this Item parentPage, Database masterDb, FileContentRequest request)
+        public static Dictionary<string, LocJsonContent> GetPageContent(this Item parentPage, Database masterDb, GetItemContentRequest request)
         {
             if (parentPage == null || masterDb == null || request == null)
             {
@@ -203,7 +203,7 @@ namespace SmartcatPlugin.Extensions
             return pathWithIds.ToString();
         }
 
-        private static bool IsFolder(this Item item)
+        public static bool IsFolder(this Item item)
         {
             if (item.TemplateID == ConstantIds.FolderTemplate
                 || !item.IsHaveLayout() && item.HasChildren)

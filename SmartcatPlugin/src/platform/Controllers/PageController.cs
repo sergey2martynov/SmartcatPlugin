@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Web.Http;
 using Sitecore.Data;
 using Sitecore.Data.Items;
@@ -7,10 +8,14 @@ using Sitecore.Data.Masters;
 using Sitecore.Globalization;
 using SmartcatPlugin.Constants;
 using SmartcatPlugin.Extensions;
+using SmartcatPlugin.Models;
+using SmartcatPlugin.Models.ApiResponse;
 using SmartcatPlugin.Models.Smartcat;
-using SmartcatPlugin.Models.Smartcat.GetDirectoryList;
-using SmartcatPlugin.Models.Smartcat.GetFileContent;
-using SmartcatPlugin.Models.Smartcat.GetFileList;
+using SmartcatPlugin.Models.Smartcat.GetFolderList;
+using SmartcatPlugin.Models.Smartcat.GetItemById;
+using SmartcatPlugin.Models.Smartcat.GetItemContent;
+using SmartcatPlugin.Models.Smartcat.GetItemList;
+using SmartcatPlugin.Models.Smartcat.GetParentDirectories;
 using SmartcatPlugin.Models.Smartcat.ImportTranslation;
 using SmartcatPlugin.Tools;
 
@@ -23,7 +28,7 @@ namespace SmartcatPlugin.Controllers
 
         [Route("directory-list")]
         [HttpPost]
-        public IHttpActionResult GetDirectoryList([FromBody] GetDataDirectoriesRequest request)
+        public IHttpActionResult GetFolderList([FromBody] GetFolderListRequest request)
         {
             Item rootItem;
 
@@ -42,7 +47,7 @@ namespace SmartcatPlugin.Controllers
                 return NotFound();
             }
 
-            var getDataDirectoriesResponse = new GetDataDirectoriesResponse
+            var getDataDirectoriesResponse = new GetFolderListResponse
             {
                 NextBatchKey = null,
                 Directories = rootItem.GetChildDirectories()
@@ -53,13 +58,13 @@ namespace SmartcatPlugin.Controllers
 
         [Route("file-list")]
         [HttpPost]
-        public IHttpActionResult GetPageList([FromBody] GetDataItemsRequest request)
+        public IHttpActionResult GetItemList([FromBody] GetItemsListRequest request)
         {
             Item rootItem;
 
             if (request.ParentDirectoryId.ExternalType != ConstantItemTypes.Folder)
             {
-                return Json(GetDataItemsResponse.Empty);
+                return Json(GetItemListResponse.Empty);
             }
 
             if (request.ParentDirectoryId.ExternalId.ToLower() == ConstantIds.Root)
@@ -77,7 +82,7 @@ namespace SmartcatPlugin.Controllers
                 return NotFound();
             }
 
-            var getDataItemsResponse = new GetDataItemsResponse
+            var getDataItemsResponse = new GetItemListResponse
             {
                 NextBatchKey = null,
                 Items = rootItem.GetChildPages(request.SearchQuery, _masterDb)
@@ -88,7 +93,7 @@ namespace SmartcatPlugin.Controllers
 
         [Route("file-content")]
         [HttpPost]
-        public IHttpActionResult GetFileContent([FromBody] FileContentRequest request)
+        public IHttpActionResult GetItemContent([FromBody] GetItemContentRequest request)
         {
             var id = new ID(request.ItemId.ExternalId);
             var item = _masterDb.GetItem(id, Language.Parse(request.SourceLocale));
@@ -100,45 +105,114 @@ namespace SmartcatPlugin.Controllers
 
             var result = item.GetPageContent(_masterDb, request);
 
-            return Json(result);
+            return Json(new GetItemContentResponse{LocaleContent = result});
         }
 
         [Route("import-translation")]
         [HttpPost]
         public IHttpActionResult ImportTranslation([FromBody] TranslationImportRequest request)
         {
-            var pageId = new ID(request.ItemId.ExternalId);
-            var item = _masterDb.GetItem(pageId);
-
             foreach (var locale in request.LocaleContent)
             {
                 Language newLanguage = Language.Parse(locale.Key);
                 var locJson = locale.Value;
+                var newVersionItemIds = new List<ID>();
 
                 foreach (var unit in locJson.Units)
                 {
                     var itemIdFieldName = IdFieldExtractor.ExtractIdAndField(unit.Key);
                     var childrenPageId = new ID(itemIdFieldName.Id);
+                    var allVersionsItem = _masterDb.GetItem(childrenPageId);
+                    bool languageVersionExists = allVersionsItem.Languages.Any(l => l == newLanguage);
 
-                    Item newLanguageItem = _masterDb.GetItem(childrenPageId, newLanguage);
+                    var newLanguageItem = _masterDb.GetItem(childrenPageId, newLanguage);
 
-                    if (newLanguageItem.Versions.Count == 0)
-                    {
-                        //newLanguageItem = newLanguageItem.Versions.AddVersion();
-                    }
-                    
                     using (new Sitecore.SecurityModel.SecurityDisabler())
                     {
+                        if (languageVersionExists && !newVersionItemIds.Contains(newLanguageItem.ID))
+                        {
+                            newLanguageItem = newLanguageItem.Versions.AddVersion();
+                        }
+
+                        newVersionItemIds.Add(newLanguageItem.ID);
                         newLanguageItem.Editing.BeginEdit();
-
                         newLanguageItem.Fields[itemIdFieldName.Field].Value = string.Join(string.Empty, unit.Target);
-
                         newLanguageItem.Editing.EndEdit();
                     }
                 }
             }
 
-            return Ok();
+            return Json(ApiResponse.Success);
+        }
+
+        [Route("parent-directories-by-id")]
+        [HttpPost]
+        public IHttpActionResult GetParentFolders([FromBody] GetParentFoldersRequest request)
+        {
+            var parentFolders = new List<GetParentDirectoriesResponseItem>();
+
+            foreach (var directoryExternalId in request.DirectoryIds)
+            {
+                var folderId = new ID(directoryExternalId.ExternalId);
+                var folder = _masterDb.GetItem(folderId);
+
+                if (!folder.IsFolder())
+                {
+                    var response = ApiResponse.Error;
+                    response.ErrorCode = 400;
+                    response.ErrorMessage = $"Item with id: {directoryExternalId.ExternalId} is not folder";
+                    return Json(response);
+                }
+
+                parentFolders.Add(new GetParentDirectoriesResponseItem
+                {
+                    DirectoryId = directoryExternalId,
+                    ParentDirectoryId = new ExternalObjectId
+                    {
+                        ExternalId = folder.ParentID.ToString(),
+                        ExternalType = ConstantItemTypes.Folder
+                    }
+                });
+            }
+
+            return Json(new GetParentFoldersResponse{Items = parentFolders });
+        }
+
+        [Route("files-by-id")]
+        [HttpPost]
+        public IHttpActionResult GetItemsById([FromBody] GetItemByIdRequest request)
+        {
+            var itemsData = new List<DataItem>();
+
+            foreach (var itemId in request.ItemIds)
+            {
+                var item = _masterDb.GetItem(new ID(itemId.ExternalId));
+
+                if (!item.IsHaveLayout())
+                {
+                    var response = ApiResponse.Error;
+                    response.ErrorCode = 400;
+                    response.ErrorMessage = $"Item with id: {itemId.ExternalId} is not page";
+                    return Json(response);
+                }
+
+                var itemData = new DataItem
+                {
+                    Id = new ExternalObjectId
+                        { ExternalId = item.ID.ToString(), ExternalType = ConstantItemTypes.Page },
+                    ParentDirectoryIds = new List<ExternalObjectId>
+                    {
+                        new ExternalObjectId
+                            { ExternalId = item.ParentID.ToString(), ExternalType = ConstantItemTypes.Folder }
+                    },
+                    Name = item.Name,
+                    Locales = item.GetItemLocales(_masterDb)
+                };
+
+                itemsData.Add(itemData);
+            }
+
+            return Json(new GetItemByIdResponse{Items = itemsData});
         }
     }
 }

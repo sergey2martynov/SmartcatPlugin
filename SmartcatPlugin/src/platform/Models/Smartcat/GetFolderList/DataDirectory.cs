@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace SmartcatPlugin.Models.Smartcat.GetDirectoryList
+namespace SmartcatPlugin.Models.Smartcat.GetFolderList
 {
     public class DataDirectory
     {

@@ -1,8 +1,8 @@
 ﻿using Newtonsoft.Json;
 
-namespace SmartcatPlugin.Models.Smartcat.GetDirectoryList
+namespace SmartcatPlugin.Models.Smartcat.GetFolderList
 {
-    public class GetDataDirectoriesRequest
+    public class GetFolderListRequest
     {
         [JsonProperty("BatchKey")]
         public string BatchKey { get; set; }

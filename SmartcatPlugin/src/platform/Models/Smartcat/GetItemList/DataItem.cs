@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace SmartcatPlugin.Models.Smartcat.GetFileList
+namespace SmartcatPlugin.Models.Smartcat.GetItemList
 {
     public class DataItem
     {

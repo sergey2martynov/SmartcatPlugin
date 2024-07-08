@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 
-namespace SmartcatPlugin.Models.Smartcat.GetFileContent
+namespace SmartcatPlugin.Models.Smartcat.GetItemContent
 {
-    public class FileContentResponse
+    public class GetItemContentResponse
     {
         public Dictionary<string, LocJsonContent> LocaleContent { get; set; }
     }

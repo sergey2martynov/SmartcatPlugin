@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 
-namespace SmartcatPlugin.Models.Smartcat.GetDirectoryList
+namespace SmartcatPlugin.Models.Smartcat.GetFolderList
 {
-    public class GetDataDirectoriesResponse
+    public class GetFolderListResponse
     {
         public string NextBatchKey { get; set; }
         public List<DataDirectory> Directories { get; set; } = new List<DataDirectory>();
