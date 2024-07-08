@@ -83,6 +83,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="SmartcatPluginClient.cs" />
     <Compile Include="Commands\ShowBasketCommand.cs" />
     <Compile Include="Constants\ConstantsIds.cs" />
     <Compile Include="Constants\ConstantItemTypes.cs" />
