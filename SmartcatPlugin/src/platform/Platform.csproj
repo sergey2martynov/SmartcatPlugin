@@ -71,6 +71,7 @@
     <Content Include="sitecore modules\shell\BusketModal.aspx" />
     <Content Include="App_Config\Include\Commands.config" />
     <Content Include="App_Config\Include\Routes\PageRoutes.config" />
+    <Content Include="App_Config\Include\Authentication\SmartcatAuthentication.config" />
     <None Include="Platform.wpp.targets" />
     <None Include="Properties\PublishProfiles\Local.pubxml" />
     <None Include="README.md" />
@@ -83,6 +84,8 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Models\Smartcat\Authentication\SmartcatToken.cs" />
+    <Compile Include="Services\AuthenticationService.cs" />
     <Compile Include="SmartcatPluginClient.cs" />
     <Compile Include="Commands\ShowBasketCommand.cs" />
     <Compile Include="Constants\ConstantsIds.cs" />

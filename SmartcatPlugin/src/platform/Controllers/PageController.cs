@@ -1,30 +1,75 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
+using System.Security.Cryptography;
+using System.Text;
 using System.Web.Http;
+using Newtonsoft.Json;
 using Sitecore.Data;
 using Sitecore.Data.Items;
-using Sitecore.Data.Masters;
 using Sitecore.Globalization;
 using SmartcatPlugin.Constants;
 using SmartcatPlugin.Extensions;
-using SmartcatPlugin.Models;
 using SmartcatPlugin.Models.ApiResponse;
 using SmartcatPlugin.Models.Smartcat;
+using SmartcatPlugin.Models.Smartcat.Authentication;
 using SmartcatPlugin.Models.Smartcat.GetFolderList;
 using SmartcatPlugin.Models.Smartcat.GetItemById;
 using SmartcatPlugin.Models.Smartcat.GetItemContent;
 using SmartcatPlugin.Models.Smartcat.GetItemList;
 using SmartcatPlugin.Models.Smartcat.GetParentDirectories;
 using SmartcatPlugin.Models.Smartcat.ImportTranslation;
+using SmartcatPlugin.Services;
 using SmartcatPlugin.Tools;
 
 namespace SmartcatPlugin.Controllers
 {
+    [Authorize]
     [RoutePrefix("smartcat")]
     public class PageController : ApiController
     {
         private readonly Database _masterDb = Database.GetDatabase("master");
+
+        [Route("authenticate")]
+        [HttpPost]
+        public IHttpActionResult Authenticate(HttpRequestMessage request)
+        {
+            var headers = request.Headers;
+
+            if (!headers.Contains("Authorization"))
+            {
+                return Json(ApiResponse.Return(401, "Unauthorized"));
+            }
+
+            var encryptedToken = headers.GetValues("Authorization").FirstOrDefault();
+
+            string decryptedToken;
+
+            using (var rsa = new RSACryptoServiceProvider())
+            {
+                var publicKey = Sitecore.Configuration.Settings.GetSetting("Smartcat.PublicKey");
+
+                rsa.FromXmlString(publicKey);
+
+                byte[] encryptedBytes = Convert.FromBase64String(encryptedToken);
+                byte[] decryptedBytes = rsa.Decrypt(encryptedBytes, false);
+                decryptedToken = Encoding.UTF8.GetString(decryptedBytes);
+            }
+
+            var token = JsonConvert.DeserializeObject<SmartcatToken>(decryptedToken);
+
+            if (string.IsNullOrEmpty(token.SmartcatAuthKey))
+            {
+                return Json(ApiResponse.Return(400, "SmartcatAuthKey can not be empty"));
+            }
+
+            var authenticateService = new AuthenticationService();
+
+            var tokenItem = authenticateService.SaveToken(token.SmartcatAuthKey);
+
+            return Json(ApiResponse.Return(200, "Authenticated"));
+        }
 
         [Route("directory-list")]
         [HttpPost]

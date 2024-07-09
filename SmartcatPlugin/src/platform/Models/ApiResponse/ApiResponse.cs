@@ -9,5 +9,15 @@
         public static ApiResponse Success = new ApiResponse { IsSuccess = true };
         public static ApiResponse Error = new ApiResponse { IsSuccess = false };
 
+        public static ApiResponse Return(int errorCode, string errorMessage)
+        {
+            return new ApiResponse
+            {
+                IsSuccess = false,
+                ErrorMessage = errorMessage,
+                ErrorCode = errorCode
+            };
+        }
+
     }
 }
