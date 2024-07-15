@@ -1,36 +1,34 @@
-﻿using System.Web.UI;
-using Sitecore.Data;
+﻿using System.Collections.Generic;
+using System.Web.UI;
+using Newtonsoft.Json;
 using Sitecore.Data.Items;
 using Sitecore.Shell.Framework.Commands;
 using Sitecore.Shell.Web.UI.WebControls;
 using Sitecore.Web.UI.WebControls.Ribbons;
+using SmartcatPlugin.Cache;
 
 namespace SmartcatPlugin.Panels
 {
     public class CustomPanel : RibbonPanel
     {
-        public int SelectedItemCount { get; set; }
-        private const string SelectedItems = "Seleceted items:";
-
         public override void Render(HtmlTextWriter output,
                                     Ribbon ribbon,
                                     Item button,
                                     CommandContext context)
         {
+            string cachedData = CustomCacheManager.GetCache("selectedItems");
 
-            Item contextItem = context.Items[0];
-            Database database = Sitecore.Configuration.Factory.GetDatabase("core");
-
-            Item item = database.SelectSingleItem(contextItem.ID.ToString());
-
-            if (item != null)
+            if (cachedData == null)
             {
-                var htmlOutput = string.Empty;
-
-                htmlOutput += "<div><textarea>" + SelectedItems + item.DisplayName + "</textarea></div>";
-
-                output.Write(htmlOutput);
+                output.Write($"<div><textarea readonly>SelectedItems:0</textarea></div>");
+                return;
             }
+
+            var itemIds = JsonConvert.DeserializeObject<List<string>>(cachedData);
+
+            var htmlOutput = $"<div><textarea readonly>SelectedItems: {itemIds.Count}</textarea></div>";
+
+            output.Write(htmlOutput);
         }
     }
 }

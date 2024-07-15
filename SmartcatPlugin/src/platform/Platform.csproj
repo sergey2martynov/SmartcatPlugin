@@ -68,10 +68,15 @@
     <Content Include="App_Config\Include\Sitecore.LoadBalancing.config" />
     <Content Include="App_Config\Include\Sitecore.Media.config" />
     <Content Include="App_Config\Include\SmartcatPlugin.config" />
-    <Content Include="sitecore modules\shell\BusketModal.aspx" />
     <Content Include="App_Config\Include\Commands.config" />
     <Content Include="App_Config\Include\Routes\PageRoutes.config" />
     <Content Include="App_Config\Include\Authentication\SmartcatAuthentication.config" />
+    <Content Include="App_Config\Include\WebApiInit.config" />
+    <Content Include="App_Config\Log4net.config" />
+    <Content Include="sitecore modules\shell\AddItem\AddItemModal.aspx" />
+    <Content Include="sitecore modules\shell\Basket\app.js" />
+    <Content Include="sitecore modules\shell\Basket\BasketModal.aspx" />
+    <Content Include="sitecore modules\shell\Basket\styles.css" />
     <None Include="Platform.wpp.targets" />
     <None Include="Properties\PublishProfiles\Local.pubxml" />
     <None Include="README.md" />
@@ -84,10 +89,31 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Models\Smartcat\Authentication\SmartcatToken.cs" />
-    <Compile Include="Services\AuthenticationService.cs" />
-    <Compile Include="SmartcatPluginClient.cs" />
+    <Compile Include="Cache\CustomCacheManager.cs" />
+    <Compile Include="Cache\CustomCache.cs" />
     <Compile Include="Commands\ShowBasketCommand.cs" />
+    <Compile Include="CustomExceptionFilter.cs" />
+    <Compile Include="Constants\LogNames.cs" />
+    <Compile Include="Extensions\ItemAppearanceExtensions.cs" />
+    <Compile Include="Models\Smartcat\Authorization\AuthorizationRequest.cs" />
+    <Compile Include="Models\Smartcat\Authorization\SmartcatToken.cs" />
+    <Compile Include="Services\AuthenticationService.cs" />
+    <Compile Include="sitecore modules\shell\AddItem\AddItemModal.aspx.cs">
+      <DependentUpon>AddItemModal.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="sitecore modules\shell\AddItem\AddItemModal.aspx.designer.cs">
+      <DependentUpon>AddItemModal.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="sitecore modules\shell\Basket\BasketModal.aspx.cs">
+      <DependentUpon>BasketModal.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="sitecore modules\shell\Basket\BasketModal.aspx.designer.cs">
+      <DependentUpon>BasketModal.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="SmartcatPluginClient.cs" />
+    <Compile Include="Commands\ShowAddItemCommand.cs" />
     <Compile Include="Constants\ConstantsIds.cs" />
     <Compile Include="Constants\ConstantItemTypes.cs" />
     <Compile Include="Controllers\ServicesConfigurator.cs" />
@@ -115,19 +141,16 @@
     <Compile Include="Models\Smartcat\ImportTranslation\TranslationImportRequest.cs" />
     <Compile Include="Models\Smartcat\LocJsonContent.cs" />
     <Compile Include="Panels\CustomPanel.cs" />
-    <Compile Include="sitecore modules\shell\BusketModal.aspx.cs">
-      <DependentUpon>BusketModal.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="sitecore modules\shell\BusketModal.aspx.designer.cs">
-      <DependentUpon>BusketModal.aspx</DependentUpon>
-    </Compile>
     <Compile Include="Controllers\PageController.cs" />
     <Compile Include="Extensions\ItemExtensions.cs" />
     <Compile Include="Tools\IdFieldExtractor.cs" />
     <Compile Include="Tools\StringSplitter.cs" />
+    <Compile Include="WebApiConfig.cs" />
+    <Compile Include="WebApiInitializer.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Exceptions\" />
+  </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>

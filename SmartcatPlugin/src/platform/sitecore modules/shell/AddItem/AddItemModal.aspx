@@ -1,4 +1,4 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="BusketModal.aspx.cs" Inherits="SmartcatPlugin.sitecore_modules.shell.BusketModal" %>
+﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="AddItemModal.aspx.cs" Inherits="SmartcatPlugin.sitecore_modules.shell.AddItemModal" %>
 
 <!DOCTYPE html>
 <html>

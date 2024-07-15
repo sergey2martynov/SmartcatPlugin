@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
 using System.Web.Http;
+using log4net;
 using Newtonsoft.Json;
 using Sitecore.Data;
 using Sitecore.Data.Items;
@@ -13,7 +13,7 @@ using SmartcatPlugin.Constants;
 using SmartcatPlugin.Extensions;
 using SmartcatPlugin.Models.ApiResponse;
 using SmartcatPlugin.Models.Smartcat;
-using SmartcatPlugin.Models.Smartcat.Authentication;
+using SmartcatPlugin.Models.Smartcat.Authorization;
 using SmartcatPlugin.Models.Smartcat.GetFolderList;
 using SmartcatPlugin.Models.Smartcat.GetItemById;
 using SmartcatPlugin.Models.Smartcat.GetItemContent;
@@ -25,24 +25,23 @@ using SmartcatPlugin.Tools;
 
 namespace SmartcatPlugin.Controllers
 {
-    [Authorize]
     [RoutePrefix("smartcat")]
     public class PageController : ApiController
     {
         private readonly Database _masterDb = Database.GetDatabase("master");
+        private readonly ILog _log = LogManager.GetLogger(LogNames.SmartcatApi);
 
-        [Route("authenticate")]
+        [Route("authorize")]
         [HttpPost]
-        public IHttpActionResult Authenticate(HttpRequestMessage request)
+        public IHttpActionResult Authorize([FromBody] AuthorizationRequest request)
         {
-            var headers = request.Headers;
 
-            if (!headers.Contains("Authorization"))
+            if (string.IsNullOrEmpty(request.Token))
             {
-                return Json(ApiResponse.Return(401, "Unauthorized"));
+                return Json(ApiResponse.Error(400, "Token can not be null or empty"));
             }
 
-            var encryptedToken = headers.GetValues("Authorization").FirstOrDefault();
+            var encryptedToken = request.Token;
 
             string decryptedToken;
 
@@ -61,20 +60,25 @@ namespace SmartcatPlugin.Controllers
 
             if (string.IsNullOrEmpty(token.SmartcatAuthKey))
             {
-                return Json(ApiResponse.Return(400, "SmartcatAuthKey can not be empty"));
+                return Json(ApiResponse.Error(400, "SmartcatAuthKey can not be empty"));
             }
 
             var authenticateService = new AuthenticationService();
 
-            var tokenItem = authenticateService.SaveToken(token.SmartcatAuthKey);
+            authenticateService.SaveToken(token.SmartcatAuthKey);
 
-            return Json(ApiResponse.Return(200, "Authenticated"));
+            _log.Info("Authorization was success completed");
+
+            return Json(ApiResponse.Error(200, "Authenticated"));
         }
 
         [Route("directory-list")]
         [HttpPost]
         public IHttpActionResult GetFolderList([FromBody] GetFolderListRequest request)
         {
+            var logger = Sitecore.Diagnostics.LoggerFactory.GetLogger("SmartcatApi");
+            logger.Info("This is an info message for my custom log");
+
             Item rootItem;
 
             if (request.ParentDirectoryId.ExternalId.ToLower() == ConstantIds.Root)
@@ -89,7 +93,8 @@ namespace SmartcatPlugin.Controllers
 
             if (rootItem == null)
             {
-                return NotFound();
+                return Json(ApiResponse.Error(404,
+                    $"Parent folder with Id:{request.ParentDirectoryId} not found"));
             }
 
             var getDataDirectoriesResponse = new GetFolderListResponse
@@ -98,6 +103,7 @@ namespace SmartcatPlugin.Controllers
                 Directories = rootItem.GetChildDirectories()
             };
 
+            _log.Info("SmartcatApi method \"directory-list\" was success completed");
             return Json(getDataDirectoriesResponse);
         }
 
@@ -124,7 +130,8 @@ namespace SmartcatPlugin.Controllers
 
             if (rootItem == null)
             {
-                return NotFound();
+                ApiResponse.Error(404,
+                    $"Parent folder with Id:{request.ParentDirectoryId} not found");
             }
 
             var getDataItemsResponse = new GetItemListResponse
@@ -133,6 +140,7 @@ namespace SmartcatPlugin.Controllers
                 Items = rootItem.GetChildPages(request.SearchQuery, _masterDb)
             };
 
+            _log.Info("SmartcatApi method \"file-list\" was success completed");
             return Json(getDataItemsResponse);
         }
 
@@ -145,11 +153,12 @@ namespace SmartcatPlugin.Controllers
 
             if (!item.IsHaveLayout())
             {
+                _log.Error($"Item {item.Name} with {item.ID} is not Page");
                 return Json(new Dictionary<string, LocJsonContent>());
             }
 
             var result = item.GetPageContent(_masterDb, request);
-
+            _log.Info("SmartcatApi method \"file-content\" was success completed");
             return Json(new GetItemContentResponse{LocaleContent = result});
         }
 
@@ -183,10 +192,15 @@ namespace SmartcatPlugin.Controllers
                         newLanguageItem.Editing.BeginEdit();
                         newLanguageItem.Fields[itemIdFieldName.Field].Value = string.Join(string.Empty, unit.Target);
                         newLanguageItem.Editing.EndEdit();
+
+                        _log.Info($"{typeof(Item)} with Id {newLanguageItem.ID}," +
+                                  $" locale {newLanguageItem.Language}," +
+                                  $" new version {newLanguageItem.Version} was created");
                     }
                 }
             }
 
+            _log.Info("SmartcatApi method \"import-translation\" was success completed");
             return Json(ApiResponse.Success);
         }
 
@@ -203,10 +217,8 @@ namespace SmartcatPlugin.Controllers
 
                 if (!folder.IsFolder())
                 {
-                    var response = ApiResponse.Error;
-                    response.ErrorCode = 400;
-                    response.ErrorMessage = $"Item with id: {directoryExternalId.ExternalId} is not folder";
-                    return Json(response);
+                    return Json(ApiResponse.Error(400,
+                        $"Item with id: {directoryExternalId.ExternalId} is not folder"));
                 }
 
                 parentFolders.Add(new GetParentDirectoriesResponseItem
@@ -220,6 +232,7 @@ namespace SmartcatPlugin.Controllers
                 });
             }
 
+            _log.Info("SmartcatApi method \"parent-directories-by-id\" was success completed");
             return Json(new GetParentFoldersResponse{Items = parentFolders });
         }
 
@@ -235,20 +248,24 @@ namespace SmartcatPlugin.Controllers
 
                 if (!item.IsHaveLayout())
                 {
-                    var response = ApiResponse.Error;
-                    response.ErrorCode = 400;
-                    response.ErrorMessage = $"Item with id: {itemId.ExternalId} is not page";
-                    return Json(response);
+                    return Json(ApiResponse.Error(400,
+                        $"Item with id: {itemId.ExternalId} is not page"));
                 }
 
                 var itemData = new DataItem
                 {
                     Id = new ExternalObjectId
-                        { ExternalId = item.ID.ToString(), ExternalType = ConstantItemTypes.Page },
+                    {
+                        ExternalId = item.ID.ToString(),
+                        ExternalType = ConstantItemTypes.Page
+                    },
                     ParentDirectoryIds = new List<ExternalObjectId>
                     {
                         new ExternalObjectId
-                            { ExternalId = item.ParentID.ToString(), ExternalType = ConstantItemTypes.Folder }
+                        {
+                            ExternalId = item.ParentID.ToString(),
+                            ExternalType = ConstantItemTypes.Folder
+                        }
                     },
                     Name = item.Name,
                     Locales = item.GetItemLocales(_masterDb)
@@ -257,6 +274,7 @@ namespace SmartcatPlugin.Controllers
                 itemsData.Add(itemData);
             }
 
+            _log.Info("SmartcatApi method \"files-by-id\" was success completed");
             return Json(new GetItemByIdResponse{Items = itemsData});
         }
     }

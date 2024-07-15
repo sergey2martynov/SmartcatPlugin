@@ -11,7 +11,7 @@ namespace SmartcatPlugin.sitecore_modules.shell
 {
 
 
-    public partial class BusketModal
+    public partial class AddItemModal
     {
 
         /// <summary>

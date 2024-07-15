@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using log4net;
 using Sitecore.Data;
 using Sitecore.Data.Items;
 using Sitecore.Globalization;
@@ -15,11 +17,12 @@ namespace SmartcatPlugin.Extensions
 {
     public static class ItemExtensions
     {
+        private static readonly ILog Log = LogManager.GetLogger(LogNames.SmartcatApi);
         public static List<DataDirectory> GetChildDirectories(this Item item)
         {
             var childList = item.Children.ToList();
 
-            if (childList == null || !childList.Any())
+            if (!childList.Any())
             {
                 return new List<DataDirectory>();
             }
@@ -38,6 +41,8 @@ namespace SmartcatPlugin.Extensions
                         CanLoadChildItems = true,
                         ChildDirectories = GetChildDirectories(childItem)
                     });
+
+                    Log.Info($"DataDirectory ${childItem.Name} with Id {childItem.ID} was created. ItemExtensions.GetChildPages()");
                 }
             }
 
@@ -59,13 +64,9 @@ namespace SmartcatPlugin.Extensions
         {
             var childList = parentItem.Children.ToList();
 
-            //todo one query to db
-            /*var allChildren = parentItem.Axes.GetDescendants()
-                .Where(item => string.IsNullOrEmpty(request.SearchQuery) || item.Name.Contains(request.SearchQuery))
-                .ToList()*/
-
             if (!childList.Any())
             {
+                Log.Info($"Item ${parentItem.Name} with Id {parentItem.ID} do not contain children. ItemExtensions.GetChildPages()");
                 return new List<DataItem>();
             }
 
@@ -88,6 +89,8 @@ namespace SmartcatPlugin.Extensions
                         Name = childItem.Name,
                         Locales = childItem.GetItemLocales(masterDb)
                     });
+
+                    Log.Info($"DataItem ${childItem.Name} with Id {childItem.ID} was created. ItemExtensions.GetChildPages()");
                 }
             }
 
@@ -98,6 +101,7 @@ namespace SmartcatPlugin.Extensions
         {
             if (item == null)
             {
+                Log.Warn($"Item is null. ItemExtensions.GetItemLocales()");
                 return new List<string>();
             }
 
@@ -120,7 +124,7 @@ namespace SmartcatPlugin.Extensions
         {
             if (parentPage == null || masterDb == null || request == null)
             {
-                return new Dictionary<string, LocJsonContent>();
+                throw new NullReferenceException("Invalid inner data");
             }
 
             var allChildren = parentPage.GetAllChildrenPages();
@@ -149,8 +153,9 @@ namespace SmartcatPlugin.Extensions
                         Source = StringSplitter.SplitStringWithNewlines(field.Value),
                         Target = new List<string>()
                     };
-
+                    
                     units.Add(unit);
+                    Log.Info($"{typeof(Unit)} key:{unit.Key} was created. ItemExtensions.GetPageContent()");
                 }
             }
 

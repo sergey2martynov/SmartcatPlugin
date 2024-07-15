@@ -1,4 +1,4 @@
-﻿namespace SmartcatPlugin.Models.Smartcat.Authentication
+﻿namespace SmartcatPlugin.Models.Smartcat.Authorization
 {
     public class SmartcatToken
     {

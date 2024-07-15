@@ -9,7 +9,7 @@ namespace SmartcatPlugin.Services
     {
         private readonly Database _masterDb = Database.GetDatabase("master");
 
-        public Item SaveToken(string smartcatAuthKey)
+        public void SaveToken(string smartcatAuthKey)
         {
             using (new SecurityDisabler())
             {
@@ -32,8 +32,6 @@ namespace SmartcatPlugin.Services
                 {
                     tokenItem["Key"] = smartcatAuthKey;
                 }
-
-                return tokenItem;
             }
         }
 

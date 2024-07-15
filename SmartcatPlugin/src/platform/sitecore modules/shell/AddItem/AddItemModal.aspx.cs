@@ -1,12 +1,15 @@
-﻿using Sitecore.Data;
+﻿using Newtonsoft.Json;
 using Sitecore.Data.Items;
+using SmartcatPlugin.Cache;
+using SmartcatPlugin.Extensions;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Web.UI.WebControls;
 
 namespace SmartcatPlugin.sitecore_modules.shell
 {
-    public partial class BusketModal : System.Web.UI.Page
+    public partial class AddItemModal : System.Web.UI.Page
     {
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -18,10 +21,13 @@ namespace SmartcatPlugin.sitecore_modules.shell
 
         private void PopulateTree()
         {
-            Database masterDb = Sitecore.Configuration.Factory.GetDatabase("core");
-            Item rootItem = masterDb.GetItem("/sitecore");
+            var masterDb = Sitecore.Configuration.Factory.GetDatabase("master");
+            var rootItem = masterDb.GetItem("/sitecore/content");
 
-            TreeNode rootNode = new TreeNode(rootItem.Name, rootItem.ID.ToString());
+            var rootNode = new TreeNode(rootItem.Name, rootItem.ID.ToString())
+            {
+                Expanded = false
+            };
             AddChildNodes(rootItem, rootNode);
             TreeView1.Nodes.Add(rootNode);
         }
@@ -30,7 +36,14 @@ namespace SmartcatPlugin.sitecore_modules.shell
         {
             foreach (Item child in parentItem.Children)
             {
-                TreeNode childNode = new TreeNode(child.Name, child.ID.ToString());
+                TreeNode childNode = new TreeNode(child.Name, child.ID.ToString(), child.Appearance.GetIconPath());
+                childNode.Expanded = false;
+
+                if (child.IsFolder() || child.Fields.All(f => f.Name.StartsWith("_")))
+                {
+                    childNode.ShowCheckBox = false;
+                }
+
                 parentNode.ChildNodes.Add(childNode);
 
                 AddChildNodes(child, childNode);
@@ -39,12 +52,17 @@ namespace SmartcatPlugin.sitecore_modules.shell
 
         protected void btnAdd_Click(object sender, EventArgs e)
         {
-            var selectedItems = new List<string>();
-
-            foreach (TreeNode node in TreeView1.Nodes)
+            var itemIds = new List<string>();
+            foreach (TreeNode chekedNode in TreeView1.CheckedNodes)
             {
-                AddCheckedNodes(node, selectedItems);
+                if (chekedNode.Value != null)
+                {
+                    itemIds.Add(chekedNode.Value);
+                }
             }
+
+            var serializedList = JsonConvert.SerializeObject(itemIds);
+            CustomCacheManager.SetCache("selectedItems", serializedList);
         }
 
         private void AddCheckedNodes(TreeNode node, List<string> selectedItems)
