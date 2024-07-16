@@ -1,6 +1,5 @@
-﻿using log4net;
-using System.Diagnostics;
-using System.Reflection;
+﻿using System;
+using log4net;
 using SmartcatPlugin.Constants;
 
 namespace SmartcatPlugin.Models.ApiResponse
@@ -17,18 +16,16 @@ namespace SmartcatPlugin.Models.ApiResponse
 
         public static ApiResponse Error(int errorCode, string errorMessage)
         {
-            StackTrace stackTrace = new StackTrace();
-            MethodBase methodBase = stackTrace.GetFrame(3).GetMethod();
-            string methodName = $"{methodBase.ReflectedType?.Name}.{methodBase.Name}";
+            string stackTrace = Environment.StackTrace;
 
-            Log.Error($"{errorMessage} Called from: {methodName}");
+            Log.Error($"{errorMessage} Called from: {stackTrace}");
 
             return new ApiResponse
             {
                 IsSuccess = false,
                 ErrorMessage = errorMessage,
                 ErrorCode = errorCode,
-                StackTrace = methodName
+                StackTrace = stackTrace
             };
         }
 

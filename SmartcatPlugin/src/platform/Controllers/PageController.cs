@@ -76,9 +76,6 @@ namespace SmartcatPlugin.Controllers
         [HttpPost]
         public IHttpActionResult GetFolderList([FromBody] GetFolderListRequest request)
         {
-            var logger = Sitecore.Diagnostics.LoggerFactory.GetLogger("SmartcatApi");
-            logger.Info("This is an info message for my custom log");
-
             Item rootItem;
 
             if (request.ParentDirectoryId.ExternalId.ToLower() == ConstantIds.Root)
@@ -113,9 +110,10 @@ namespace SmartcatPlugin.Controllers
         {
             Item rootItem;
 
-            if (request.ParentDirectoryId.ExternalType != ConstantItemTypes.Folder)
+            if (request.ParentDirectoryId.ExternalType != ConstantItemTypes.Directory)
             {
-                return Json(GetItemListResponse.Empty);
+                return Json(ApiResponse.Error(400,
+                    $"Item with Id:{request.ParentDirectoryId.ExternalId} is not directory"));
             }
 
             if (request.ParentDirectoryId.ExternalId.ToLower() == ConstantIds.Root)
@@ -130,8 +128,8 @@ namespace SmartcatPlugin.Controllers
 
             if (rootItem == null)
             {
-                ApiResponse.Error(404,
-                    $"Parent folder with Id:{request.ParentDirectoryId} not found");
+                return Json(ApiResponse.Error(404,
+                    $"Parent folder with Id:{request.ParentDirectoryId.ExternalId} not found"));
             }
 
             var getDataItemsResponse = new GetItemListResponse
@@ -151,13 +149,13 @@ namespace SmartcatPlugin.Controllers
             var id = new ID(request.ItemId.ExternalId);
             var item = _masterDb.GetItem(id, Language.Parse(request.SourceLocale));
 
-            if (!item.IsHaveLayout())
+            if (!item.IsHasContentFields())
             {
-                _log.Error($"Item {item.Name} with {item.ID} is not Page");
+                _log.Error($"Item {item.Name} with {item.ID} is not Item");  
                 return Json(new Dictionary<string, LocJsonContent>());
             }
 
-            var result = item.GetPageContent(_masterDb, request);
+            var result = item.GetItemContent(_masterDb, request);
             _log.Info("SmartcatApi method \"file-content\" was success completed");
             return Json(new GetItemContentResponse{LocaleContent = result});
         }
@@ -174,8 +172,8 @@ namespace SmartcatPlugin.Controllers
 
                 foreach (var unit in locJson.Units)
                 {
-                    var itemIdFieldName = IdFieldExtractor.ExtractIdAndField(unit.Key);
-                    var childrenPageId = new ID(itemIdFieldName.Id);
+                    var fieldName = unit.Key;
+                    var childrenPageId = new ID(request.ItemId.ExternalId);
                     var allVersionsItem = _masterDb.GetItem(childrenPageId);
                     bool languageVersionExists = allVersionsItem.Languages.Any(l => l == newLanguage);
 
@@ -190,7 +188,7 @@ namespace SmartcatPlugin.Controllers
 
                         newVersionItemIds.Add(newLanguageItem.ID);
                         newLanguageItem.Editing.BeginEdit();
-                        newLanguageItem.Fields[itemIdFieldName.Field].Value = string.Join(string.Empty, unit.Target);
+                        newLanguageItem.Fields[fieldName].Value = string.Join(string.Empty, unit.Target);
                         newLanguageItem.Editing.EndEdit();
 
                         _log.Info($"{typeof(Item)} with Id {newLanguageItem.ID}," +
@@ -227,7 +225,7 @@ namespace SmartcatPlugin.Controllers
                     ParentDirectoryId = new ExternalObjectId
                     {
                         ExternalId = folder.ParentID.ToString(),
-                        ExternalType = ConstantItemTypes.Folder
+                        ExternalType = ConstantItemTypes.Directory
                     }
                 });
             }
@@ -246,7 +244,7 @@ namespace SmartcatPlugin.Controllers
             {
                 var item = _masterDb.GetItem(new ID(itemId.ExternalId));
 
-                if (!item.IsHaveLayout())
+                if (!item.IsHasContentFields())
                 {
                     return Json(ApiResponse.Error(400,
                         $"Item with id: {itemId.ExternalId} is not page"));
@@ -257,14 +255,14 @@ namespace SmartcatPlugin.Controllers
                     Id = new ExternalObjectId
                     {
                         ExternalId = item.ID.ToString(),
-                        ExternalType = ConstantItemTypes.Page
+                        ExternalType = ConstantItemTypes.Item
                     },
                     ParentDirectoryIds = new List<ExternalObjectId>
                     {
                         new ExternalObjectId
                         {
                             ExternalId = item.ParentID.ToString(),
-                            ExternalType = ConstantItemTypes.Folder
+                            ExternalType = ConstantItemTypes.Directory
                         }
                     },
                     Name = item.Name,

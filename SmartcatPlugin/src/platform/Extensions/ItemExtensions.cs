@@ -6,6 +6,7 @@ using log4net;
 using Sitecore.Data;
 using Sitecore.Data.Items;
 using Sitecore.Globalization;
+using Sitecore.Shell.Framework.Commands.TemplateBuilder;
 using SmartcatPlugin.Constants;
 using SmartcatPlugin.Models.Smartcat;
 using SmartcatPlugin.Models.Smartcat.GetFolderList;
@@ -18,6 +19,7 @@ namespace SmartcatPlugin.Extensions
     public static class ItemExtensions
     {
         private static readonly ILog Log = LogManager.GetLogger(LogNames.SmartcatApi);
+
         public static List<DataDirectory> GetChildDirectories(this Item item)
         {
             var childList = item.Children.ToList();
@@ -31,12 +33,12 @@ namespace SmartcatPlugin.Extensions
 
             foreach (var childItem in childList)
             {
-                if (childItem.IsFolder())            //todo make base template finder
+                if (childItem.HasChildren)
                 {
                     directories.Add(new DataDirectory
                     {
-                        Id = new ExternalObjectId { ExternalId = childItem.ID.ToString(), ExternalType = "Folder" },
-                        Name = item.Name,
+                        Id = new ExternalObjectId { ExternalId = childItem.ID.ToString(), ExternalType = ConstantItemTypes.Directory },
+                        Name = childItem.Name,
                         CanLoadChildDirectories = true,
                         CanLoadChildItems = true,
                         ChildDirectories = GetChildDirectories(childItem)
@@ -49,15 +51,14 @@ namespace SmartcatPlugin.Extensions
             return directories;
         }
 
-        public static bool IsHaveLayout(this Item item)
+        public static bool IsHasContentFields(this Item item)
         {
-            if (item == null)
+            if (item.Fields.All(f => f.Name.StartsWith("_")))
             {
                 return false;
             }
 
-            var layoutField = item.Fields[Sitecore.FieldIDs.LayoutField];
-            return layoutField != null && !string.IsNullOrEmpty(layoutField.Value);
+            return true;
         }
 
         public static List<DataItem> GetChildPages(this Item parentItem, string searchQuery, Database masterDb)
@@ -77,14 +78,14 @@ namespace SmartcatPlugin.Extensions
                 var matchesSearchQuery = !string.IsNullOrEmpty(searchQuery) && childItem.Name.Contains(searchQuery);
                 var isSearchQueryEmpty = string.IsNullOrEmpty(searchQuery);
 
-                if (childItem.IsHaveLayout() && (matchesSearchQuery || isSearchQueryEmpty))
+                if (childItem.IsHasContentFields() && (matchesSearchQuery || isSearchQueryEmpty))
                 {
                     pages.Add(new DataItem
                     {
-                        Id = new ExternalObjectId { ExternalId = childItem.ID.ToString(), ExternalType = ConstantItemTypes.Page },
+                        Id = new ExternalObjectId { ExternalId = childItem.ID.ToString(), ExternalType = ConstantItemTypes.Item },
                         ParentDirectoryIds = new List<ExternalObjectId>
                         {
-                            new ExternalObjectId{ ExternalId = parentItem.ID.ToString(), ExternalType = ConstantItemTypes.Folder }
+                            new ExternalObjectId{ ExternalId = parentItem.ID.ToString(), ExternalType = ConstantItemTypes.Directory }
                         },
                         Name = childItem.Name,
                         Locales = childItem.GetItemLocales(masterDb)
@@ -120,16 +121,12 @@ namespace SmartcatPlugin.Extensions
             return locales;
         }
 
-        public static Dictionary<string, LocJsonContent> GetPageContent(this Item parentPage, Database masterDb, GetItemContentRequest request)
+        public static Dictionary<string, LocJsonContent> GetItemContent(this Item parentPage, Database masterDb, GetItemContentRequest request)
         {
             if (parentPage == null || masterDb == null || request == null)
             {
                 throw new NullReferenceException("Invalid inner data");
             }
-
-            var allChildren = parentPage.GetAllChildrenPages();
-
-            allChildren.Insert(0, parentPage);
 
             var targetLanguages = request.TargetLocales
                 .Select(Language.Parse)
@@ -139,24 +136,21 @@ namespace SmartcatPlugin.Extensions
 
             var units = new List<Unit>();
 
-            foreach (var children in allChildren)
-            {
-                var fields = children.Fields
+            var fields = parentPage.Fields
                     .Where(f => !f.Name.StartsWith("_") && f.HasValue);
 
-                foreach (var field in fields)
+            foreach (var field in fields)
+            {
+                var unit = new Unit
                 {
-                    var unit = new Unit
-                    {
-                        Key = children.GetPathWithIds(parentPage) + "/" + field.Key,
-                        Properties = new UnitProperties(),
-                        Source = StringSplitter.SplitStringWithNewlines(field.Value),
-                        Target = new List<string>()
-                    };
-                    
-                    units.Add(unit);
-                    Log.Info($"{typeof(Unit)} key:{unit.Key} was created. ItemExtensions.GetPageContent()");
-                }
+                    Key = field.Key,
+                    Properties = new UnitProperties(),
+                    Source = StringSplitter.SplitStringWithNewlines(field.Value),
+                    Target = new List<string>()
+                };
+                
+                units.Add(unit);
+                Log.Info($"{typeof(Unit)} key:{unit.Key} was created. ItemExtensions.GetItemContent()");
             }
 
             var locJsonContent = new LocJsonContent { Units = units };
@@ -173,7 +167,7 @@ namespace SmartcatPlugin.Extensions
         {
             var allChildren = item.Axes.GetDescendants()
                 .Where(childItem => childItem.Language.Equals(item.Language)
-                                    && (childItem.IsHaveLayout() || !childItem.IsFolder()))
+                                    && (childItem.IsHasContentFields() || !childItem.IsFolder()))
                 .GroupBy(childItem => childItem.ID)
                 .Select(group => group.OrderByDescending(childItem => childItem.Version.Number).First())
                 .ToList();
@@ -211,7 +205,7 @@ namespace SmartcatPlugin.Extensions
         public static bool IsFolder(this Item item)
         {
             if (item.TemplateID == ConstantIds.FolderTemplate
-                || !item.IsHaveLayout() && item.HasChildren)
+                || !item.IsHasContentFields() && item.HasChildren)
             {
                 return true;
             }
