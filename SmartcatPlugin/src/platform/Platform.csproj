@@ -97,6 +97,7 @@
     <Compile Include="Extensions\ItemAppearanceExtensions.cs" />
     <Compile Include="Models\Smartcat\Authorization\AuthorizationRequest.cs" />
     <Compile Include="Models\Smartcat\Authorization\SmartcatToken.cs" />
+    <Compile Include="Models\Smartcat\ExternalObjectIdConverter.cs" />
     <Compile Include="Services\AuthenticationService.cs" />
     <Compile Include="sitecore modules\shell\AddItem\AddItemModal.aspx.cs">
       <DependentUpon>AddItemModal.aspx</DependentUpon>
