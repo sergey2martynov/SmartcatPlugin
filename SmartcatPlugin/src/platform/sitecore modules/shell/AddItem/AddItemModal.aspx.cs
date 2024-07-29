@@ -1,13 +1,13 @@
-﻿using Newtonsoft.Json;
-using Sitecore.Data.Items;
-using SmartcatPlugin.Cache;
-using SmartcatPlugin.Extensions;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI.WebControls;
+using Newtonsoft.Json;
+using Sitecore.Data.Items;
+using SmartcatPlugin.Cache;
+using SmartcatPlugin.Extensions;
 
-namespace SmartcatPlugin.sitecore_modules.shell
+namespace SmartcatPlugin.sitecore_modules.shell.AddItem
 {
     public partial class AddItemModal : System.Web.UI.Page
     {
@@ -16,6 +16,12 @@ namespace SmartcatPlugin.sitecore_modules.shell
             if (!IsPostBack)
             {
                 PopulateTree();
+            }
+
+            if (IsPostBack)
+            {
+                Sitecore.Context.ClientPage.SendMessage((object)this, "item:refresh");
+                Sitecore.Context.ClientPage.ClientResponse.Timer("item:refresh", 500);
             }
         }
 

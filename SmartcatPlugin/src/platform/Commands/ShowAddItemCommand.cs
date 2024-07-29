@@ -1,4 +1,5 @@
 ﻿using Sitecore.Shell.Framework.Commands;
+using Sitecore.Web.UI.Sheer;
 
 namespace SmartcatPlugin.Commands
 {
@@ -6,8 +7,8 @@ namespace SmartcatPlugin.Commands
     {
         public override void Execute(CommandContext context)
         {
-            Sitecore.Context.ClientPage.ClientResponse.ShowModalDialog(
-                "/sitecore modules/shell/AddItem/AddItemModal.aspx", "600", "400", "AddItem", false);
+            SheerResponse.ShowModalDialog(
+                "/sitecore modules/shell/AddItem/AddItemModal.aspx", "900", "400", "AddItem", false);
         }
 
         public override CommandState QueryState(CommandContext context)

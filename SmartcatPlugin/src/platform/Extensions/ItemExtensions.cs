@@ -121,7 +121,8 @@ namespace SmartcatPlugin.Extensions
             return locales;
         }
 
-        public static Dictionary<string, LocJsonContent> GetItemContent(this Item parentPage, Database masterDb, GetItemContentRequest request)
+        public static Dictionary<string, LocJsonContent> GetItemContent(this Item parentPage, Database masterDb,
+            GetItemContentRequest request)
         {
             if (parentPage == null || masterDb == null || request == null)
             {
@@ -137,10 +138,12 @@ namespace SmartcatPlugin.Extensions
             var units = new List<Unit>();
 
             var fields = parentPage.Fields
-                    .Where(f => !f.Name.StartsWith("_") && f.HasValue);
+                    .Where(f => !f.Name.StartsWith("_") && ConstantItemFieldTypes.Types.Contains(f.Type) && f.HasValue);
 
             foreach (var field in fields)
             {
+                var fieldType = field.Type;
+
                 var unit = new Unit
                 {
                     Key = field.Key,

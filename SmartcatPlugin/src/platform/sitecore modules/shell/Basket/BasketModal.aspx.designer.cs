@@ -7,7 +7,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace SmartcatPlugin.sitecore_modules.shell
+namespace SmartcatPlugin.sitecore_modules.shell.Basket
 {
 
 

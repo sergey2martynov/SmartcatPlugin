@@ -10,6 +10,9 @@ namespace SmartcatPlugin.Controllers
         {
             serviceCollection.Replace(ServiceDescriptor.Transient(typeof(PageController),
                 typeof(PageController)));
+
+            serviceCollection.Replace(ServiceDescriptor.Scoped(typeof(BasketController),
+                typeof(BasketController)));
         }
     }
 }

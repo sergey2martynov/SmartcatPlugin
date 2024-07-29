@@ -74,7 +74,6 @@
     <Content Include="App_Config\Include\WebApiInit.config" />
     <Content Include="App_Config\Log4net.config" />
     <Content Include="sitecore modules\shell\AddItem\AddItemModal.aspx" />
-    <Content Include="sitecore modules\shell\Basket\app.js" />
     <Content Include="sitecore modules\shell\Basket\BasketModal.aspx" />
     <Content Include="sitecore modules\shell\Basket\styles.css" />
     <None Include="Platform.wpp.targets" />
@@ -92,12 +91,18 @@
     <Compile Include="Cache\CustomCacheManager.cs" />
     <Compile Include="Cache\CustomCache.cs" />
     <Compile Include="Commands\ShowBasketCommand.cs" />
+    <Compile Include="Constants\ConstantItemFieldTypes.cs" />
+    <Compile Include="Controllers\BasketController.cs" />
+    <Compile Include="Controllers\ItemController.cs" />
     <Compile Include="CustomExceptionFilter.cs" />
     <Compile Include="Constants\LogNames.cs" />
     <Compile Include="Extensions\ItemAppearanceExtensions.cs" />
+    <Compile Include="Models\Dtos\TreeNodeDto.cs" />
+    <Compile Include="Models\SelectedItemsDto.cs" />
     <Compile Include="Models\Smartcat\Authorization\AuthorizationRequest.cs" />
     <Compile Include="Models\Smartcat\Authorization\SmartcatToken.cs" />
     <Compile Include="Services\AuthenticationService.cs" />
+    <Compile Include="Services\BasketService.cs" />
     <Compile Include="sitecore modules\shell\AddItem\AddItemModal.aspx.cs">
       <DependentUpon>AddItemModal.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>

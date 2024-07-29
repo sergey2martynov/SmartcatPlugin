@@ -156,6 +156,7 @@ namespace SmartcatPlugin.Controllers
             }
 
             var result = item.GetItemContent(_masterDb, request);
+
             _log.Info("SmartcatApi method \"file-content\" was success completed");
             return Json(new GetItemContentResponse{LocaleContent = result});
         }
