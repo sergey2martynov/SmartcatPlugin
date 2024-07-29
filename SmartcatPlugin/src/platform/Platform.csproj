@@ -101,6 +101,7 @@
     <Compile Include="Models\SelectedItemsDto.cs" />
     <Compile Include="Models\Smartcat\Authorization\AuthorizationRequest.cs" />
     <Compile Include="Models\Smartcat\Authorization\SmartcatToken.cs" />
+    <Compile Include="Models\Smartcat\ExternalObjectIdConverter.cs" />
     <Compile Include="Services\AuthenticationService.cs" />
     <Compile Include="Services\BasketService.cs" />
     <Compile Include="sitecore modules\shell\AddItem\AddItemModal.aspx.cs">
