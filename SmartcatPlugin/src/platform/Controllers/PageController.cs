@@ -110,7 +110,8 @@ namespace SmartcatPlugin.Controllers
         {
             Item rootItem;
 
-            if (request.ParentDirectoryId.ExternalType != ConstantItemTypes.Directory)
+            if (request.ParentDirectoryId.ExternalType != ConstantItemTypes.Directory 
+                && request.ParentDirectoryId.ExternalId.ToLower() != ConstantIds.Root)
             {
                 return Json(ApiResponse.Error(400,
                     $"Item with Id:{request.ParentDirectoryId.ExternalId} is not directory"));
