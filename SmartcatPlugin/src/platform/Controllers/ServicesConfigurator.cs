@@ -13,6 +13,9 @@ namespace SmartcatPlugin.Controllers
 
             serviceCollection.Replace(ServiceDescriptor.Scoped(typeof(BasketController),
                 typeof(BasketController)));
+
+            serviceCollection.Replace(ServiceDescriptor.Scoped(typeof(AddItemController),
+                typeof(AddItemController)));
         }
     }
 }

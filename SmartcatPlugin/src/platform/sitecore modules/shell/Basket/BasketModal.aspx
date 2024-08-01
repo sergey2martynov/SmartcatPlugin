@@ -53,6 +53,7 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Basket.BasketModal" %>
                 <el-container>
                     <el-main class="tree-container">
                         <el-tree
+                            ref="tree"
                             :data="processedTreeData"
                             :props="defaultProps"
                             :default-expanded-keys="allNodeIds"

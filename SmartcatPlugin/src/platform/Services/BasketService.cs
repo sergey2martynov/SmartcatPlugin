@@ -16,12 +16,12 @@ namespace SmartcatPlugin.Services
         private readonly Database _masterDb = Database.GetDatabase("master");
         private TreeNodeDto _rootNode;
 
-        public SelectedItemsDto BuildSelectedItemTree()
+        public ItemsTreeDto BuildSelectedItemTree()
         {
             string cachedData = CustomCacheManager.GetCache("selectedItems");
             if (string.IsNullOrEmpty(cachedData))
             {
-                return new SelectedItemsDto(); // todo: exception
+                return new ItemsTreeDto(); // todo: exception
             }
 
             var itemIds = JsonConvert.DeserializeObject<List<string>>(cachedData);
@@ -36,7 +36,7 @@ namespace SmartcatPlugin.Services
                 }
             }
 
-            var result = new SelectedItemsDto
+            var result = new ItemsTreeDto
             {
                 TreeNodes = new List<TreeNodeDto> { _rootNode },
                 CheckedItems = itemIds,
@@ -52,7 +52,7 @@ namespace SmartcatPlugin.Services
             {
                 Id = item.ID.ToString(),
                 Name = item.DisplayName,
-                ShowCheckbox = true,
+                ShowCheckBox = true,
                 ImageUrl = item.Appearance.GetIconPath()
             };
 

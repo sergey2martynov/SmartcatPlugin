@@ -93,17 +93,19 @@
     <Compile Include="Commands\ShowBasketCommand.cs" />
     <Compile Include="Constants\ConstantItemFieldTypes.cs" />
     <Compile Include="Controllers\BasketController.cs" />
-    <Compile Include="Controllers\ItemController.cs" />
+    <Compile Include="Controllers\AddItemController.cs" />
     <Compile Include="CustomExceptionFilter.cs" />
     <Compile Include="Constants\LogNames.cs" />
     <Compile Include="Extensions\ItemAppearanceExtensions.cs" />
+    <Compile Include="Models\Dtos\SaveItemIdsToCacheDto.cs" />
     <Compile Include="Models\Dtos\TreeNodeDto.cs" />
-    <Compile Include="Models\SelectedItemsDto.cs" />
+    <Compile Include="Models\Dtos\ItemsTreeDto.cs" />
     <Compile Include="Models\Smartcat\Authorization\AuthorizationRequest.cs" />
     <Compile Include="Models\Smartcat\Authorization\SmartcatToken.cs" />
     <Compile Include="Models\Smartcat\ExternalObjectIdConverter.cs" />
     <Compile Include="Services\AuthenticationService.cs" />
     <Compile Include="Services\BasketService.cs" />
+    <Compile Include="Services\ItemService.cs" />
     <Compile Include="sitecore modules\shell\AddItem\AddItemModal.aspx.cs">
       <DependentUpon>AddItemModal.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>

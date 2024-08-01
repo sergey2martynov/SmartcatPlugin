@@ -1,4 +1,5 @@
-﻿using System.Web.Http;
+﻿using System.Threading;
+using System.Web.Http;
 using SmartcatPlugin.Services;
 
 namespace SmartcatPlugin.Controllers
@@ -21,6 +22,7 @@ namespace SmartcatPlugin.Controllers
         [HttpGet]
         public IHttpActionResult UpdateRibbon()
         {
+            Thread.Sleep(5000);
             Sitecore.Context.ClientPage.ClientResponse.Timer("item:refresh", 2000);
 
             return Ok();

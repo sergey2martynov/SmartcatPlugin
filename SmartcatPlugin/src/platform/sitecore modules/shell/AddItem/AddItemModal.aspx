@@ -8,17 +8,20 @@
     <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <link href="../Basket/styles.css" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
-    <link href="styles.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <div id="app">
     <el-container style="height: 100vh;">
-        <el-aside width="200px" style="background-color: #505050; padding: 10px; box-sizing: border-box;"/>
+        <el-aside width="200px" style="background-color: #505050; padding: 10px; box-sizing: border-box;">
+            Add items to basket
+        </el-aside>
         <el-container direction="vertical">
             <el-container>
-                <el-main class="tree-container">
+                <el-main class="tree-container" style="background-color: #fff;">
                     <el-tree
+                        ref="tree"
                         :data="processedTreeData"
                         :props="defaultProps"
                         :default-expanded-keys="allNodeIds"
@@ -26,8 +29,8 @@
                         check-strictly>
                         <span slot="default" slot-scope="{ node, data }">
                             <div class="tree-node-content">
-                                <template v-if="data.ShowCheckbox">
-                                    <el-checkbox :checked="data.checked" disabled />
+                                <template v-if="data.ShowCheckBox">
+                                    <el-checkbox :checked="data.checked" @change="handleCheckboxChange(node, $event)"/>
                                 </template>
                                 <img :src="data.ImageUrl" alt="" class="tree-node-icon">
                                 <span>{{ data.Name }}</span>
@@ -40,11 +43,8 @@
                 </el-aside>
             </el-container>
             <el-footer style="text-align: center;">
-                <el-button style="width: 100px; height: 40px;" :disabled="currentStep === 0" type="primary" @click="prevStep">
-                    Back
-                </el-button>
-                <el-button style="width: 100px; height: 40px;" :disabled="currentStep === 3" type="primary" @click="nextStep">
-                    Next
+                <el-button style="width: 100px; height: 40px;" type="primary" @click="saveItems">
+                    Save
                 </el-button>
             </el-footer>
         </el-container>
@@ -67,7 +67,7 @@
                 processedTreeData() {
                     const processNode = node => {
                         const processedNode = { ...node };
-                        if (processedNode.ShowCheckbox) {
+                        if (this.checkedNodes.includes(processedNode.Id)) {
                             processedNode.checked = true;
                         }
                         if (processedNode.Children && processedNode.Children.length) {
@@ -79,7 +79,43 @@
                 }
             },
             created() {
+                this.fetchTreeData();
+            },
+            methods: {
+                fetchTreeData() {
+                    axios.get('/api/additem/get-items-tree')
+                        .then(response => {
+                            console.log(response);
+                            this.treeData = response.data.TreeNodes;
+                            this.checkedNodes = response.data.CheckedItems;
+                            this.allNodeIds = response.data.ExpandedItems;
+                        })
+                        .catch(error => {
+                            console.error('There was an error!', error);
+                        });
+                },
+                saveItems() {
+                    const checkedNodes = this.$refs.tree.getCheckedNodes();
+                    const checkedIds = checkedNodes.map(node => node.Id);
+                    console.log(checkedNodes);
+                    console.log(checkedIds);
 
+                    const data = {
+                        SelectedItemIds: checkedIds
+                    };
+
+                    axios.post('/api/additem/add-items', data)
+                        .then(response => {
+                                
+                            window.parent.$('.ui-dialog-content:visible').dialog('close');
+                        })
+                        .catch(error => {
+                            console.error('There was an error!', error);
+                        });
+                },
+                handleCheckboxChange(node, checked) {
+                    node.checked = true;
+                }
             }
         });
 </script>

@@ -1,9 +1,8 @@
 ﻿using System.Collections.Generic;
-using SmartcatPlugin.Models.Dtos;
 
-namespace SmartcatPlugin.Models
+namespace SmartcatPlugin.Models.Dtos
 {
-    public class SelectedItemsDto
+    public class ItemsTreeDto
     {
         public List<TreeNodeDto> TreeNodes { get; set; }
         public List<string> CheckedItems { get; set; }
