@@ -61,7 +61,7 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Basket.BasketModal" %>
                             check-strictly>
                             <span slot="default" slot-scope="{ node, data }">
                                 <div class="tree-node-content">
-                                    <template v-if="data.ShowCheckbox">
+                                    <template v-if="data.ShowCheckBox">
                                         <el-checkbox :checked="data.checked" disabled />
                                     </template>
                                     <img :src="data.ImageUrl" alt="" class="tree-node-icon">
@@ -104,7 +104,7 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Basket.BasketModal" %>
             processedTreeData() {
                 const processNode = node => {
                     const processedNode = { ...node };
-                    if (processedNode.ShowCheckbox) {
+                    if (processedNode.ShowCheckBox) {
                         processedNode.checked = true;
                     }
                     if (processedNode.Children && processedNode.Children.length) {
