@@ -30,7 +30,10 @@
                         <span slot="default" slot-scope="{ node, data }">
                             <div class="tree-node-content">
                                 <template v-if="data.ShowCheckBox">
-                                    <el-checkbox :checked="data.checked" @change="handleCheckboxChange(node, $event)"/>
+                                    <el-checkbox 
+                                        :checked="data.checked" 
+                                        @change="handleCheckboxChange(node, $event)" 
+                                        @click.native.stop/>
                                 </template>
                                 <img :src="data.ImageUrl" alt="" class="tree-node-icon">
                                 <span>{{ data.Name }}</span>
@@ -85,10 +88,13 @@
                 fetchTreeData() {
                     axios.get('/api/additem/get-items-tree')
                         .then(response => {
-                            console.log(response);
                             this.treeData = response.data.TreeNodes;
                             this.checkedNodes = response.data.CheckedItems;
                             this.allNodeIds = response.data.ExpandedItems;
+
+                            this.$nextTick(() => {
+                                this.$refs.tree.setCheckedKeys(this.checkedNodes);
+                            });
                         })
                         .catch(error => {
                             console.error('There was an error!', error);
@@ -97,9 +103,6 @@
                 saveItems() {
                     const checkedNodes = this.$refs.tree.getCheckedNodes();
                     const checkedIds = checkedNodes.map(node => node.Id);
-                    console.log(checkedNodes);
-                    console.log(checkedIds);
-
                     const data = {
                         SelectedItemIds: checkedIds
                     };
@@ -114,7 +117,7 @@
                         });
                 },
                 handleCheckboxChange(node, checked) {
-                    node.checked = true;
+                    node.checked = checked;
                 }
             }
         });
