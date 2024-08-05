@@ -1,20 +1,23 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
+using Sitecore.Data;
 using Sitecore.Data.Items;
 using SmartcatPlugin.Cache;
+using SmartcatPlugin.Constants;
 using SmartcatPlugin.Extensions;
-using SmartcatPlugin.Models;
 using SmartcatPlugin.Models.Dtos;
+using HtmlAgilityPack;
 
 namespace SmartcatPlugin.Services
 {
     public class ItemService
     {
+        private readonly Database _masterDb = Database.GetDatabase("master");
+
         public ItemsTreeDto GetContentEditorItemsTree()
         {
-            var masterDb = Sitecore.Configuration.Factory.GetDatabase("master");
-            var rootItem = masterDb.GetItem("/sitecore/content");
+            var rootItem = _masterDb.GetItem("/sitecore/content");
             string cachedData = CustomCacheManager.GetCache("selectedItems");
             var selectedItemIds = cachedData == null ? new List<string>()
                 : JsonConvert.DeserializeObject<List<string>>(cachedData);
@@ -59,6 +62,48 @@ namespace SmartcatPlugin.Services
 
                 AddChildNodes(child, childNode);
             }
+        }
+
+        public List<string> GetInvalidItemsNames(List<string> itemIds)
+        {
+            var invalidNames = new List<string>();
+
+            foreach (var itemId in itemIds)
+            {
+                var id = new ID(itemId);
+                var item = _masterDb.GetItem(id);
+
+                if (item.Locking.IsLocked())
+                {
+                    invalidNames.Add(item.Name);
+                    continue;
+                }
+
+                var fields = item.GetNonSystemFields();
+
+                foreach (var field in fields)
+                {
+                    if (field.Type != ConstantItemFieldTypes.RichText)
+                    {
+                        continue;
+                    }
+
+                    var doc = new HtmlDocument();
+                    doc.OptionFixNestedTags = false;
+
+                    doc.LoadHtml(field.Value);
+
+                    foreach (var error in doc.ParseErrors)
+                    {
+                        if (!invalidNames.Contains(item.Name))
+                        {
+                            invalidNames.Add(item.Name);
+                        }
+                    }
+                }
+            }
+
+            return invalidNames;
         }
     }
 }

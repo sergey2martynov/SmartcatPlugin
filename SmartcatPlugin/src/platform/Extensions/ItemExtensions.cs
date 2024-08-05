@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using log4net;
 using Sitecore.Data;
+using Sitecore.Data.Fields;
 using Sitecore.Data.Items;
 using Sitecore.Globalization;
 using Sitecore.Shell.Framework.Commands.TemplateBuilder;
@@ -137,13 +138,10 @@ namespace SmartcatPlugin.Extensions
 
             var units = new List<Unit>();
 
-            var fields = parentPage.Fields
-                    .Where(f => !f.Name.StartsWith("_") && ConstantItemFieldTypes.Types.Contains(f.Type) && f.HasValue);
+            var fields = parentPage.GetNonSystemFields();
 
             foreach (var field in fields)
             {
-                var fieldType = field.Type;
-
                 var unit = new Unit
                 {
                     Key = field.Key,
@@ -214,6 +212,14 @@ namespace SmartcatPlugin.Extensions
             }
 
             return false;
+        }
+
+        public static IEnumerable<Field> GetNonSystemFields(this Item item)
+        {
+            var fields = item.Fields
+                .Where(f => !f.Name.StartsWith("_") && ConstantItemFieldTypes.Types.Contains(f.Type) && f.HasValue);
+
+            return fields;
         }
     }
 }

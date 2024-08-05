@@ -100,6 +100,7 @@
     <Compile Include="Models\Dtos\SaveItemIdsToCacheDto.cs" />
     <Compile Include="Models\Dtos\TreeNodeDto.cs" />
     <Compile Include="Models\Dtos\ItemsTreeDto.cs" />
+    <Compile Include="Models\Dtos\ValidatingItemsDto.cs" />
     <Compile Include="Models\Smartcat\Authorization\AuthorizationRequest.cs" />
     <Compile Include="Models\Smartcat\Authorization\SmartcatToken.cs" />
     <Compile Include="Models\Smartcat\ExternalObjectIdConverter.cs" />

@@ -42,7 +42,7 @@
                     </el-tree>
                 </el-main>
                 <el-aside width="200px" style="padding: 10px; box-sizing: border-box;">
-                    <div>In this will be validation info</div>
+                    
                 </el-aside>
             </el-container>
             <el-footer style="text-align: center;">
@@ -82,10 +82,10 @@
                 }
             },
             created() {
-                this.fetchTreeData();
+                this.getTreeData();
             },
             methods: {
-                fetchTreeData() {
+                getTreeData() {
                     axios.get('/api/additem/get-items-tree')
                         .then(response => {
                             this.treeData = response.data.TreeNodes;

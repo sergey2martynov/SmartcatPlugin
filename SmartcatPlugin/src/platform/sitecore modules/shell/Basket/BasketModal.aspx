@@ -71,7 +71,13 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Basket.BasketModal" %>
                         </el-tree>
                     </el-main>
                     <el-aside width="200px" style="padding: 10px; box-sizing: border-box;">
-                        <div>In this will be validation info</div>
+                        <div style="display: flex; flex-direction: column;">
+                            <a>{{validItemCount}} items are valid</a>
+                            <div v-if="invalidItemCount > 0">
+                                <a>{{invalidItemCount}} items failed</a>
+                                <a>Invalid item names: {{invalidItemNames}}</a>
+                            </div>
+                        </div>
                     </el-aside>
                 </el-container>
                 <el-footer style="text-align: center;">
@@ -95,6 +101,9 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Basket.BasketModal" %>
             treeData: [],
             checkedNodes: [],
             allNodeIds: [],
+            invalidItemNames: "",
+            invalidItemCount: 0,
+            validItemCount:0,
             defaultProps: {
                 children: 'Children',
                 label: 'Name'
@@ -116,15 +125,27 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Basket.BasketModal" %>
             }
         },
         created() {
-            this.fetchTreeData();
+            this.getTreeData();
+            this.getValidatingInfo();
         },
         methods: {
-            fetchTreeData() {
+            getTreeData() {
                 axios.get('/api/basket/get-selected-items')
                     .then(response => {
                         this.treeData = response.data.TreeNodes;
                         this.checkedNodes = response.data.CheckedItems;
                         this.allNodeIds = response.data.ExpandedItems;
+                    })
+                    .catch(error => {
+                        console.error('There was an error!', error);
+                    });
+            },
+            getValidatingInfo() {
+                axios.get('/api/basket/get-validating-info')
+                    .then(response => {
+                        this.invalidItemNames = response.data.InvalidItemNames;
+                        this.invalidItemCount = response.data.InvalidItemCount;
+                        this.validItemCount = response.data.ValidItemCount;
                     })
                     .catch(error => {
                         console.error('There was an error!', error);
