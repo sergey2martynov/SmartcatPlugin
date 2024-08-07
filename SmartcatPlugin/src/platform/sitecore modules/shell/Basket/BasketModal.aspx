@@ -11,6 +11,9 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Basket.BasketModal" %>
     <script src="https://unpkg.com/element-ui/lib/index.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
     <link href="styles.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="https://unpkg.com/vue2-datepicker/index.css">
+    <script src="https://unpkg.com/vue2-datepicker"></script>
+
 </head>
 <body>
         <div id="app">
@@ -142,11 +145,11 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Basket.BasketModal" %>
                                 </el-label>
                             </el-col>
                             <el-col style="width: 300px">
-                                    <el-date-picker
+                                    <date-picker
                                         v-model="deadline"
                                         type="date"
                                         placeholder="Pick a date"
-                                        :default-value="new Date(2010, 9, 1)"
+                                        :default-value="getTomorrowDate()"
                                         size="small"
                                         style="width: 300px"
                                     />
@@ -280,6 +283,11 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Basket.BasketModal" %>
                 this.$nextTick(() => {
                     console.log(`Step updated to: ${this.currentStep}`);
                 });
+            },
+            getTomorrowDate() {
+                const today = new Date();
+                const tomorrow = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
+                return tomorrow;
             }
         },
         mounted() {
