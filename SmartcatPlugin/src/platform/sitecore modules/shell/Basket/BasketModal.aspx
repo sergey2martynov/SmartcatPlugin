@@ -50,7 +50,7 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Basket.BasketModal" %>
                 </div>
             </el-aside>
             <el-container direction="vertical">
-                <el-container>
+                <el-container v-if="currentStep === 0">
                     <el-main class="tree-container">
                         <el-tree
                             ref="tree"
@@ -80,6 +80,96 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Basket.BasketModal" %>
                         </div>
                     </el-aside>
                 </el-container>
+                <el-container v-if="currentStep === 1" style="margin-left: 30px">
+                    <el-col>
+                        <el-row style="margin-top: 15px;" >
+                                <el-col style="width: 150px; text-align: right; padding-right: 15px">
+                                    <el-label for="projectName">
+                                        Project name
+                                    </el-label>
+                                </el-col>
+                                <el-col style="width: 300px">
+                                    <el-input 
+                                        type="text" 
+                                        id="projectName" 
+                                        v-model="projectName"
+                                        size="small"
+                                    />
+                                </el-col>
+                        </el-row>
+                        <el-row style="padding-top: 15px">
+                            <el-col style="width: 150px; text-align: right; padding-right: 15px">
+                                <el-label for="workflowStagesSelect">
+                                    Workflow Stages
+                                </el-label>
+                            </el-col>
+                            <el-col style="width: 300px;">
+                                <el-select
+                                    id="workflowStagesSelect"
+                                    value-key="id"
+                                    v-model="selectedWorkFlowStage"
+                                    size="small"
+                                    class="mr-1"
+                                    style="width: 300px">
+                                    <el-option
+                                        v-for="item in workflowStages"
+                                        :key="item.id"
+                                        :label="item.name"
+                                        :value="item.name">
+                                    </el-option>
+                                </el-select>
+                            </el-col>
+                        </el-row>
+                        <el-row style="padding-top: 15px; ">
+                            <el-col style="width: 150px; text-align: right; padding-right: 15px">
+                                <el-label for="subject" >
+                                    Subject
+                                </el-label>
+                            </el-col>
+                            <el-col style="width: 300px">
+                                <el-input 
+                                    type="text" 
+                                    id="subject" 
+                                    v-model="subject"
+                                    size="small"
+                                />
+                            </el-col>
+                        </el-row>
+                        <el-row style="padding-top: 15px; ">
+                            <el-col style="width: 150px; text-align: right; padding-right: 15px">
+                                <el-label for="subject" >
+                                    Deadline
+                                </el-label>
+                            </el-col>
+                            <el-col style="width: 300px">
+                                    <el-date-picker
+                                        v-model="deadline"
+                                        type="date"
+                                        placeholder="Pick a date"
+                                        :default-value="new Date(2010, 9, 1)"
+                                        size="small"
+                                        style="width: 300px"
+                                    />
+                            </el-col>
+                        </el-row>
+                        <el-row style="padding-top: 15px;">
+                            <el-col style="width: 150px; text-align: right; padding-right: 15px;">
+                                <el-label for="description">
+                                    Description
+                                </el-label>
+                            </el-col>
+                            <el-col style="width: 300px;">
+                                <el-input 
+                                    type="textarea" 
+                                    id="description" 
+                                    v-model="description"
+                                    rows="4"
+                                    style="width: 100%; height: 100px;"
+                                />
+                            </el-col>
+                        </el-row>
+                    </el-col>
+                </el-container>
                 <el-footer style="text-align: center;">
                     <el-button style="width: 100px; height: 40px;" :disabled="currentStep === 0" type="primary" @click="prevStep">
                         Back
@@ -107,7 +197,27 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Basket.BasketModal" %>
             defaultProps: {
                 children: 'Children',
                 label: 'Name'
-            }
+            },
+
+            projectName: "",
+            subject: "",
+            selectedWorkFlowStage: "",
+            deadline: "",
+            description: "",
+            workflowStages: [
+                {
+                    name: "Manual translation",
+                    id: 0
+                },
+                {
+                    name: "AI Translation",
+                    id: 1 
+                },
+                {
+                    name: "AI translation + post-editing",
+                    id: 2
+                }
+            ]
         },
         computed: {
             processedTreeData() {
@@ -127,6 +237,10 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Basket.BasketModal" %>
         created() {
             this.getTreeData();
             this.getValidatingInfo();
+
+            if (this.workflowStages.length > 0) {
+                this.selectedWorkFlowStage = this.workflowStages[0].name;
+            }
         },
         methods: {
             getTreeData() {
