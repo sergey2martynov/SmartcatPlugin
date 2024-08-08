@@ -98,6 +98,7 @@
     <Compile Include="Constants\LogNames.cs" />
     <Compile Include="Extensions\ItemAppearanceExtensions.cs" />
     <Compile Include="Models\Dtos\SaveItemIdsToCacheDto.cs" />
+    <Compile Include="Models\Dtos\SaveProjectInfoDto.cs" />
     <Compile Include="Models\Dtos\TreeNodeDto.cs" />
     <Compile Include="Models\Dtos\ItemsTreeDto.cs" />
     <Compile Include="Models\Dtos\ValidatingItemsDto.cs" />

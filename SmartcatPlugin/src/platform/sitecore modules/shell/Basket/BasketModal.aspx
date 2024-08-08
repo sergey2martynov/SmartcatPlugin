@@ -88,7 +88,7 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Basket.BasketModal" %>
                         <el-row style="margin-top: 15px;" >
                                 <el-col style="width: 150px; text-align: right; padding-right: 15px">
                                     <el-label for="projectName">
-                                        Project name
+                                        Project name*
                                     </el-label>
                                 </el-col>
                                 <el-col style="width: 300px">
@@ -103,7 +103,7 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Basket.BasketModal" %>
                         <el-row style="padding-top: 15px">
                             <el-col style="width: 150px; text-align: right; padding-right: 15px">
                                 <el-label for="workflowStagesSelect">
-                                    Workflow Stages
+                                    Workflow Stages*
                                 </el-label>
                             </el-col>
                             <el-col style="width: 300px;">
@@ -126,7 +126,7 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Basket.BasketModal" %>
                         <el-row style="padding-top: 15px; ">
                             <el-col style="width: 150px; text-align: right; padding-right: 15px">
                                 <el-label for="subject" >
-                                    Subject
+                                    Subject*
                                 </el-label>
                             </el-col>
                             <el-col style="width: 300px">
@@ -141,7 +141,7 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Basket.BasketModal" %>
                         <el-row style="padding-top: 15px; ">
                             <el-col style="width: 150px; text-align: right; padding-right: 15px">
                                 <el-label for="subject" >
-                                    Deadline
+                                    Deadline*
                                 </el-label>
                             </el-col>
                             <el-col style="width: 300px">
@@ -240,7 +240,7 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Basket.BasketModal" %>
         created() {
             this.getTreeData();
             this.getValidatingInfo();
-
+            this.getSavedProjectInfo();
             if (this.workflowStages.length > 0) {
                 this.selectedWorkFlowStage = this.workflowStages[0].name;
             }
@@ -268,7 +268,44 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Basket.BasketModal" %>
                         console.error('There was an error!', error);
                     });
             },
+            getSavedProjectInfo() {
+                axios.get('/api/basket/get-saved-project-info')
+                    .then(response => {
+                        this.projectName = response.data.ProjectName;
+                        this.subject = response.data.Subject;
+                        this.selectedWorkFlowStage = response.data.WorkflowStage;
+                        this.deadline = new Date(response.data.Deadline);
+                        this.description = response.data.Description;
+                        console.log(this.deadline);
+                    })
+                    .catch(error => {
+                        console.error('There was an error!', error);
+                    });
+            },
             nextStep() {
+                if (this.currentStep === 1) {
+
+                    if (!this.projectName || !this.subject || !this.selectedWorkFlowStage || !this.deadline) {
+                        alert("Required fields was not filling");
+                        return;
+                    }
+
+                    const data = {
+                        projectName: this.projectName,
+                        subject: this.subject,
+                        workflowStage: this.selectedWorkFlowStage,
+                        deadline: this.deadline.toISOString(),
+                        description: this.description
+                    };
+                    console.log(data);
+                    axios.post('/api/basket/save-project-info', data)
+                        .then(response => {
+                            this.currentStep += 1;
+                        })
+                        .catch(error => {
+                            alert("There was an error: " + error.message);
+                        });
+                }
                 if (this.currentStep < this.totalSteps - 1 ) {
                     this.currentStep += 1;
                 }

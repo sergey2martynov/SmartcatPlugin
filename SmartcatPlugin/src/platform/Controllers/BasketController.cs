@@ -58,5 +58,34 @@ namespace SmartcatPlugin.Controllers
 
             return Ok(validatingInfo);
         }
+
+        [Route("save-project-info")]
+        [HttpPost]
+        public IHttpActionResult SaveProjectInfo([FromBody] SaveProjectInfoDto dto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest("Fill required fields");
+            }
+            var projectInfo = JsonConvert.SerializeObject(dto);
+            CustomCacheManager.SetCache("projectInfo", projectInfo);
+
+            return Ok();
+        }
+
+        [Route("get-saved-project-info")]
+        [HttpGet]
+        public IHttpActionResult GetSavedProjectInfo()
+        {
+            string cachedData = CustomCacheManager.GetCache("projectInfo");
+            if (string.IsNullOrEmpty(cachedData))
+            {
+                return Ok(new List<string>()); // todo: exception
+            }
+
+            var projectInfo = JsonConvert.DeserializeObject<SaveProjectInfoDto>(cachedData);
+
+            return Ok(projectInfo);
+        }
     }
 }
