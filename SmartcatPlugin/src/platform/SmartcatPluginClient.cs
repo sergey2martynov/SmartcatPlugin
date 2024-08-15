@@ -6,6 +6,7 @@ using SmartcatPlugin.Models.Smartcat.GetItemContent;
 using SmartcatPlugin.Models.Smartcat.GetItemList;
 using SmartcatPlugin.Models.Smartcat.GetParentDirectories;
 using SmartcatPlugin.Models.Smartcat.ImportTranslation;
+using SmartcatPlugin.Models.Smartcat.Testing;
 using System;
 using System.Net.Http;
 using System.Text;
@@ -68,6 +69,30 @@ namespace SmartcatPlugin
             response.EnsureSuccessStatusCode();
             var content = await response.Content.ReadAsStringAsync();
             return JsonConvert.DeserializeObject<GetItemByIdResponse>(content);
+        }
+
+        public async Task<ApiResponse> CreateTestData()
+        {
+            var response = await _httpClient.PostAsync("test-data", null);
+            response.EnsureSuccessStatusCode();
+            var content = await response.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<ApiResponse>(content);
+        }
+
+        public async Task<ApiResponse> DeleteTestData()
+        {
+            var response = await _httpClient.DeleteAsync("test-data");
+            response.EnsureSuccessStatusCode();
+            var content = await response.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<ApiResponse>(content);
+        }
+
+        public async Task<GetLocalesResponse> GetLocales()
+        {
+            var response = await _httpClient.PostAsync("locale-list", null);
+            response.EnsureSuccessStatusCode();
+            var content = await response.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<GetLocalesResponse>(content);
         }
 
         private StringContent CreateJsonContent(object obj)

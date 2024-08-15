@@ -324,7 +324,7 @@ namespace SmartcatPlugin.Controllers
                 Locales = mappedLanguageCodes
             };
 
-            return Ok(result);
+            return Json(result);
         }
 
         [Route("test-data")]
@@ -333,7 +333,7 @@ namespace SmartcatPlugin.Controllers
         {
             var itemService = new ItemService();
             itemService.CreateContentItem(request.RootDirectory);
-            return Ok();
+            return Json(ApiResponse.Success);
         }
 
         [Route("test-data")]
@@ -352,7 +352,7 @@ namespace SmartcatPlugin.Controllers
                 item.Delete();
             }
 
-            return Ok();
+            return Json(ApiResponse.Success);
         }
     }
 }
