@@ -2,7 +2,6 @@
 using System.Web.Http;
 using Newtonsoft.Json;
 using SmartcatPlugin.Cache;
-using System.Collections.Generic;
 using SmartcatPlugin.Models.Dtos;
 
 namespace SmartcatPlugin.Controllers

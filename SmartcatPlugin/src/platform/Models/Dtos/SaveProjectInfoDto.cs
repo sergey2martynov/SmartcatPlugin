@@ -13,6 +13,6 @@ namespace SmartcatPlugin.Models.Dtos
         public string WorkflowStage { get; set; }
         [Required]
         public DateTimeOffset Deadline { get; set; }
-        public string Description { get; set; }
+        public string Comment { get; set; }
     }
 }

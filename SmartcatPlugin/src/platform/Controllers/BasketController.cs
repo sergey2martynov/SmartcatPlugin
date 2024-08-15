@@ -2,8 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Web.Http;
 using Newtonsoft.Json;
+using Sitecore.Data.Managers;
+using Sitecore.Globalization;
+using Sitecore.Tasks;
 using SmartcatPlugin.Cache;
 using SmartcatPlugin.Models.Dtos;
 using SmartcatPlugin.Services;
@@ -38,6 +42,7 @@ namespace SmartcatPlugin.Controllers
         [HttpGet]
         public IHttpActionResult GetValidatingInfo()
         {
+
             string cachedData = CustomCacheManager.GetCache("selectedItems");
             if (string.IsNullOrEmpty(cachedData))
             {
@@ -87,5 +92,57 @@ namespace SmartcatPlugin.Controllers
 
             return Ok(projectInfo);
         }
+
+        [Route("get-translation-languages")]
+        [HttpGet]
+        public IHttpActionResult GetTranslationLanguages()
+        {
+            var result = new TranslationLanguagesDto
+            {
+                SourceLanguages = new List<LanguageDto>
+                {
+                    new LanguageDto
+                    {
+                        Name = "English", Code = "en"
+                    },
+                    new LanguageDto
+                    {
+                        Name = "Russian", Code = "ru"
+                    }
+                },
+                TargetLanguages = new List<LanguageDto>
+                {
+                    new LanguageDto
+                    {
+                        Name = "English", Code = "en"
+                    },
+                    new LanguageDto
+                    {
+                        Name = "Russian", Code = "ru"
+                    },
+                    new LanguageDto
+                    {
+                        Name = "Spanish", Code = "es"
+                    },
+                    new LanguageDto
+                    {
+                        Name = "French", Code = "fr"
+                    },
+                    new LanguageDto
+                    {
+                        Name = "German", Code = "de"
+                    },
+                }
+            };
+
+            return Ok(result);
+        }
+
+        /*[Route("confirm-project")]
+        [HttpPost]
+        public async Task<IHttpActionResult> CreateSmartcatProject()
+        {
+
+        }*/
     }
 }

@@ -157,15 +157,15 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Basket.BasketModal" %>
                         </el-row>
                         <el-row style="padding-top: 15px;">
                             <el-col style="width: 150px; text-align: right; padding-right: 15px;">
-                                <el-label for="description">
-                                    Description
+                                <el-label for="comment">
+                                    Comment
                                 </el-label>
                             </el-col>
                             <el-col style="width: 300px;">
                                 <el-input 
                                     type="textarea" 
-                                    id="description" 
-                                    v-model="description"
+                                    id="comment" 
+                                    v-model="comment"
                                     rows="4"
                                     style="width: 100%; height: 100px;"
                                 />
@@ -173,12 +173,147 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Basket.BasketModal" %>
                         </el-row>
                     </el-col>
                 </el-container>
+                <el-container v-if="currentStep === 2" style="margin-left: 30px; margin-right: 30px; display: grid; grid-template-rows: auto 1fr; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <!-- Текстовая область -->
+                    <el-container style="grid-column: 1 / span 2; text-align: center;">
+                        <el-col>
+                            <el-row style="text-align: left;">
+                                <div style="height: 40px; background-color: gray; margin-top: 15px; display: flex; align-items: center;">
+                                    <label style="color: aliceblue; margin-left: 10px">
+                                        Translation
+                                    </label>
+                                </div>
+                            </el-row>
+                            <el-row style="padding-top: 15px; text-align: left;">
+                                <label>
+                                    Choose the target language(s) for your project. Depending on the service, 
+                                    some languages may be unavailable or selected by default
+                                </label>
+                            </el-row>
+                        </el-col>
+                        
+                    </el-container>
+
+                    <!-- Колонка для исходных языков -->
+                    <el-col>
+                        <label style="padding-top: 15px; font-weight: bold;" >Source language</label>
+                        <el-row style="padding-top: 15px" v-for="sourceLanguage in sourceLanguages" :key="sourceLanguage.code">
+                            <el-checkbox
+                                v-model="selectedSourceLanguage"
+                                :label="sourceLanguage.code"
+                                @change="handleSourceLanguageChange(sourceLanguage)"
+                            >
+                                {{ sourceLanguage.name }}
+                            </el-checkbox>
+                        </el-row>
+                    </el-col>
+
+                    <!-- Колонка для целевых языков -->
+                    <el-col>
+                        <label style="padding-top: 15px; font-weight: bold;">Target language</label>
+                        <el-row style="padding-top: 15px" v-for="targetLanguage in targetLanguages" :key="targetLanguage.code">
+                            <el-checkbox
+                                v-model="selectedTargetLanguages"
+                                :label="targetLanguage.code"
+                                @change="handleTargetLanguageChange(targetLanguage)"
+                            >
+                                {{ targetLanguage.name }}
+                            </el-checkbox>
+                        </el-row>
+                    </el-col>
+                </el-container>
+                <el-container v-if="currentStep === 3" style="margin-left: 30px; display: grid; grid-template-rows: auto 1fr; grid-template-columns: 200px 350px; gap: 20px;">
+                    <el-container style="grid-column: 1 / span 2; width: 100%;">
+                        <div style="height: 40px; background-color: gray; margin-top: 15px; width: 100%; display: flex; align-items: center;">
+                            <label style="color: aliceblue; margin-left: 10px">
+                                1 project created & added for translation
+                            </label>
+                        </div>
+                    </el-container>
+                        <el-col style="text-align: left;">
+                            <el-row>
+                                <label style="text-align: left; font-weight: bold;">
+                                    Project name
+                                </label>
+                            </el-row>
+                            <el-row>
+                                <label style="text-align: left; font-weight: bold;">
+                                    Workflow stage
+                                </label>
+                            </el-row>
+                            <el-row>
+                                <label style="text-align: left; font-weight: bold;">
+                                    Subject
+                                </label>
+                            </el-row>
+                            <el-row>
+                                <label style="text-align: left; font-weight: bold;">
+                                    Deadline
+                                </label>
+                            </el-row>
+                            <el-row>
+                                <label style="text-align: left; font-weight: bold;">
+                                    Comment
+                                </label>
+                            </el-row>
+                            <el-row>
+                                <label style="text-align: left; font-weight: bold;">
+                                    Source language
+                                </label>
+                            </el-row>
+                            <el-row>
+                                <label style="text-align: left; font-weight: bold;">
+                                    Target language
+                                </label>
+                            </el-row>
+                        </el-col>
+                        <el-col style="text-align: left;">
+                            <el-row>
+                                <a style="padding-left: 30px">
+                                    {{ projectName }}
+                                </a>
+                            </el-row>
+                            <el-row>
+                                <a style="padding-left: 30px">
+                                    {{ selectedWorkFlowStage }}
+                                </a>
+                            </el-row>
+                            <el-row>
+                                <a style="padding-left: 30px">
+                                    {{ subject }}
+                                </a>
+                            </el-row>
+                            <el-row>
+                                <a style="padding-left: 30px">
+                                    {{ new Date(deadline).toLocaleDateString() }}
+                                </a>
+                            </el-row>
+                            <el-row>
+                                <a style="padding-left: 30px">
+                                    {{ comment }}
+                                </a>
+                            </el-row>
+                            <el-row>
+                                <a style="padding-left: 30px">
+                                    {{ selectedSourceLanguageName }}
+                                </a>
+                            </el-row>
+                            <el-row>
+                                <a style="padding-left: 30px">
+                                    {{ selectedTargetLanguageNames.join(', ') }}
+                                </a>
+                            </el-row>
+                        </el-col>
+                </el-container>
                 <el-footer style="text-align: center;">
                     <el-button style="width: 100px; height: 40px;" :disabled="currentStep === 0" type="primary" @click="prevStep">
                         Back
                     </el-button>
-                    <el-button style="width: 100px; height: 40px;" :disabled="currentStep === 3" type="primary" @click="nextStep">
+                    <el-button v-if="currentStep < 3"style="width: 100px; height: 40px;" type="primary" @click="nextStep">
                         Next
+                    </el-button>
+                    <el-button v-if="currentStep === 3"style="width: 130px; height: 40px;" type="primary" @click="confirmProject">
+                        Confirm project
                     </el-button>
                 </el-footer>
             </el-container>
@@ -196,7 +331,7 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Basket.BasketModal" %>
             allNodeIds: [],
             invalidItemNames: "",
             invalidItemCount: 0,
-            validItemCount:0,
+            validItemCount: 0,
             defaultProps: {
                 children: 'Children',
                 label: 'Name'
@@ -206,7 +341,7 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Basket.BasketModal" %>
             subject: "",
             selectedWorkFlowStage: "",
             deadline: "",
-            description: "",
+            comment: "",
             workflowStages: [
                 {
                     name: "Manual translation",
@@ -214,13 +349,22 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Basket.BasketModal" %>
                 },
                 {
                     name: "AI Translation",
-                    id: 1 
+                    id: 1
                 },
                 {
                     name: "AI translation + post-editing",
                     id: 2
                 }
-            ]
+            ],
+
+            sourceLanguages: [],
+            targetLanguages: [],
+            selectedSourceLanguage: [],
+            selectedTargetLanguages: [],
+            selectedSourceLanguageName: "",
+            selectedTargetLanguageNames: [],
+
+            summaryData: new Map()
         },
         computed: {
             processedTreeData() {
@@ -241,6 +385,7 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Basket.BasketModal" %>
             this.getTreeData();
             this.getValidatingInfo();
             this.getSavedProjectInfo();
+            this.getLanguages();
             if (this.workflowStages.length > 0) {
                 this.selectedWorkFlowStage = this.workflowStages[0].name;
             }
@@ -275,8 +420,18 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Basket.BasketModal" %>
                         this.subject = response.data.Subject;
                         this.selectedWorkFlowStage = response.data.WorkflowStage;
                         this.deadline = new Date(response.data.Deadline);
-                        this.description = response.data.Description;
-                        console.log(this.deadline);
+                        this.comment = response.data.Comment;
+                    })
+                    .catch(error => {
+                        console.error('There was an error!', error);
+                    });
+            },
+            getLanguages() {
+                axios.get('/api/basket/get-translation-languages')
+                    .then(response => {
+                        console.log(response);
+                        this.sourceLanguages = response.data.sourceLanguages;
+                        this.targetLanguages = response.data.targetLanguages;
                     })
                     .catch(error => {
                         console.error('There was an error!', error);
@@ -295,18 +450,21 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Basket.BasketModal" %>
                         subject: this.subject,
                         workflowStage: this.selectedWorkFlowStage,
                         deadline: this.deadline.toISOString(),
-                        description: this.description
+                        comment: this.comment
                     };
                     console.log(data);
                     axios.post('/api/basket/save-project-info', data)
                         .then(response => {
-                            this.currentStep += 1;
+
                         })
                         .catch(error => {
                             alert("There was an error: " + error.message);
                         });
                 }
-                if (this.currentStep < this.totalSteps - 1 ) {
+                if (this.currentStep === 2) {
+                    this.getSummaryData();
+                }
+                if (this.currentStep < this.totalSteps - 1) {
                     this.currentStep += 1;
                 }
                 this.$nextTick(() => {
@@ -325,12 +483,35 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Basket.BasketModal" %>
                 const today = new Date();
                 const tomorrow = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
                 return tomorrow;
+            },
+            handleSourceLanguageChange(selectedLanguage) {
+                this.selectedSourceLanguage = [];
+                this.selectedSourceLanguageName = selectedLanguage.name;
+                this.selectedSourceLanguage.push(selectedLanguage.code);
+                console.log('Selected source language:', this.selectedSourceLanguage);
+            },
+            handleTargetLanguageChange(selectedLanguage) {
+                this.selectedTargetLanguageNames.push(selectedLanguage.name);
+            },
+            getSummaryData() {
+                const formatedDeadline = new Date(this.deadline).toLocaleDateString();
+                this.summaryData = new Map([
+                    ['Project name', this.projectName],
+                    ['Workflow stage', this.selectedWorkFlowStage],
+                    ['Subject', this.subject],
+                    ['Deadline', formatedDeadline],
+                    ['Comment', this.comment],
+                    ['Source language', this.selectedSourceLanguage],
+                    ['Target languages', this.selectedTargetLanguages.join(',')]]);
+            },
+            confirmProject() {
+
             }
         },
         mounted() {
             Vue.use(ELEMENT);
         },
-        
+
     });
 </script>
 </body>

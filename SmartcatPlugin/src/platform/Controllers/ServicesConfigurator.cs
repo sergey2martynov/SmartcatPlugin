@@ -8,8 +8,8 @@ namespace SmartcatPlugin.Controllers
     {
         public void Configure(IServiceCollection serviceCollection)
         {
-            serviceCollection.Replace(ServiceDescriptor.Transient(typeof(PageController),
-                typeof(PageController)));
+            serviceCollection.Replace(ServiceDescriptor.Transient(typeof(SmartcatController),
+                typeof(SmartcatController)));
 
             serviceCollection.Replace(ServiceDescriptor.Scoped(typeof(BasketController),
                 typeof(BasketController)));

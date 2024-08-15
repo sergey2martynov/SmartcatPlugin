@@ -1,14 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Web.Http;
 using log4net;
+using Microsoft.Practices.EnterpriseLibrary.Common.Utility;
 using Newtonsoft.Json;
 using Sitecore.Data;
 using Sitecore.Data.Items;
+using Sitecore.Data.Managers;
 using Sitecore.Globalization;
+using Sitecore.SecurityModel;
 using SmartcatPlugin.Constants;
 using SmartcatPlugin.Extensions;
 using SmartcatPlugin.Models.ApiResponse;
@@ -20,13 +25,14 @@ using SmartcatPlugin.Models.Smartcat.GetItemContent;
 using SmartcatPlugin.Models.Smartcat.GetItemList;
 using SmartcatPlugin.Models.Smartcat.GetParentDirectories;
 using SmartcatPlugin.Models.Smartcat.ImportTranslation;
+using SmartcatPlugin.Models.Smartcat.Testing;
 using SmartcatPlugin.Services;
 using SmartcatPlugin.Tools;
 
 namespace SmartcatPlugin.Controllers
 {
     [RoutePrefix("smartcat")]
-    public class PageController : ApiController
+    public class SmartcatController : ApiController
     {
         private readonly Database _masterDb = Database.GetDatabase("master");
         private readonly ILog _log = LogManager.GetLogger(LogNames.SmartcatApi);
@@ -110,7 +116,7 @@ namespace SmartcatPlugin.Controllers
         {
             Item rootItem;
 
-            if (request.ParentDirectoryId.ExternalType != ConstantItemTypes.Directory 
+            if (request.ParentDirectoryId.ExternalType != ConstantItemTypes.Directory
                 && request.ParentDirectoryId.ExternalId.ToLower() != ConstantIds.Root)
             {
                 return Json(ApiResponse.Error(400,
@@ -152,14 +158,14 @@ namespace SmartcatPlugin.Controllers
 
             if (!item.IsHasContentFields())
             {
-                _log.Error($"Item {item.Name} with {item.ID} is not Item");  
+                _log.Error($"Item {item.Name} with {item.ID} is not Item");
                 return Json(new Dictionary<string, LocJsonContent>());
             }
 
             var result = item.GetItemContent(_masterDb, request);
 
             _log.Info("SmartcatApi method \"file-content\" was success completed");
-            return Json(new GetItemContentResponse{LocaleContent = result});
+            return Json(new GetItemContentResponse { LocaleContent = result });
         }
 
         [Route("import-translation")]
@@ -233,7 +239,7 @@ namespace SmartcatPlugin.Controllers
             }
 
             _log.Info("SmartcatApi method \"parent-directories-by-id\" was success completed");
-            return Json(new GetParentFoldersResponse{Items = parentFolders });
+            return Json(new GetParentFoldersResponse { Items = parentFolders });
         }
 
         [Route("files-by-id")]
@@ -275,7 +281,78 @@ namespace SmartcatPlugin.Controllers
             }
 
             _log.Info("SmartcatApi method \"files-by-id\" was success completed");
-            return Json(new GetItemByIdResponse{Items = itemsData});
+            return Json(new GetItemByIdResponse { Items = itemsData });
+        }
+
+        [Route("locale-list")]
+        [HttpPost]
+        public IHttpActionResult GetLocales()
+        {
+            var sitecoreLanguageCodes = Sitecore.Globalization.LanguageDefinitions.Definitions.Select(d => d.Name);
+            List<string> smartcatLanguages;
+            string filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "sitecore modules/Shell/SmartcatLocales.json");
+            using (StreamReader reader = new StreamReader(filePath))
+            {
+                var jsonData = reader.ReadToEnd();
+                smartcatLanguages = JsonConvert.DeserializeObject<List<string>>(jsonData);
+            }
+
+            var mappedLanguageCodes = new List<string>();
+
+            foreach (var sitecoreLanguage in sitecoreLanguageCodes)
+            {
+                if (smartcatLanguages.Contains(sitecoreLanguage))
+                {
+                    mappedLanguageCodes.Add(sitecoreLanguage);
+                }
+            }
+
+            var defaultLanguage = LanguageManager.DefaultLanguage.CultureInfo.Name;
+            var customLanguages = LanguageManager.GetLanguages(_masterDb).Select(l => l.CultureInfo.Name).ToList();
+            customLanguages.Add(defaultLanguage);
+
+            foreach (var language in customLanguages)
+            {
+                if (smartcatLanguages.Contains(language) && !mappedLanguageCodes.Contains(language))
+                {
+                    mappedLanguageCodes.Add(language);
+                }
+            }
+            var result = new GetLocalesResponse
+            {
+                DefaultLocale = defaultLanguage,
+                Locales = mappedLanguageCodes
+            };
+
+            return Ok(result);
+        }
+
+        [Route("test-data")]
+        [HttpPost]
+        public IHttpActionResult CreateTestData([FromBody] CreateTestDataDirectoryRequest request)
+        {
+            var itemService = new ItemService();
+            itemService.CreateContentItem(request.RootDirectory);
+            return Ok();
+        }
+
+        [Route("test-data")]
+        [HttpDelete]
+        public IHttpActionResult DeleteTestData([FromBody] DeleteTestDataDirectoryRequest request)
+        {
+            var item = _masterDb.GetItem(new ID(request.TestDirectoryId.ExternalId));
+
+            if (item == null)
+            {
+                throw new InvalidOperationException($"Item at path '{request.TestDirectoryId.ExternalId}' not found.");
+            }
+
+            using (new SecurityDisabler())
+            {
+                item.Delete();
+            }
+
+            return Ok();
         }
     }
 }
