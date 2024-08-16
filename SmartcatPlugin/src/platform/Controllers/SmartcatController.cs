@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Web.Http;
 using log4net;
-using Microsoft.Practices.EnterpriseLibrary.Common.Utility;
 using Newtonsoft.Json;
 using Sitecore.Data;
 using Sitecore.Data.Items;
@@ -27,7 +25,6 @@ using SmartcatPlugin.Models.Smartcat.GetParentDirectories;
 using SmartcatPlugin.Models.Smartcat.ImportTranslation;
 using SmartcatPlugin.Models.Smartcat.Testing;
 using SmartcatPlugin.Services;
-using SmartcatPlugin.Tools;
 
 namespace SmartcatPlugin.Controllers
 {
@@ -232,7 +229,7 @@ namespace SmartcatPlugin.Controllers
                     DirectoryId = directoryExternalId,
                     ParentDirectoryId = new ExternalObjectId
                     {
-                        ExternalId = folder.ParentID.ToString(),
+                        ExternalId = folder.ParentID == ConstantIds.ContentDirectory ? ConstantIds.Root : folder.ParentID.ToString(),
                         ExternalType = ConstantItemTypes.Directory
                     }
                 });

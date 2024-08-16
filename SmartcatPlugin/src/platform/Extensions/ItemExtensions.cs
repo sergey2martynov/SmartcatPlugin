@@ -86,7 +86,7 @@ namespace SmartcatPlugin.Extensions
                         Id = new ExternalObjectId { ExternalId = childItem.ID.ToString(), ExternalType = ConstantItemTypes.Item },
                         ParentDirectoryIds = new List<ExternalObjectId>
                         {
-                            new ExternalObjectId{ ExternalId = parentItem.ID.ToString(), ExternalType = ConstantItemTypes.Directory }
+                            new ExternalObjectId{ ExternalId = parentItem.ID == ConstantIds.ContentDirectory ? ConstantIds.Root : parentItem.ID.ToString(), ExternalType = ConstantItemTypes.Directory }
                         },
                         Name = childItem.Name,
                         Locales = childItem.GetItemLocales(masterDb)
