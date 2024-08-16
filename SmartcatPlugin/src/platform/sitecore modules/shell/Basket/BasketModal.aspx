@@ -13,10 +13,16 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Basket.BasketModal" %>
     <link href="styles.css" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="https://unpkg.com/vue2-datepicker/index.css">
     <script src="https://unpkg.com/vue2-datepicker"></script>
-
+    <script src="../onload.js"></script>
+    <link href="../closeButton.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
         <div id="app">
+            <el-button
+                icon="el-icon-close"
+                class="close-button"
+                @click="closeWindow">
+            </el-button>
         <el-container style="height: 100vh;">
             <el-aside width="200px" style="background-color: #505050; padding: 10px; box-sizing: border-box;">
                 <div style="height: 35px; display: flex; align-items: center;">
@@ -506,11 +512,11 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Basket.BasketModal" %>
             },
             confirmProject() {
 
+            },
+            closeWindow() {
+                window.parent.$('.ui-dialog-content:visible').dialog('close');
             }
-        },
-        mounted() {
-            Vue.use(ELEMENT);
-        },
+        }
 
     });
 </script>

@@ -1,0 +1,26 @@
+﻿.close-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 1000;
+    background-color: transparent;
+    border: none;
+    color: #000;
+    cursor: pointer;
+    box-shadow: none;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+}
+
+.close-button .el-icon-close {
+    font-size: 20px;
+    color: #000;
+}
+
+.close-button:focus,
+.close-button:active {
+    outline: none;
+    box-shadow: none;
+    background-color: transparent;
+}

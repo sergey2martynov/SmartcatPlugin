@@ -10,9 +10,18 @@
     <script src="https://unpkg.com/element-ui/lib/index.js"></script>
     <link href="../Basket/styles.css" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <script src="../onload.js"></script>
+    <link href="../closeButton.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <div id="app">
+    <el-container>
+        <el-button
+            icon="el-icon-close"
+            class="close-button"
+            @click="closeWindow">
+        </el-button>
+    </el-container>    
     <el-container style="height: 100vh;">
         <el-aside width="200px" style="background-color: #505050; padding: 10px; box-sizing: border-box;">
             Add items to basket
@@ -118,6 +127,9 @@
                 },
                 handleCheckboxChange(node, checked) {
                     node.checked = checked;
+                },
+                closeWindow() {
+                    window.parent.$('.ui-dialog-content:visible').dialog('close');
                 }
             }
         });

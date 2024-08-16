@@ -76,6 +76,8 @@
     <Content Include="sitecore modules\shell\AddItem\AddItemModal.aspx" />
     <Content Include="sitecore modules\shell\Basket\BasketModal.aspx" />
     <Content Include="sitecore modules\shell\Basket\styles.css" />
+    <Content Include="sitecore modules\shell\closeButton.css" />
+    <Content Include="sitecore modules\shell\onload.js" />
     <None Include="SmartcatLocales.json" />
     <None Include="Platform.wpp.targets" />
     <None Include="Properties\PublishProfiles\Local.pubxml" />
