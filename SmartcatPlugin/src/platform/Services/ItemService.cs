@@ -9,10 +9,9 @@ using SmartcatPlugin.Extensions;
 using SmartcatPlugin.Models.Dtos;
 using HtmlAgilityPack;
 using Sitecore.SecurityModel;
-using System;
 using SmartcatPlugin.Models.Smartcat.Testing;
 using Sitecore.Globalization;
-using Sitecore.Shell.Framework.Commands;
+using Sitecore.Shell.Framework.Commands.IDE;
 
 namespace SmartcatPlugin.Services
 {

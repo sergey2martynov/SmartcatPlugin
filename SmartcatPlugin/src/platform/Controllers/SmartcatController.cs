@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using System.Web.Http;
@@ -41,7 +42,7 @@ namespace SmartcatPlugin.Controllers
 
             if (string.IsNullOrEmpty(request.Token))
             {
-                return Json(ApiResponse.Error(400, "Token can not be null or empty"));
+                return Json(ApiResponseBase.Error(HttpStatusCode.BadRequest, "Token can not be null or empty"));
             }
 
             var encryptedToken = request.Token;
@@ -63,7 +64,7 @@ namespace SmartcatPlugin.Controllers
 
             if (string.IsNullOrEmpty(token.SmartcatAuthKey))
             {
-                return Json(ApiResponse.Error(400, "SmartcatAuthKey can not be empty"));
+                return Json(ApiResponseBase.Error(HttpStatusCode.BadRequest, "SmartcatAuthKey can not be empty"));
             }
 
             var authenticateService = new AuthenticationService();
@@ -72,7 +73,7 @@ namespace SmartcatPlugin.Controllers
 
             _log.Info("Authorization was success completed");
 
-            return Json(ApiResponse.Error(200, "Authenticated"));
+            return Json(ApiResponseBase.Error(HttpStatusCode.OK, "Authenticated"));
         }
 
         [Route("directory-list")]
@@ -93,7 +94,7 @@ namespace SmartcatPlugin.Controllers
 
             if (rootItem == null)
             {
-                return Json(ApiResponse.Error(404,
+                return Json(ApiResponseBase.Error(HttpStatusCode.NotFound,
                     $"Parent folder with Id:{request.ParentDirectoryId} not found"));
             }
 
@@ -116,7 +117,7 @@ namespace SmartcatPlugin.Controllers
             if (request.ParentDirectoryId.ExternalType != ConstantItemTypes.Directory
                 && request.ParentDirectoryId.ExternalId.ToLower() != ConstantIds.Root)
             {
-                return Json(ApiResponse.Error(400,
+                return Json(ApiResponseBase.Error(HttpStatusCode.BadRequest,
                     $"Item with Id:{request.ParentDirectoryId.ExternalId} is not directory"));
             }
 
@@ -132,7 +133,7 @@ namespace SmartcatPlugin.Controllers
 
             if (rootItem == null)
             {
-                return Json(ApiResponse.Error(404,
+                return Json(ApiResponseBase.Error(HttpStatusCode.NotFound,
                     $"Parent folder with Id:{request.ParentDirectoryId.ExternalId} not found"));
             }
 
@@ -204,7 +205,7 @@ namespace SmartcatPlugin.Controllers
             }
 
             _log.Info("SmartcatApi method \"import-translation\" was success completed");
-            return Json(ApiResponse.Success);
+            return Json(ApiResponseBase.Success);
         }
 
         [Route("parent-directories-by-id")]
@@ -220,7 +221,7 @@ namespace SmartcatPlugin.Controllers
 
                 if (!folder.IsFolder())
                 {
-                    return Json(ApiResponse.Error(400,
+                    return Json(ApiResponseBase.Error(HttpStatusCode.BadRequest,
                         $"Item with id: {directoryExternalId.ExternalId} is not folder"));
                 }
 
@@ -251,7 +252,7 @@ namespace SmartcatPlugin.Controllers
 
                 if (!item.IsHasContentFields())
                 {
-                    return Json(ApiResponse.Error(400,
+                    return Json(ApiResponseBase.Error(HttpStatusCode.BadRequest,
                         $"Item with id: {itemId.ExternalId} is not page"));
                 }
 
@@ -330,18 +331,18 @@ namespace SmartcatPlugin.Controllers
         {
             var itemService = new ItemService();
             itemService.CreateContentItem(request.RootDirectory);
-            return Json(ApiResponse.Success);
+            return Json(ApiResponseBase.Success);
         }
 
         [Route("test-data")]
         [HttpDelete]
-        public IHttpActionResult DeleteTestData([FromBody] DeleteTestDataDirectoryRequest request)
+        public IHttpActionResult DeleteTestData(string id)
         {
-            var item = _masterDb.GetItem(new ID(request.TestDirectoryId.ExternalId));
+            var item = _masterDb.GetItem(new ID(id));
 
             if (item == null)
             {
-                throw new InvalidOperationException($"Item at path '{request.TestDirectoryId.ExternalId}' not found.");
+                throw new InvalidOperationException($"Item at path '{id}' not found.");
             }
 
             using (new SecurityDisabler())
@@ -349,7 +350,7 @@ namespace SmartcatPlugin.Controllers
                 item.Delete();
             }
 
-            return Json(ApiResponse.Success);
+            return Json(ApiResponseBase.Success);
         }
     }
 }

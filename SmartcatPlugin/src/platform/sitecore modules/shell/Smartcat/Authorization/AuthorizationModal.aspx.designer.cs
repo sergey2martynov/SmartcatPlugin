@@ -7,11 +7,11 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace SmartcatPlugin.sitecore_modules.shell.AddItem
+namespace SmartcatPlugin.sitecore_modules.shell.Smartcat.Authorization
 {
 
 
-    public partial class AddItemModal
+    public partial class AuthorizationModal
     {
     }
 }

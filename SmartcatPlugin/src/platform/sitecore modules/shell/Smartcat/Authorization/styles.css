@@ -1,0 +1,18 @@
+﻿body, html, #app {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.center-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.input-wrapper {
+    display: flex;
+    flex-direction: column;
+    width: 300px;
+}

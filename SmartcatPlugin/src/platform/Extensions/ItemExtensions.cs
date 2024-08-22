@@ -159,6 +159,22 @@ namespace SmartcatPlugin.Extensions
             foreach (var targetLanguage in targetLanguages)
             {
                 locJsonDictionary.Add(targetLanguage.Name, locJsonContent);
+
+                var versions = parentPage.Versions.GetVersions(true);
+                var isItemHaveTargetLanguages = versions.Any(v => v.Language == targetLanguage);
+
+                if (!isItemHaveTargetLanguages)
+                {
+                    continue;
+                }
+
+                var targetVersionItem = masterDb.GetItem(parentPage.ID, targetLanguage);
+
+                foreach (var unit in locJsonContent.Units)
+                {
+                    var field = targetVersionItem.Fields[unit.Key];
+                    unit.Target = StringSplitter.SplitStringWithNewlines(field.Value);
+                }
             }
 
             return locJsonDictionary;

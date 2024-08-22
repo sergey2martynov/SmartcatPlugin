@@ -1,7 +1,6 @@
-﻿using Sitecore.Web.UI.Sheer;
-using System;
+﻿using System;
 
-namespace SmartcatPlugin.sitecore_modules.shell.Basket
+namespace SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket
 {
     public partial class BasketModal : System.Web.UI.Page
     {

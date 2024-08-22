@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Web.Http;
 using Newtonsoft.Json;
-using Sitecore.Data.Managers;
-using Sitecore.Globalization;
-using Sitecore.Tasks;
 using SmartcatPlugin.Cache;
 using SmartcatPlugin.Models.Dtos;
 using SmartcatPlugin.Services;

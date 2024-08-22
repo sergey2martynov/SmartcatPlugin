@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SmartcatPlugin.sitecore_modules.shell.AddItem
+namespace SmartcatPlugin.sitecore_modules.shell.Smartcat.AddItem
 {
     public partial class AddItemModal : System.Web.UI.Page
     {

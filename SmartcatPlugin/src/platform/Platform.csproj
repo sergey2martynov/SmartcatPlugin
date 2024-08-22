@@ -73,11 +73,13 @@
     <Content Include="App_Config\Include\Authentication\SmartcatAuthentication.config" />
     <Content Include="App_Config\Include\WebApiInit.config" />
     <Content Include="App_Config\Log4net.config" />
-    <Content Include="sitecore modules\shell\AddItem\AddItemModal.aspx" />
-    <Content Include="sitecore modules\shell\Basket\BasketModal.aspx" />
-    <Content Include="sitecore modules\shell\Basket\styles.css" />
-    <Content Include="sitecore modules\shell\closeButton.css" />
-    <Content Include="sitecore modules\shell\onload.js" />
+    <Content Include="sitecore modules\shell\Smartcat\AddItem\AddItemModal.aspx" />
+    <Content Include="sitecore modules\shell\Smartcat\Authorization\AuthorizationModal.aspx" />
+    <Content Include="sitecore modules\shell\Smartcat\Authorization\styles.css" />
+    <Content Include="sitecore modules\shell\Smartcat\Basket\BasketModal.aspx" />
+    <Content Include="sitecore modules\shell\Smartcat\Basket\styles.css" />
+    <Content Include="sitecore modules\shell\Smartcat\closeButton.css" />
+    <Content Include="sitecore modules\shell\Smartcat\onload.js" />
     <None Include="SmartcatLocales.json" />
     <None Include="Platform.wpp.targets" />
     <None Include="Properties\PublishProfiles\Local.pubxml" />
@@ -93,14 +95,20 @@
   <ItemGroup>
     <Compile Include="Cache\CustomCacheManager.cs" />
     <Compile Include="Cache\CustomCache.cs" />
+    <Compile Include="Commands\ShowAuthorizationCommand.cs" />
     <Compile Include="Commands\ShowBasketCommand.cs" />
     <Compile Include="Constants\ConstantItemFieldTypes.cs" />
+    <Compile Include="Controllers\AuthController.cs" />
     <Compile Include="Controllers\BasketController.cs" />
     <Compile Include="Controllers\AddItemController.cs" />
     <Compile Include="CustomExceptionFilter.cs" />
     <Compile Include="Constants\LogNames.cs" />
     <Compile Include="Extensions\ItemAppearanceExtensions.cs" />
+    <Compile Include="Extensions\TemplateSectionItemExtension.cs" />
+    <Compile Include="Models\ApiResponse\ApiResponseBase.cs" />
+    <Compile Include="Models\Dtos\ApiKeyDto.cs" />
     <Compile Include="Models\Dtos\LanguageDto.cs" />
+    <Compile Include="Models\Dtos\ProjectDto.cs" />
     <Compile Include="Models\Dtos\SaveItemIdsToCacheDto.cs" />
     <Compile Include="Models\Dtos\SaveProjectInfoDto.cs" />
     <Compile Include="Models\Dtos\TranslationLanguagesDto.cs" />
@@ -116,18 +124,26 @@
     <Compile Include="Services\AuthenticationService.cs" />
     <Compile Include="Services\BasketService.cs" />
     <Compile Include="Services\ItemService.cs" />
-    <Compile Include="sitecore modules\shell\AddItem\AddItemModal.aspx.cs">
+    <Compile Include="Services\AuthService.cs" />
+    <Compile Include="sitecore modules\shell\Smartcat\AddItem\AddItemModal.aspx.cs">
       <DependentUpon>AddItemModal.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="sitecore modules\shell\AddItem\AddItemModal.aspx.designer.cs">
+    <Compile Include="sitecore modules\shell\Smartcat\AddItem\AddItemModal.aspx.designer.cs">
       <DependentUpon>AddItemModal.aspx</DependentUpon>
     </Compile>
-    <Compile Include="sitecore modules\shell\Basket\BasketModal.aspx.cs">
+    <Compile Include="sitecore modules\shell\Smartcat\Authorization\AuthorizationModal.aspx.cs">
+      <DependentUpon>AuthorizationModal.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="sitecore modules\shell\Smartcat\Authorization\AuthorizationModal.aspx.designer.cs">
+      <DependentUpon>AuthorizationModal.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="sitecore modules\shell\Smartcat\Basket\BasketModal.aspx.cs">
       <DependentUpon>BasketModal.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="sitecore modules\shell\Basket\BasketModal.aspx.designer.cs">
+    <Compile Include="sitecore modules\shell\Smartcat\Basket\BasketModal.aspx.designer.cs">
       <DependentUpon>BasketModal.aspx</DependentUpon>
     </Compile>
     <Compile Include="SmartcatPluginClient.cs" />

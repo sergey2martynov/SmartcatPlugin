@@ -1,5 +1,5 @@
 ﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="BasketModal.aspx.cs" 
-Inherits="SmartcatPlugin.sitecore_modules.shell.Basket.BasketModal" %>
+Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
 
 <!DOCTYPE html>
 <html lang="en">

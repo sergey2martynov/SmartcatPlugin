@@ -47,12 +47,12 @@ namespace SmartcatPlugin
             return JsonConvert.DeserializeObject<GetItemContentResponse>(content);
         }
 
-        public async Task<ApiResponse> ImportTranslationAsync(TranslationImportRequest request)
+        public async Task<ApiResponseBase> ImportTranslationAsync(TranslationImportRequest request)
         {
             var response = await _httpClient.PostAsync("import-translation", CreateJsonContent(request));
             response.EnsureSuccessStatusCode();
             var content = await response.Content.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<ApiResponse>(content);
+            return JsonConvert.DeserializeObject<ApiResponseBase>(content);
         }
 
         public async Task<GetParentFoldersResponse> GetParentFoldersAsync(GetParentFoldersRequest request)
@@ -71,20 +71,20 @@ namespace SmartcatPlugin
             return JsonConvert.DeserializeObject<GetItemByIdResponse>(content);
         }
 
-        public async Task<ApiResponse> CreateTestData()
+        public async Task<ApiResponseBase> CreateTestData(CreateTestDataDirectoryRequest request)
         {
-            var response = await _httpClient.PostAsync("test-data", null);
+            var response = await _httpClient.PostAsync("test-data", CreateJsonContent(request));
             response.EnsureSuccessStatusCode();
             var content = await response.Content.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<ApiResponse>(content);
+            return JsonConvert.DeserializeObject<ApiResponseBase>(content);
         }
 
-        public async Task<ApiResponse> DeleteTestData()
+        public async Task<ApiResponseBase> DeleteTestData(string id)
         {
-            var response = await _httpClient.DeleteAsync("test-data");
+            var response = await _httpClient.DeleteAsync($"test-data?id={id}");
             response.EnsureSuccessStatusCode();
             var content = await response.Content.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<ApiResponse>(content);
+            return JsonConvert.DeserializeObject<ApiResponseBase>(content);
         }
 
         public async Task<GetLocalesResponse> GetLocales()
