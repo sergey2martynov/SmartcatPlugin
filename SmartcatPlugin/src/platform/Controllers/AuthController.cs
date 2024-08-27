@@ -1,7 +1,10 @@
 ﻿using System.Threading.Tasks;
 using System.Web.Http;
 using Sitecore.Data;
+using Sitecore.SecurityModel;
+using SmartcatPlugin.Constants;
 using SmartcatPlugin.Models.Dtos;
+using SmartcatPlugin.Services;
 using SmartcatPlugin.Smartcat;
 
 namespace SmartcatPlugin.Controllers
@@ -23,8 +26,22 @@ namespace SmartcatPlugin.Controllers
                 return BadRequest("Authorization was failed");
             }
 
+            var authService = new AuthService();
+            var apiKeyItem = authService.GetApiKeyItem(_masterDb);
 
-            //_masterDb.GetItem()
+            using (new SecurityDisabler())
+            {
+                try
+                {
+                    apiKeyItem.Editing.BeginEdit();
+                    apiKeyItem.Fields[StringConstants.WorkSpaceId].Value = dto.WorkspaceId;
+                    apiKeyItem.Fields[StringConstants.ApiKey].Value = dto.ApiKey;
+                }
+                finally
+                {
+                    apiKeyItem.Editing.EndEdit();
+                }
+            }
 
             return Ok(result);
         }

@@ -38,7 +38,7 @@ namespace SmartcatPlugin.Extensions
                 {
                     directories.Add(new DataDirectory
                     {
-                        Id = new ExternalObjectId { ExternalId = childItem.ID.ToString(), ExternalType = ConstantItemTypes.Directory },
+                        Id = new ExternalObjectId { ExternalId = childItem.ID.ToString(), ExternalType = StringConstants.Directory },
                         Name = childItem.Name,
                         CanLoadChildDirectories = true,
                         CanLoadChildItems = true,
@@ -83,10 +83,10 @@ namespace SmartcatPlugin.Extensions
                 {
                     pages.Add(new DataItem
                     {
-                        Id = new ExternalObjectId { ExternalId = childItem.ID.ToString(), ExternalType = ConstantItemTypes.Item },
+                        Id = new ExternalObjectId { ExternalId = childItem.ID.ToString(), ExternalType = StringConstants.Item },
                         ParentDirectoryIds = new List<ExternalObjectId>
                         {
-                            new ExternalObjectId{ ExternalId = parentItem.ID == ConstantIds.ContentDirectory ? ConstantIds.Root : parentItem.ID.ToString(), ExternalType = ConstantItemTypes.Directory }
+                            new ExternalObjectId{ ExternalId = parentItem.ID == ConstantIds.ContentDirectory ? ConstantIds.Root : parentItem.ID.ToString(), ExternalType = StringConstants.Directory }
                         },
                         Name = childItem.Name,
                         Locales = childItem.GetItemLocales(masterDb)
@@ -233,7 +233,7 @@ namespace SmartcatPlugin.Extensions
         public static IEnumerable<Field> GetNonSystemFields(this Item item)
         {
             var fields = item.Fields
-                .Where(f => !f.Name.StartsWith("_") && ConstantItemFieldTypes.Types.Contains(f.Type) && f.HasValue);
+                .Where(f => !f.Name.StartsWith("_") && f.Type.IsTranslatedType() && f.HasValue);
 
             return fields;
         }

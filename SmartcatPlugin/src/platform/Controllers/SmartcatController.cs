@@ -114,7 +114,7 @@ namespace SmartcatPlugin.Controllers
         {
             Item rootItem;
 
-            if (request.ParentDirectoryId.ExternalType != ConstantItemTypes.Directory
+            if (request.ParentDirectoryId.ExternalType != StringConstants.Directory
                 && request.ParentDirectoryId.ExternalId.ToLower() != ConstantIds.Root)
             {
                 return Json(ApiResponseBase.Error(HttpStatusCode.BadRequest,
@@ -185,7 +185,7 @@ namespace SmartcatPlugin.Controllers
 
                     var newLanguageItem = _masterDb.GetItem(childrenPageId, newLanguage);
 
-                    using (new Sitecore.SecurityModel.SecurityDisabler())
+                    using (new SecurityDisabler())
                     {
                         if (languageVersionExists && !newVersionItemIds.Contains(newLanguageItem.ID))
                         {
@@ -231,7 +231,7 @@ namespace SmartcatPlugin.Controllers
                     ParentDirectoryId = new ExternalObjectId
                     {
                         ExternalId = folder.ParentID == ConstantIds.ContentDirectory ? ConstantIds.Root : folder.ParentID.ToString(),
-                        ExternalType = ConstantItemTypes.Directory
+                        ExternalType = StringConstants.Directory
                     }
                 });
             }
@@ -261,14 +261,14 @@ namespace SmartcatPlugin.Controllers
                     Id = new ExternalObjectId
                     {
                         ExternalId = item.ID.ToString(),
-                        ExternalType = ConstantItemTypes.Item
+                        ExternalType = StringConstants.Item
                     },
                     ParentDirectoryIds = new List<ExternalObjectId>
                     {
                         new ExternalObjectId
                         {
                             ExternalId = item.ParentID.ToString(),
-                            ExternalType = ConstantItemTypes.Directory
+                            ExternalType = StringConstants.Directory
                         }
                     },
                     Name = item.Name,

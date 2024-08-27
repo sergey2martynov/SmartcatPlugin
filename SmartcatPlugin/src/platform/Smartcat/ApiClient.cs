@@ -6,6 +6,8 @@ using Newtonsoft.Json;
 using SmartcatPlugin.Models.ApiResponse;
 using SmartcatPlugin.Models.Dtos;
 using System.Text;
+using SmartcatPlugin.Services;
+using Sitecore.Data;
 
 namespace SmartcatPlugin.Smartcat
 {
@@ -22,6 +24,11 @@ namespace SmartcatPlugin.Smartcat
 
         public async Task<ApiResponse<object>> ValidateApiKeyAsync(ApiKeyDto dto)
         {
+            var authService = new AuthService();
+            _httpClient.DefaultRequestHeaders.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", 
+                    EncodeClientIdSecretToBase64(dto.WorkspaceId, dto.ApiKey));
+
             var response = await _httpClient.PostAsync("/api/aem/validate-api-key", CreateJsonContent(dto));
             var result = await HandleResponse<object>(response);
             return result;
@@ -65,9 +72,11 @@ namespace SmartcatPlugin.Smartcat
 
         private static HttpClient CreateClient()
         {
+            var authService = new AuthService();
+            var apiKey = authService.GetApiKey(Database.GetDatabase("master"));
             var httpClient = new HttpClient();
             httpClient.DefaultRequestHeaders.Add("Authorization",
-                "Basic " + EncodeClientIdSecretToBase64("e5eb8cbb-8504-4508-9c4c-b0fd413acf7a", "1_nuOYUuPNRBeNs1clMNWHpL2Rl"));
+                "Basic " + EncodeClientIdSecretToBase64(apiKey.WorkspaceId, apiKey.ApiKey));
             return httpClient;
         }
 

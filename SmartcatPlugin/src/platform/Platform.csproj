@@ -104,6 +104,7 @@
     <Compile Include="CustomExceptionFilter.cs" />
     <Compile Include="Constants\LogNames.cs" />
     <Compile Include="Extensions\ItemAppearanceExtensions.cs" />
+    <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Extensions\TemplateSectionItemExtension.cs" />
     <Compile Include="Models\ApiResponse\ApiResponseBase.cs" />
     <Compile Include="Models\Dtos\ApiKeyDto.cs" />
@@ -149,7 +150,7 @@
     <Compile Include="SmartcatPluginClient.cs" />
     <Compile Include="Commands\ShowAddItemCommand.cs" />
     <Compile Include="Constants\ConstantsIds.cs" />
-    <Compile Include="Constants\ConstantItemTypes.cs" />
+    <Compile Include="Constants\StringConstants.cs" />
     <Compile Include="Controllers\ServicesConfigurator.cs" />
     <Compile Include="Extensions\ContentSearchExtension.cs" />
     <Compile Include="Models\ApiResponse\ApiResponse.cs" />

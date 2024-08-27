@@ -4,12 +4,13 @@ using Sitecore.SecurityModel;
 using System;
 using Sitecore;
 using SmartcatPlugin.Constants;
+using SmartcatPlugin.Models.Dtos;
 
 namespace SmartcatPlugin.Services
 {
     public class AuthService
     {
-        public void CreateApiKeyTemplate(Database database)
+        public TemplateItem CreateApiKeyTemplate(Database database)
         {
             var templatesRoot = database.GetItem("/sitecore/templates/Smartcat");
 
@@ -20,16 +21,17 @@ namespace SmartcatPlugin.Services
                 templatesRoot = database.GetItem("/sitecore/templates/Smartcat");
             }
 
+            Item newTemplate;
+
             using (new SecurityDisabler())
             {
-
                 TemplateItem baseTemplate = database.GetItem(TemplateIDs.Template);
                 if (baseTemplate == null)
                 {
                     throw new InvalidOperationException("Base template not found.");
                 }
 
-                var newTemplate = templatesRoot.Add("SmartcatApiKeyTemplate", baseTemplate);
+                newTemplate = templatesRoot.Add("SmartcatApiKeyTemplate", baseTemplate);
 
                 if (newTemplate == null)
                 {
@@ -45,14 +47,14 @@ namespace SmartcatPlugin.Services
                         throw new InvalidOperationException("Failed to create 'Data' section.");
                     }
 
-                    var textField1 = section.AddField("WorkSpaceId");
+                    var textField1 = section.AddField(StringConstants.WorkSpaceId);
                     if (textField1 != null)
                     {
                         textField1.InnerItem.Editing.BeginEdit();
                         try
                         {
-                            textField1.Type = "Single-Line Text";
-                            textField1.Title = "WorkSpaceId";
+                            textField1.Type = ConstantItemFieldTypes.SingleLineText;
+                            textField1.Title = StringConstants.WorkSpaceId;
                         }
                         finally
                         {
@@ -60,14 +62,14 @@ namespace SmartcatPlugin.Services
                         }
                     }
 
-                    var textField2 = section.AddField("ApiKey");
+                    var textField2 = section.AddField(StringConstants.ApiKey);
                     if (textField2 != null)
                     {
                         textField2.InnerItem.Editing.BeginEdit();
                         try
                         {
-                            textField2.Type = "Single-Line Text";
-                            textField2.Title = "ApiKey";
+                            textField2.Type = ConstantItemFieldTypes.SingleLineText;
+                            textField2.Title = StringConstants.ApiKey;
                         }
                         finally
                         {
@@ -80,15 +82,42 @@ namespace SmartcatPlugin.Services
                     newTemplate.Editing.EndEdit();
                 }
             }
+
+            return newTemplate;
         }
 
-        public void CreateApiKeyItem(Database database)
+        public Item GetApiKeyItem(Database database)
         {
             TemplateItem templateItem = database.GetItem("/sitecore/templates/Smartcat/SmartcatApiKeyTemplate");
 
-            var rootDirectory = database.GetItem("/sitecore/system/Settings");
+            if (templateItem == null)
+            {
+                templateItem = CreateApiKeyTemplate(database);
+            }
 
-            rootDirectory.Add("SmartcatApiKey", templateItem, ConstantIds.ApiKeyItem);
+            var apiKeyItem = database.GetItem(ConstantIds.ApiKeyItem);
+
+            if (apiKeyItem == null)
+            {
+                var settingsDirectory = database.GetItem("/sitecore/system/Settings");
+                var smartcatDirectory = settingsDirectory.Add("Smartcat", new TemplateID(ConstantIds.FolderTemplate), ID.NewID);
+                apiKeyItem = smartcatDirectory.Add(StringConstants.ApiKey, templateItem, ConstantIds.ApiKeyItem);
+            }
+
+            return apiKeyItem;
+        }
+
+        public ApiKeyDto GetApiKey(Database database)
+        {
+            var apiKeyItem = database.GetItem(ConstantIds.ApiKeyItem);
+
+            var apiKey = new ApiKeyDto
+            {
+                WorkspaceId = apiKeyItem.Fields[StringConstants.WorkSpaceId].Value,
+                ApiKey = apiKeyItem.Fields[StringConstants.ApiKey].Value
+            };
+
+            return apiKey;
         }
     }
 }
