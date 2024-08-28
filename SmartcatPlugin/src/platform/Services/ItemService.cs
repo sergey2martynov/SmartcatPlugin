@@ -134,25 +134,37 @@ namespace SmartcatPlugin.Services
         private void CreateChildrenDirectory(TestDirectory parentDirectory, Item parentDirectoryItem)
         {
             var templateItem = _masterDb.GetItem(ConstantIds.FolderTemplate);
-            foreach (var child in parentDirectory.Children)
+            if (parentDirectory.Children != null)
             {
-                Item newItem;
-                using (new SecurityDisabler())
+                foreach (var child in parentDirectory.Children)
                 {
-                    newItem = parentDirectoryItem.Add(child.Title, new TemplateID(templateItem.ID));
+                    Item newItem;
+                    using (new SecurityDisabler())
+                    {
+                        newItem = parentDirectoryItem.Add(child.Title, new TemplateID(templateItem.ID));
+                    }
+                    CreateChildrenDirectory(child, newItem);
                 }
-                CreateChildrenDirectory(child, newItem);
             }
 
-            foreach (var page in parentDirectory.Pages)
+            if (parentDirectory.Pages != null)
             {
-                var pageItem = CreatePage(parentDirectoryItem, page);
-                CreateChildrenPages(page, pageItem);
+                foreach (var page in parentDirectory.Pages)
+                {
+                    var pageItem = CreatePage(parentDirectoryItem, page);
+                    CreateChildrenPages(page, pageItem);
+                }
             }
+            
         }
 
         private void CreateChildrenPages(TestPage parentPage, Item parentPageItem)
         {
+            if (parentPage.Children == null)
+            {
+                return;
+            }
+
             foreach (var child in parentPage.Children)
             {
                 var pageItem = CreatePage(parentPageItem, child);
