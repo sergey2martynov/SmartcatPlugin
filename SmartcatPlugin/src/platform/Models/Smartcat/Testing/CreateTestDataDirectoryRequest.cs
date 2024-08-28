@@ -11,14 +11,14 @@ namespace SmartcatPlugin.Models.Smartcat.Testing
     {
         public string Title { get; set; }
         public List<TestPage> Pages { get; set; }
-        public List<TestDirectory> Children { get; set; }
+        public List<TestDirectory> Children { get; set; } = new List<TestDirectory>();
     }
 
     public class TestPage
     {
         public TestValue Title { get; set; }
         public TestValue Content { get; set; }
-        public List<TestPage> Children { get; set; }
+        public List<TestPage> Children { get; set; } = new List<TestPage>();
     }
 
     public class TestValue
