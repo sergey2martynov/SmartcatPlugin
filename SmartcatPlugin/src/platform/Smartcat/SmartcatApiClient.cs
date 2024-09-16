@@ -1,6 +1,7 @@
 ﻿using System.Net.Http;
 using System;
-using System.Configuration;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using SmartcatPlugin.Models.ApiResponse;
@@ -8,36 +9,62 @@ using SmartcatPlugin.Models.Dtos;
 using System.Text;
 using SmartcatPlugin.Services;
 using Sitecore.Data;
+using System.Security.Policy;
 
 namespace SmartcatPlugin.Smartcat
 {
-    public class ApiClient
+    public class SmartcatApiClient
     {
         private static readonly HttpClient _httpClient;
 
-        static ApiClient()
+        static SmartcatApiClient()
         {
-            string baseUrl = ConfigurationManager.AppSettings["baseUrl"]; //todo fix
-            _httpClient = CreateClient();
+            _httpClient = new HttpClient();
             _httpClient.BaseAddress = new Uri("https://ihub.smartcat.com");
         }
 
         public async Task<ApiResponse<object>> ValidateApiKeyAsync(ApiKeyDto dto)
         {
-            var authService = new AuthService();
             _httpClient.DefaultRequestHeaders.Authorization =
-                new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", 
+                new System.Net.Http.Headers.AuthenticationHeaderValue("Basic",
                     EncodeClientIdSecretToBase64(dto.WorkspaceId, dto.ApiKey));
-
-            var response = await _httpClient.PostAsync("/api/aem/validate-api-key", CreateJsonContent(dto));
+            var response = await _httpClient.PostAsync("/api/v1/workspaces/validate-api-key", CreateJsonContent(dto));
             var result = await HandleResponse<object>(response);
             return result;
         }
 
-        /*public async Task<ApiResponse<object>> CreateProject(ProjectDto dto)
+        public async Task<ApiResponse<ProjectIdDto>> CreateProject(ProjectDto dto)
         {
+            var authService = new AuthService();
+            var apiKey = authService.GetApiKey(Database.GetDatabase("master"));
+            dto.WorkspaceId = apiKey.WorkspaceId;
+            dto.IntegrationType = "sitecore-app";
+            _httpClient.DefaultRequestHeaders.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue("Basic",
+                    EncodeClientIdSecretToBase64(apiKey.WorkspaceId, apiKey.ApiKey));
+            var response = await _httpClient.PostAsync("/api/v1/projects", CreateJsonContent(dto));
+            var result = await HandleResponse<ProjectIdDto>(response);
+            return result;
+        }
 
-        }*/
+        public async Task<List<ApiResponse<DocumentIdDto>>> CreateDocuments(List<DocumentDto> documentDto)
+        {
+            var result = new List<ApiResponse<DocumentIdDto>>();
+            using (HttpClient client = new HttpClient())
+            {
+                var tasks = documentDto.Select(dto => 
+                    _httpClient.PostAsync("/api/v1/documents", CreateJsonContent(dto)));
+                var httpResponseMessages = await Task.WhenAll(tasks);
+
+                foreach (var httpResponseMessage in httpResponseMessages)
+                {
+                    var response = await HandleResponse<DocumentIdDto>(httpResponseMessage);
+                    result.Add(response);
+                }
+            }
+
+            return result;
+        }
 
         private StringContent CreateJsonContent(object obj)
         {

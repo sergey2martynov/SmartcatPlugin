@@ -18,14 +18,13 @@ namespace SmartcatPlugin.Controllers
         [HttpPost]
         public async Task<IHttpActionResult> SaveCredentials(ApiKeyDto dto)
         {
-            var client = new ApiClient();
+            var client = new SmartcatApiClient();
             var result = await client.ValidateApiKeyAsync(dto);
 
             if (!result.IsSuccess)
             {
                 return BadRequest("Authorization was failed");
             }
-
             var authService = new AuthService();
             var apiKeyItem = authService.GetApiKeyItem(_masterDb);
 

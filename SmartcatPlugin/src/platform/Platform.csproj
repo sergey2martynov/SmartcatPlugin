@@ -74,12 +74,14 @@
     <Content Include="App_Config\Include\WebApiInit.config" />
     <Content Include="App_Config\Log4net.config" />
     <Content Include="sitecore modules\shell\Smartcat\AddItem\AddItemModal.aspx" />
+    <Content Include="sitecore modules\shell\Smartcat\AddItem\styles.css" />
     <Content Include="sitecore modules\shell\Smartcat\Authorization\AuthorizationModal.aspx" />
     <Content Include="sitecore modules\shell\Smartcat\Authorization\styles.css" />
     <Content Include="sitecore modules\shell\Smartcat\Basket\BasketModal.aspx" />
     <Content Include="sitecore modules\shell\Smartcat\Basket\styles.css" />
     <Content Include="sitecore modules\shell\Smartcat\closeButton.css" />
     <Content Include="sitecore modules\shell\Smartcat\onload.js" />
+    <Content Include="sitecore modules\shell\Smartcat\Projects\ProjectsModal.aspx" />
     <None Include="SmartcatLocales.json" />
     <None Include="Platform.wpp.targets" />
     <None Include="Properties\PublishProfiles\Local.pubxml" />
@@ -97,6 +99,7 @@
     <Compile Include="Cache\CustomCache.cs" />
     <Compile Include="Commands\ShowAuthorizationCommand.cs" />
     <Compile Include="Commands\ShowBasketCommand.cs" />
+    <Compile Include="Commands\ShowProjectsCommand.cs" />
     <Compile Include="Constants\ConstantItemFieldTypes.cs" />
     <Compile Include="Controllers\AuthController.cs" />
     <Compile Include="Controllers\BasketController.cs" />
@@ -106,10 +109,15 @@
     <Compile Include="Extensions\ItemAppearanceExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Extensions\TemplateSectionItemExtension.cs" />
+    <Compile Include="Interfaces\IBasketService.cs" />
     <Compile Include="Models\ApiResponse\ApiResponseBase.cs" />
+    <Compile Include="Models\Dtos\AddedItemsTreeDto.cs" />
     <Compile Include="Models\Dtos\ApiKeyDto.cs" />
+    <Compile Include="Models\Dtos\DocumentDto.cs" />
+    <Compile Include="Models\Dtos\DocumentIdDto.cs" />
     <Compile Include="Models\Dtos\LanguageDto.cs" />
     <Compile Include="Models\Dtos\ProjectDto.cs" />
+    <Compile Include="Models\Dtos\ProjectIdDto .cs" />
     <Compile Include="Models\Dtos\SaveItemIdsToCacheDto.cs" />
     <Compile Include="Models\Dtos\SaveProjectInfoDto.cs" />
     <Compile Include="Models\Dtos\TranslationLanguagesDto.cs" />
@@ -147,6 +155,13 @@
     <Compile Include="sitecore modules\shell\Smartcat\Basket\BasketModal.aspx.designer.cs">
       <DependentUpon>BasketModal.aspx</DependentUpon>
     </Compile>
+    <Compile Include="sitecore modules\shell\Smartcat\Projects\ProjectsModal.aspx.cs">
+      <DependentUpon>ProjectsModal.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="sitecore modules\shell\Smartcat\Projects\ProjectsModal.aspx.designer.cs">
+      <DependentUpon>ProjectsModal.aspx</DependentUpon>
+    </Compile>
     <Compile Include="SmartcatPluginClient.cs" />
     <Compile Include="Commands\ShowAddItemCommand.cs" />
     <Compile Include="Constants\ConstantsIds.cs" />
@@ -178,7 +193,7 @@
     <Compile Include="Panels\CustomPanel.cs" />
     <Compile Include="Controllers\SmartcatController.cs" />
     <Compile Include="Extensions\ItemExtensions.cs" />
-    <Compile Include="Smartcat\ApiClient.cs" />
+    <Compile Include="Smartcat\SmartcatApiClient.cs" />
     <Compile Include="Tools\IdFieldExtractor.cs" />
     <Compile Include="Tools\StringSplitter.cs" />
     <Compile Include="WebApiConfig.cs" />

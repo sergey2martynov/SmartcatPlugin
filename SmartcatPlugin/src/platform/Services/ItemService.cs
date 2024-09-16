@@ -19,43 +19,64 @@ namespace SmartcatPlugin.Services
     {
         private readonly Database _masterDb = Database.GetDatabase("master");
 
-        public ItemsTreeDto GetContentEditorItemsTree()
+        public AddedItemsTreeDto GetContentEditorItemsTree()
         {
             var rootItem = _masterDb.GetItem("/sitecore/content");
             string cachedData = CustomCacheManager.GetCache("selectedItems");
             var selectedItemIds = cachedData == null ? new List<string>()
                 : JsonConvert.DeserializeObject<List<string>>(cachedData);
 
+            var selectedNodes = new Dictionary<string, TreeNodeDto>();
+
+            foreach (var id in selectedItemIds)
+            {
+                selectedNodes[id] = null;
+            }
+
             var rootNode = new TreeNodeDto
             {
                 Id = rootItem.ID.ToString(),
                 Name = rootItem.Name,
                 ShowCheckBox = false,
-                ImageUrl = rootItem.Appearance.GetIconPath()
+                ImageUrl = rootItem.Appearance.GetIconPath(),
+                IsChecked = selectedItemIds.Contains(rootItem.ID.ToString())
             };
-            AddChildNodes(rootItem, rootNode);
 
-            var result = new ItemsTreeDto
+            rootNode.IsExpanded = rootNode.IsChecked;
+            AddChildNodes(rootItem, rootNode, selectedNodes);
+
+            var result = new AddedItemsTreeDto
             {
                 TreeNodes = new List<TreeNodeDto> { rootNode },
-                CheckedItems = selectedItemIds ?? new List<string>(),
-                ExpandedItems = selectedItemIds ?? new List<string>(),
+                CheckedItems = selectedNodes.Values.ToList(),
+                ExpandedItems = selectedNodes.Values.ToList(),
             };
 
             return result;
         }
 
-        private void AddChildNodes(Item parentItem, TreeNodeDto parentNode)
+        private void AddChildNodes(Item parentItem, TreeNodeDto parentNode, Dictionary<string, TreeNodeDto> selectedNodes)
         {
             foreach (Item child in parentItem.Children)
             {
+                var childId = child.ID.ToString();
+
+                var isContain = selectedNodes.Keys.Contains(childId);
+
                 var childNode = new TreeNodeDto
                 {
-                    Id = child.ID.ToString(),
+                    Id = childId,
                     Name = child.Name,
                     ShowCheckBox = true,
-                    ImageUrl = child.Appearance.GetIconPath()
+                    ImageUrl = child.Appearance.GetIconPath(),
+                    IsChecked = isContain,
+                    IsExpanded = isContain
                 };
+
+                if (isContain)
+                {
+                    selectedNodes[childId] = childNode;
+                }
 
                 if (child.IsFolder() || child.Fields.All(f => f.Name.StartsWith("_"))) //todo: validation step
                 {
@@ -64,7 +85,7 @@ namespace SmartcatPlugin.Services
 
                 parentNode.Children.Add(childNode);
 
-                AddChildNodes(child, childNode);
+                AddChildNodes(child, childNode, selectedNodes);
             }
         }
 

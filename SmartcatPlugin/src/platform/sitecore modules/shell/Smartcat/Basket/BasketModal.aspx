@@ -66,15 +66,15 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
                             :data="processedTreeData"
                             :props="defaultProps"
                             :default-expanded-keys="allNodeIds"
-                            node-key="Id"
+                            node-key="id"
                             check-strictly>
                             <span slot="default" slot-scope="{ node, data }">
                                 <div class="tree-node-content">
-                                    <template v-if="data.ShowCheckBox">
-                                        <el-checkbox :checked="data.checked" disabled />
+                                    <template v-if="data.showCheckBox">
+                                        <el-checkbox :checked="data.isChecked" disabled />
                                     </template>
-                                    <img :src="data.ImageUrl" alt="" class="tree-node-icon">
-                                    <span>{{ data.Name }}</span>
+                                    <img :src="data.imageUrl" alt="" class="tree-node-icon">
+                                    <span>{{ data.name }}</span>
                                 </div>
                             </span>
                         </el-tree>
@@ -339,8 +339,8 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
             invalidItemCount: 0,
             validItemCount: 0,
             defaultProps: {
-                children: 'Children',
-                label: 'Name'
+                children: 'children',
+                label: 'name'
             },
 
             projectName: "",
@@ -376,11 +376,11 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
             processedTreeData() {
                 const processNode = node => {
                     const processedNode = { ...node };
-                    if (processedNode.ShowCheckBox) {
-                        processedNode.checked = true;
+                    if (processedNode.showCheckBox) {
+                        processedNode.isChecked = true;
                     }
-                    if (processedNode.Children && processedNode.Children.length) {
-                        processedNode.Children = processedNode.Children.map(processNode);
+                    if (processedNode.children && processedNode.children.length) {
+                        processedNode.children = processedNode.children.map(processNode);
                     }
                     return processedNode;
                 };
@@ -403,6 +403,7 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
                         this.treeData = response.data.TreeNodes;
                         this.checkedNodes = response.data.CheckedItems;
                         this.allNodeIds = response.data.ExpandedItems;
+                        console.log(response);
                     })
                     .catch(error => {
                         console.error('There was an error!', error);
@@ -511,7 +512,27 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
                     ['Target languages', this.selectedTargetLanguages.join(',')]]);
             },
             confirmProject() {
+                const data = {
+                    "integrationType": "string",
+                    "name": this.projectName,
+                    "description": this.comment,
+                    "sourceLanguage": this.selectedSourceLanguage[0],
+                    "targetLanguage": this.selectedTargetLanguages[0],
+                    "dueDate": this.deadline,
+                    "projectTemplateId": null
+                };
 
+                axios.post('/api/basket/save-project', data)
+                    .then(response => {
+                        console.log(response);
+                        if (!response.ok) {
+                            return response.text().then(text => { throw new Error(text); });
+                        }
+                    })
+                    .catch(error => {
+                        console.log("ERROR", error.response.data.Message);
+                        alert("There was an error: " + error.response.data.Message);
+                    });
             },
             closeWindow() {
                 window.parent.$('.ui-dialog-content:visible').dialog('close');

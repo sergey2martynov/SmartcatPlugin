@@ -123,14 +123,14 @@ namespace SmartcatPlugin.Extensions
         }
 
         public static Dictionary<string, LocJsonContent> GetItemContent(this Item parentPage, Database masterDb,
-            GetItemContentRequest request)
+            string[] targetLocales)
         {
-            if (parentPage == null || masterDb == null || request == null)
+            if (parentPage == null || masterDb == null || targetLocales == null)
             {
                 throw new NullReferenceException("Invalid inner data");
             }
 
-            var targetLanguages = request.TargetLocales
+            var targetLanguages = targetLocales
                 .Select(Language.Parse)
                 .ToList();
 

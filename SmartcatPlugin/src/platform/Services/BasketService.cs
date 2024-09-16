@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using System;
+using Newtonsoft.Json;
 using Sitecore.Data;
 using SmartcatPlugin.Cache;
 using SmartcatPlugin.Constants;
@@ -8,10 +9,12 @@ using Sitecore.Data.Items;
 using SmartcatPlugin.Extensions;
 using SmartcatPlugin.Models.Dtos;
 using SmartcatPlugin.Models;
+using Sitecore.Globalization;
+using SmartcatPlugin.Interfaces;
 
 namespace SmartcatPlugin.Services
 {
-    public class BasketService
+    public class BasketService : IBasketService
     {
         private readonly Database _masterDb = Database.GetDatabase("master");
         private TreeNodeDto _rootNode;
@@ -109,6 +112,28 @@ namespace SmartcatPlugin.Services
             }
 
             AddParentNodes(parentItem, addedItems, parentNode);
+        }
+
+        public List<Item> GetItemsByIds(Database database, List<string> ids, string language)
+        {
+            List<Item> items = new List<Item>();
+            Language itemLanguage = Language.Parse(language);
+
+            foreach (var id in ids)
+            {
+                ID itemId = new ID(id);
+                Item item = database.GetItem(itemId, itemLanguage);
+
+                if (item == null || item.Versions.Count == 0)
+                {
+                    throw new InvalidOperationException($"Item with ID {id} does not exist or " +
+                                                        $"does not have a version in language {language}.");
+                }
+
+                items.Add(item);
+            }
+
+            return items;
         }
     }
 }

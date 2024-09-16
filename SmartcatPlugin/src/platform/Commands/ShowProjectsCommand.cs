@@ -3,12 +3,12 @@ using Sitecore.Web.UI.Sheer;
 
 namespace SmartcatPlugin.Commands
 {
-    public class ShowBasketCommand : Command
+    public class ShowProjectsCommand : Command
     {
         public override void Execute(CommandContext context)
         {
             SheerResponse.ShowModalDialog(
-                "/sitecore modules/shell/Smartcat/Basket/BasketModal.aspx", "900", "600", "Basket", false);
+                "/sitecore modules/shell/Smartcat/Projects/ProjectsModal.aspx", "1000", "600", "Basket", false);
         }
 
         public override CommandState QueryState(CommandContext context)

@@ -1,0 +1,129 @@
+﻿body, html {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+#app {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.tree {
+    flex-grow: 1;
+    margin: 0 30px;
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.tree-node {
+    height: 30px;
+    display: flex;
+    align-items: center;
+    padding: 5px 10px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+    .tree-node img {
+        width: 16px;
+        height: 16px;
+        padding-right: 10px;
+    }
+
+    .tree-node .toggle-icon {
+        cursor: pointer;
+        padding-right: 10px;
+    }
+
+.tree-node-content {
+    display: flex;
+    align-items: center;
+    flex-grow: 1;
+}
+
+.tree-children {
+    margin-left: 20px;
+    display: none;
+}
+
+    .tree-children.active {
+        display: block;
+    }
+
+.header {
+    margin-top: 20px;
+    padding-left: 30px;
+}
+
+.checkbox {
+    padding-right: 10px;
+}
+
+
+.el-checkbox.is-checked .el-checkbox__inner {
+    background-color: black !important;
+    border-color: black !important;
+}
+
+    .el-checkbox.is-checked .el-checkbox__inner:hover {
+        background-color: black !important;
+        border-color: black !important;
+    }
+
+.el-checkbox.is-checked + .el-checkbox__label {
+    color: black;
+}
+
+.el-checkbox .el-checkbox__inner {
+    border-color: gray !important;
+}
+
+    .el-checkbox .el-checkbox__inner:hover {
+        border-color: gray !important;
+    }
+
+.footer-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    padding-right: 30px;
+}
+
+.el-footer {
+    margin-top: auto;
+    padding: 10px 30px;
+}
+
+.el-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 35px;
+    margin-left: 10px;
+}
+
+    .el-button.cancel-button {
+        background-color: white;
+        border: 1px solid black;
+        color: black;
+        width: 80px;
+    }
+
+        .el-button.cancel-button:hover {
+            background-color: #f0f0f0;
+            border-color: black;
+        }
+
+    .el-button.save-button {
+        background-color: black;
+        border: 1px solid black;
+        color: white;
+        width: 60px;
+    }
+
+        .el-button.save-button:hover {
+            background-color: #333;
+            border-color: black;
+        }
