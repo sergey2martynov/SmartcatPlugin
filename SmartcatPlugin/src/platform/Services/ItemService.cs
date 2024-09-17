@@ -11,7 +11,6 @@ using HtmlAgilityPack;
 using Sitecore.SecurityModel;
 using SmartcatPlugin.Models.Smartcat.Testing;
 using Sitecore.Globalization;
-using Sitecore.Shell.Framework.Commands.IDE;
 
 namespace SmartcatPlugin.Services
 {
@@ -39,10 +38,10 @@ namespace SmartcatPlugin.Services
                 Name = rootItem.Name,
                 ShowCheckBox = false,
                 ImageUrl = rootItem.Appearance.GetIconPath(),
-                IsChecked = selectedItemIds.Contains(rootItem.ID.ToString())
+                IsChecked = selectedItemIds.Contains(rootItem.ID.ToString()),
+                IsExpanded = true
             };
 
-            rootNode.IsExpanded = rootNode.IsChecked;
             AddChildNodes(rootItem, rootNode, selectedNodes);
 
             var result = new AddedItemsTreeDto
@@ -86,6 +85,11 @@ namespace SmartcatPlugin.Services
                 parentNode.Children.Add(childNode);
 
                 AddChildNodes(child, childNode, selectedNodes);
+
+                if (childNode.IsExpanded)
+                {
+                    parentNode.IsExpanded = true;
+                }
             }
         }
 

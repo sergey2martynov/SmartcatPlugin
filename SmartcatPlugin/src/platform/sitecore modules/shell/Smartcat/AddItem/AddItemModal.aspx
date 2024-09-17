@@ -92,21 +92,6 @@
             },
             checkedNodesForSaving: []
         },
-        computed: {
-            processedTreeData() {
-                const processNode = node => {
-                    const processedNode = { ...node };
-                    if (this.checkedNodes.includes(processedNode.Id)) {
-                        processedNode.checked = true;
-                    }
-                    if (processedNode.Children && processedNode.Children.length) {
-                        processedNode.Children = processedNode.Children.map(processNode);
-                    }
-                    return processedNode;
-                };
-                return this.treeData.map(processNode);
-            }
-        },
         created() {
             this.getTreeData();
         },
@@ -117,20 +102,17 @@
                         this.treeData = response.data.TreeNodes;
                         this.checkedNodes = response.data.CheckedItems;
                         this.allNodeIds = response.data.ExpandedItems;
-                        console.log("checkedNodes", this.checkedNodes);
                     })
                     .catch(error => {
                         console.error('There was an error!', error);
                     });
             },
             saveItems() {
-                console.log("checkedNodes", this.checkedNodes);
                 const checkedIds = this.checkedNodes.map(node => node.id);
                 const data = {
                     SelectedItemIds: checkedIds
                 };
 
-                console.log("data", data);
                 axios.post('/api/additem/add-items', data)
                     .then(response => {
 
@@ -152,7 +134,6 @@
                         Vue.delete(this.checkedNodes, index);
                     }
                 }
-                console.log(this.checkedNodes);
             },
             closeWindow() {
                 window.parent.$('.ui-dialog-content:visible').dialog('close');

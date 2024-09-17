@@ -15,6 +15,68 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
     <script src="https://unpkg.com/vue2-datepicker"></script>
     <script src="../onload.js"></script>
     <link href="../closeButton.css" rel="stylesheet" type="text/css" />
+    <style>
+        body, html {
+            font-family: sans-serif;
+        }
+        .custom-stepper {
+            height: 100px;
+        }
+        .custom-stepper .el-step__head {
+            border-color: transparent;
+        }
+
+        .custom-stepper .el-step__line {
+            display: none;
+        }
+
+        .custom-stepper .el-steps__step {
+            margin-bottom: 10px;
+        }
+        .el-step__head.is-process .el-step__icon {
+            background-color: #7e3ff2 !important;
+            border-color: #7e3ff2 !important;
+            color: white !important;
+        }
+
+        .el-step__head.is-finish .el-step__icon {
+            background-color: #4CAF50 !important;
+            border-color: #4CAF50 !important;
+            color: white !important;
+        }
+
+        .el-step__title.is-process {
+            color: #7e3ff2 !important;
+        }
+
+        .el-step__title.is-wait {
+            color: #d3d3d3 !important;
+        }
+
+        .el-step__title.is-finish {
+            color: #4CAF50 !important;
+        }
+
+        .el-step__icon-inner.is-finish {
+            color: white;
+        }
+        .el-step__icon-inner.is-process {
+            color: white;
+        }
+        .el-step__icon-inner.is-process {
+            color: black;
+        }
+
+        .el-step__head.is-wait .el-step__icon {
+            background-color: #d3d3d3 !important;
+            border-color: #d3d3d3 !important;
+            color: black !important;
+        }
+
+        .el-step__head.is-wait .el-step__title {
+            color: black !important;
+        }
+    </style>
 </head>
 <body>
         <div id="app">
@@ -24,39 +86,10 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
                 @click="closeWindow">
             </el-button>
         <el-container style="height: 100vh;">
-            <el-aside width="200px" style="background-color: #505050; padding: 10px; box-sizing: border-box;">
-                <div style="height: 35px; display: flex; align-items: center;">
-                    <el-column>
-                        <label>Content</label>
-                    </el-column>
-                    <el-column>
-                        <label v-if="currentStep === 0"><</label>
-                    </el-column>
-                </div>
-                <div style="height: 35px; display: flex; align-items: center;">
-                    <el-column>
-                        <label>Project</label>
-                    </el-column>
-                    <el-column>
-                        <label v-if="currentStep === 1"><</label>
-                    </el-column>
-                </div>
-                <div style="height: 35px; display: flex; align-items: center;">
-                    <el-column>
-                        <label>Language</label>
-                    </el-column>
-                    <el-column>
-                        <label v-if="currentStep === 2"><</label>
-                    </el-column>
-                </div>
-                <div style="height: 35px; display: flex; align-items: center;">
-                    <el-column>
-                        <label>Confirmation</label>
-                    </el-column>
-                    <el-column>
-                        <label v-if="currentStep === 3"><</label>
-                    </el-column>
-                </div>
+            <el-aside width="200px" style="padding: 10px; box-sizing: border-box;">
+                <el-steps direction="vertical" :active="currentStep" class="custom-stepper" process-status="process" finish-status="finish">
+                    <el-step v-for="(step, index) in steps" :key="index" :title="step.title" />
+                </el-steps>
             </el-aside>
             <el-container direction="vertical">
                 <el-container v-if="currentStep === 0">
@@ -79,15 +112,6 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
                             </span>
                         </el-tree>
                     </el-main>
-                    <el-aside width="200px" style="padding: 10px; box-sizing: border-box;">
-                        <div style="display: flex; flex-direction: column;">
-                            <a>{{validItemCount}} items are valid</a>
-                            <div v-if="invalidItemCount > 0">
-                                <a>{{invalidItemCount}} items failed</a>
-                                <a>Invalid item names: {{invalidItemNames}}</a>
-                            </div>
-                        </div>
-                    </el-aside>
                 </el-container>
                 <el-container v-if="currentStep === 1" style="margin-left: 30px">
                     <el-col>
@@ -305,6 +329,12 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
         el: '#app',
         data: {
             currentStep: 0,
+            steps: [
+                { title: 'Content' },
+                { title: 'Project' },
+                { title: 'Languages' },
+                { title: 'Confirmation' }
+            ],
             totalSteps: 4,
             treeData: [],
             checkedNodes: [],
@@ -512,5 +542,6 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
         }
     });
 </script>
+
 </body>
 </html>
