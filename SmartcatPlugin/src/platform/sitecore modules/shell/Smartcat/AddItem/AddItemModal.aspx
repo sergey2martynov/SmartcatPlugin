@@ -73,7 +73,7 @@
                     </div>
                 </div>
                 <div class="tree-children" :class="{ active: node.isExpanded }">
-                    <tree-node v-if="node.children" :nodes="node.children" @toggle-node="$emit('toggle-node', $event)"></tree-node>
+                    <tree-node v-if="node.children" :nodes="node.children" @toggle-node="$emit('toggle-node', $event)" @handle-checkbox-change="$emit('handle-checkbox-change', $event)"></tree-node>
                 </div>
             </div>
         </div>
@@ -144,13 +144,15 @@
                 node.isExpanded = !node.isExpanded;
             },
             handleCheckboxChange(node) {
-                //node.isChecked = !node.isChecked;
-
                 if (node.isChecked) {
-                    this.checkedNodes.push(node);
+                    Vue.set(this.checkedNodes, this.checkedNodes.length, node);
                 } else {
-                    this.checkedNodes = this.checkedNodes.filter(item => item !== node);
+                    const index = this.checkedNodes.findIndex(item => item.id === node.id);
+                    if (index !== -1) {
+                        Vue.delete(this.checkedNodes, index);
+                    }
                 }
+                console.log(this.checkedNodes);
             },
             closeWindow() {
                 window.parent.$('.ui-dialog-content:visible').dialog('close');

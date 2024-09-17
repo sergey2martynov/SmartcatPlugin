@@ -64,9 +64,10 @@
 
                     axios.post('/api/auth/save-apikey', data)
                         .then(response => {
-
+                            window.parent.$('.ui-dialog-content:visible').dialog('close');
                         })
                         .catch(error => {
+                            console.log(error);
                             alert(error.message);
                         });
                 },

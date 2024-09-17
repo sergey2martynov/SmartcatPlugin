@@ -100,7 +100,13 @@ namespace SmartcatPlugin.Services
             if (apiKeyItem == null)
             {
                 var settingsDirectory = database.GetItem("/sitecore/system/Settings");
-                var smartcatDirectory = settingsDirectory.Add("Smartcat", new TemplateID(ConstantIds.FolderTemplate), ID.NewID);
+                var smartcatDirectory = database.GetItem("/sitecore/system/Settings/Smartcat");
+
+                if (smartcatDirectory == null)
+                {
+                    smartcatDirectory = settingsDirectory.Add("Smartcat", new TemplateID(ConstantIds.FolderTemplate), ID.NewID);
+                }
+                
                 apiKeyItem = smartcatDirectory.Add(StringConstants.ApiKey, templateItem, ConstantIds.ApiKeyItem);
             }
 

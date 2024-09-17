@@ -131,22 +131,7 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
                         </el-row>
                         <el-row style="padding-top: 15px; ">
                             <el-col style="width: 150px; text-align: right; padding-right: 15px">
-                                <el-label for="subject" >
-                                    Subject*
-                                </el-label>
-                            </el-col>
-                            <el-col style="width: 300px">
-                                <el-input 
-                                    type="text" 
-                                    id="subject" 
-                                    v-model="subject"
-                                    size="small"
-                                />
-                            </el-col>
-                        </el-row>
-                        <el-row style="padding-top: 15px; ">
-                            <el-col style="width: 150px; text-align: right; padding-right: 15px">
-                                <el-label for="subject" >
+                                <el-label for="deadline" >
                                     Deadline*
                                 </el-label>
                             </el-col>
@@ -249,11 +234,6 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
                             </el-row>
                             <el-row>
                                 <label style="text-align: left; font-weight: bold;">
-                                    Subject
-                                </label>
-                            </el-row>
-                            <el-row>
-                                <label style="text-align: left; font-weight: bold;">
                                     Deadline
                                 </label>
                             </el-row>
@@ -282,11 +262,6 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
                             <el-row>
                                 <a style="padding-left: 30px">
                                     {{ selectedWorkFlowStage }}
-                                </a>
-                            </el-row>
-                            <el-row>
-                                <a style="padding-left: 30px">
-                                    {{ subject }}
                                 </a>
                             </el-row>
                             <el-row>
@@ -326,7 +301,6 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
         </el-container>
     </div>
 <script>
-
     new Vue({
         el: '#app',
         data: {
@@ -344,7 +318,6 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
             },
 
             projectName: "",
-            subject: "",
             selectedWorkFlowStage: "",
             deadline: "",
             comment: "",
@@ -424,7 +397,6 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
                 axios.get('/api/basket/get-saved-project-info')
                     .then(response => {
                         this.projectName = response.data.ProjectName;
-                        this.subject = response.data.Subject;
                         this.selectedWorkFlowStage = response.data.WorkflowStage;
                         this.deadline = new Date(response.data.Deadline);
                         this.comment = response.data.Comment;
@@ -447,14 +419,13 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
             nextStep() {
                 if (this.currentStep === 1) {
 
-                    if (!this.projectName || !this.subject || !this.selectedWorkFlowStage || !this.deadline) {
+                    if (!this.projectName || !this.selectedWorkFlowStage || !this.deadline) {
                         alert("Required fields was not filling");
                         return;
                     }
 
                     const data = {
                         projectName: this.projectName,
-                        subject: this.subject,
                         workflowStage: this.selectedWorkFlowStage,
                         deadline: this.deadline.toISOString(),
                         comment: this.comment
@@ -505,7 +476,6 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
                 this.summaryData = new Map([
                     ['Project name', this.projectName],
                     ['Workflow stage', this.selectedWorkFlowStage],
-                    ['Subject', this.subject],
                     ['Deadline', formatedDeadline],
                     ['Comment', this.comment],
                     ['Source language', this.selectedSourceLanguage],
@@ -528,6 +498,8 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
                         if (!response.ok) {
                             return response.text().then(text => { throw new Error(text); });
                         }
+
+                        window.parent.$('.ui-dialog-content:visible').dialog('close');
                     })
                     .catch(error => {
                         console.log("ERROR", error.response.data.Message);
@@ -538,7 +510,6 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
                 window.parent.$('.ui-dialog-content:visible').dialog('close');
             }
         }
-
     });
 </script>
 </body>

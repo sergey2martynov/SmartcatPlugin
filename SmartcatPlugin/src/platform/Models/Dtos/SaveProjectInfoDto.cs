@@ -8,8 +8,6 @@ namespace SmartcatPlugin.Models.Dtos
         [Required]
         public string ProjectName { get; set; }
         [Required]
-        public string Subject { get; set; }
-        [Required]
         public string WorkflowStage { get; set; }
         [Required]
         public DateTimeOffset Deadline { get; set; }

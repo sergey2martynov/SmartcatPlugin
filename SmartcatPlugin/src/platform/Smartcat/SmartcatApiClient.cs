@@ -10,6 +10,8 @@ using System.Text;
 using SmartcatPlugin.Services;
 using Sitecore.Data;
 using System.Security.Policy;
+using System.Threading;
+using System.Net;
 
 namespace SmartcatPlugin.Smartcat
 {
@@ -50,20 +52,59 @@ namespace SmartcatPlugin.Smartcat
         public async Task<List<ApiResponse<DocumentIdDto>>> CreateDocuments(List<DocumentDto> documentDto)
         {
             var result = new List<ApiResponse<DocumentIdDto>>();
-            using (HttpClient client = new HttpClient())
-            {
-                var tasks = documentDto.Select(dto => 
-                    _httpClient.PostAsync("/api/v1/documents", CreateJsonContent(dto)));
-                var httpResponseMessages = await Task.WhenAll(tasks);
+            var semaphore = new SemaphoreSlim(10);
 
-                foreach (var httpResponseMessage in httpResponseMessages)
+            var tasks = documentDto.Select(async dto =>
+            {
+                await semaphore.WaitAsync();
+
+                try
                 {
-                    var response = await HandleResponse<DocumentIdDto>(httpResponseMessage);
-                    result.Add(response);
+                    return await SendWithRetry(dto);
+                }
+                finally
+                {
+                    semaphore.Release();
+                }
+            });
+
+            var responses = await Task.WhenAll(tasks);
+            result.AddRange(responses);
+
+            return result;
+        }
+
+        private async Task<ApiResponse<DocumentIdDto>> SendWithRetry(DocumentDto dto)
+        {
+            int maxRetries = 3;
+            int delay = 1000;
+
+            for (int i = 0; i < maxRetries; i++)
+            {
+                var response = await _httpClient.PostAsync("/api/v1/documents", CreateJsonContent(dto));
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return await HandleResponse<DocumentIdDto>(response);
+                }
+
+                if ((int)response.StatusCode == 429)
+                {
+                    await Task.Delay(delay);
+                    delay *= 2;
+                }
+                else
+                {
+
+                    return await HandleResponse<DocumentIdDto>(response);
                 }
             }
 
-            return result;
+            return new ApiResponse<DocumentIdDto>
+            {
+                IsSuccess = false,
+                ErrorMessage = "Failed after retrying due to TooManyRequests"
+            };
         }
 
         private StringContent CreateJsonContent(object obj)

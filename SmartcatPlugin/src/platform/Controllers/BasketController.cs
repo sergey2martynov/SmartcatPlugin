@@ -50,7 +50,6 @@ namespace SmartcatPlugin.Controllers
         [HttpGet]
         public IHttpActionResult GetValidatingInfo()
         {
-
             string cachedData = CustomCacheManager.GetCache("selectedItems");
             if (string.IsNullOrEmpty(cachedData))
             {
@@ -151,7 +150,7 @@ namespace SmartcatPlugin.Controllers
         public async Task<IHttpActionResult> CreateSmartcatProject([FromBody] ProjectDto dto)
         {
             //var basketService = new BasketService();
-            var user = Sitecore.Context.User.Name;
+            var user = Sitecore.Context.User.Name;              //todo: cached data by user name
             string cachedData = CustomCacheManager.GetCache("selectedItems");
             var selectedItemIds = JsonConvert.DeserializeObject<List<string>>(cachedData);
             var items = _basketService.GetItemsByIds(_masterDb, selectedItemIds, dto.SourceLanguage);
@@ -177,6 +176,7 @@ namespace SmartcatPlugin.Controllers
                     Title = item.Name,
                     Content = itemContent.Values.First()
                 };
+                documentDtos.Add(documentDto);
             }
 
             var results = await client.CreateDocuments(documentDtos);
