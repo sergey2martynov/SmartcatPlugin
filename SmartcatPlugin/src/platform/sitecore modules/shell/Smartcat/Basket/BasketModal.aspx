@@ -17,11 +17,25 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
     <link href="../closeButton.css" rel="stylesheet" type="text/css" />
     <style>
         body, html {
+            height: 100%;
+            margin: 0;
+            padding: 0;
             font-family: sans-serif;
+            overflow: hidden;
+        }
+        #app {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
         }
         .custom-stepper {
             height: 100px;
         }
+
+        .custom-stepper .el-step {
+            padding-bottom: 15px;
+        }
+
         .custom-stepper .el-step__head {
             border-color: transparent;
         }
@@ -37,12 +51,20 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
             background-color: #7e3ff2 !important;
             border-color: #7e3ff2 !important;
             color: white !important;
+            width: 20px;  
+            height: 20px;
+            font-size: 13px; 
+            line-height: 20px; 
         }
 
         .el-step__head.is-finish .el-step__icon {
-            background-color: #4CAF50 !important;
-            border-color: #4CAF50 !important;
+            background-color: #7e3ff2 !important;
+            border-color: #7e3ff2 !important;
             color: white !important;
+            width: 20px;  
+            height: 20px;
+            font-size: 13px; 
+            line-height: 20px;
         }
 
         .el-step__title.is-process {
@@ -54,7 +76,7 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
         }
 
         .el-step__title.is-finish {
-            color: #4CAF50 !important;
+            color: #7e3ff2 !important;
         }
 
         .el-step__icon-inner.is-finish {
@@ -70,12 +92,162 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
         .el-step__head.is-wait .el-step__icon {
             background-color: #d3d3d3 !important;
             border-color: #d3d3d3 !important;
-            color: black !important;
+            color: gray !important;
+            width: 20px;  
+            height: 20px;
+            font-size: 13px; 
+            line-height: 20px;
         }
 
         .el-step__head.is-wait .el-step__title {
             color: black !important;
         }
+
+        .tree {
+            flex-grow: 1;
+            margin-left: 20px;
+            margin-right: 15px;
+            max-height: 410px;
+            overflow-y: auto;
+        }
+
+        .tree-node {
+            height: 30px;
+            display: flex;
+            align-items: center;
+            padding: 5px 10px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .tree-node img {
+            width: 16px;
+            height: 16px;
+            padding-right: 10px;
+        }
+
+        .tree-node .toggle-icon {
+            cursor: pointer;
+            padding-right: 10px;
+        }
+
+        .tree-node-content {
+            display: flex;
+            align-items: center;
+            flex-grow: 1;
+            color: gray;
+        }
+
+        .tree-children {
+            margin-left: 20px;
+            display: none;
+        }
+
+        .tree-children.active {
+            display: block;
+        }
+
+        .header {
+            margin-top: 35px;
+            padding-left: 30px;
+        }
+
+        .checkbox {
+            padding-right: 10px;
+        }
+
+
+        .el-checkbox.is-checked .el-checkbox__inner {
+            background-color: #d3d3d3 !important;
+            border-color: #d3d3d3 !important;
+        }
+
+        .el-checkbox__inner::after {
+            border-color: white !important;
+        }
+
+        .aside-with-divider {
+            position: relative;
+            width: 200px !important;/* Чтобы псевдоэлемент позиционировался относительно aside */
+            padding: 10px;
+            box-sizing: border-box;
+            margin-top: 35px;
+            margin-left: 35px;
+        }
+
+        .aside-with-divider::after {
+            content: '';
+            position: absolute;
+            top: 10px; /* Отступ сверху */
+            bottom: 45px; /* Отступ снизу */
+            right: 0; /* Линия справа */
+            width: 1px;
+            background-color: #d3d3d3; /* Цвет линии */
+        }
+
+        .content {
+            display: flex;
+            flex-direction: column; /* Расположение блоков вертикально */
+            gap: 10px; /* Расстояние между заголовком и деревом */
+        }
+
+        .footer-container {
+            height: 80px;
+            display: flex;
+            margin-top: auto;
+            justify-content: space-between; /* Размещает кнопки с обеих сторон */
+            align-items: center;
+            padding: 10px 30px;
+        }
+
+        .left-buttons {
+            display: flex;
+            align-items: center;
+        }
+
+        .right-buttons {
+            display: flex;
+            align-items: center;
+        }
+
+        .cancel-button,
+        .back-button,
+        .next-button,
+        .confirm-button {
+            border: 1px solid black;
+            width: 80px;
+            height: 35px;
+            margin-bottom: 30px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .cancel-button,
+        .back-button {
+            background-color: white;
+            color: black;
+        }
+
+        .cancel-button:hover,
+        .back-button:hover {
+            background-color: #f0f0f0;
+            border-color: black;
+            color: #333;
+        }
+
+        .next-button,
+        .confirm-button {
+            background-color: black;
+            color: white;
+        }
+
+        .next-button:hover,
+        .confirm-button:hover
+        {
+            background-color: #333;
+            border-color: black;
+            color: white;
+        }
+
     </style>
 </head>
 <body>
@@ -85,34 +257,38 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
                 class="close-button"
                 @click="closeWindow">
             </el-button>
-        <el-container style="height: 100vh;">
-            <el-aside width="200px" style="padding: 10px; box-sizing: border-box;">
+        <el-container>
+            <el-aside class="aside-with-divider">
                 <el-steps direction="vertical" :active="currentStep" class="custom-stepper" process-status="process" finish-status="finish">
                     <el-step v-for="(step, index) in steps" :key="index" :title="step.title" />
                 </el-steps>
             </el-aside>
             <el-container direction="vertical">
-                <el-container v-if="currentStep === 0">
-                    <el-main class="tree-container">
-                        <el-tree
-                            ref="tree"
-                            :data="processedTreeData"
-                            :props="defaultProps"
-                            :default-expanded-keys="allNodeIds"
-                            node-key="id"
-                            check-strictly>
-                            <span slot="default" slot-scope="{ node, data }">
+                <div v-if="currentStep === 0" class="content">
+                    <div>
+                        <h2 class="header">
+                            Content
+                        </h2>
+                    </div>
+                    <div class="tree">
+                        <div v-for="node in treeData" :key="node.id">
+                            <div class="tree-node">
+                                <span class="toggle-icon" @click="toggleNode(node)">
+                                    <i :class="'el-icon-caret-bottom'"></i>
+                                </span>
+                                <el-checkbox v-if="node.showCheckBox" disabled class="checkbox" v-model="node.isChecked">
+                                </el-checkbox>
                                 <div class="tree-node-content">
-                                    <template v-if="data.showCheckBox">
-                                        <el-checkbox :checked="data.isChecked" disabled />
-                                    </template>
-                                    <img :src="data.imageUrl" alt="" class="tree-node-icon">
-                                    <span>{{ data.name }}</span>
+                                    <img :src="node.imageUrl" alt="icon">
+                                    <span>{{ node.name }}</span>
                                 </div>
-                            </span>
-                        </el-tree>
-                    </el-main>
-                </el-container>
+                            </div>
+                            <div class="tree-children active">
+                                <tree-node v-if="node.children" :nodes="node.children"></tree-node>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <el-container v-if="currentStep === 1" style="margin-left: 30px">
                     <el-col>
                         <el-row style="margin-top: 15px;" >
@@ -310,21 +486,64 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
                             </el-row>
                         </el-col>
                 </el-container>
-                <el-footer style="text-align: center;">
-                    <el-button style="width: 100px; height: 40px;" :disabled="currentStep === 0" type="primary" @click="prevStep">
+            <el-footer class="footer-container">
+                <div class="left-buttons">
+                    <el-button
+                        class="cancel-button"
+                        v-if="currentStep === 0"
+                        @click="cancel">
+                        Cancel
+                    </el-button>
+                    <el-button
+                        class="back-button"
+                        v-else
+                        @click="prevStep">
                         Back
                     </el-button>
-                    <el-button v-if="currentStep < 3"style="width: 100px; height: 40px;" type="primary" @click="nextStep">
+                </div>
+                <div class="right-buttons">
+                    <el-button
+                        v-if="currentStep < 3"
+                        class="next-button"
+                        @click="nextStep">
                         Next
                     </el-button>
-                    <el-button v-if="currentStep === 3"style="width: 130px; height: 40px;" type="primary" @click="confirmProject">
+                    <el-button
+                        v-if="currentStep === 3"
+                        class="confirm-button"
+                        @click="confirmProject">
                         Confirm project
                     </el-button>
-                </el-footer>
+                </div>
+            </el-footer>
             </el-container>
         </el-container>
     </div>
 <script>
+    Vue.component('tree-node', {
+        props: ['nodes'],
+        template: `
+    <div>
+        <div v-for="node in nodes" :key="node.id">
+            <div class="tree-node">
+                <span class="toggle-icon" @click="$emit('toggle-node', node)">
+                    <i :class="node.isExpanded ? 'el-icon-caret-bottom' : 'el-icon-caret-right'"></i>
+                </span>
+                <el-checkbox v-if="node.showCheckBox" disabled class="checkbox" v-model="node.isChecked" >
+                </el-checkbox>
+                <div class="tree-node-content">
+                    <img :src="node.imageUrl" alt="icon">
+                    <span>{{ node.name }}</span>
+                </div>
+            </div>
+            <div class="tree-children" :class="{ active: node.isExpanded }">
+                <tree-node v-if="node.children" :nodes="node.children" @toggle-node="$emit('toggle-node', $event)"></tree-node>
+            </div>
+        </div>
+    </div>
+`
+    });
+
     new Vue({
         el: '#app',
         data: {
@@ -538,6 +757,12 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
             },
             closeWindow() {
                 window.parent.$('.ui-dialog-content:visible').dialog('close');
+            },
+            toggleNode(node) {
+                node.isExpanded = true;
+            },
+            cancel() {
+
             }
         }
     });

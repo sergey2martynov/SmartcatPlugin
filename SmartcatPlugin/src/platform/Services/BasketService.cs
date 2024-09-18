@@ -37,6 +37,12 @@ namespace SmartcatPlugin.Services
                 {
                     AddNodeWithParents(item, addedItems);
                 }
+                else if (itemIds.Contains(item.ID.ToString()))
+                {
+                    var addedItem = addedItems[item.ID.ToString()];
+                    addedItem.IsChecked = true;
+                    addedItem.ShowCheckBox = true;
+                }
             }
 
             var result = new ItemsTreeDto
@@ -56,7 +62,9 @@ namespace SmartcatPlugin.Services
                 Id = item.ID.ToString(),
                 Name = item.DisplayName,
                 ShowCheckBox = true,
-                ImageUrl = item.Appearance.GetIconPath()
+                ImageUrl = item.Appearance.GetIconPath(),
+                IsChecked = true,
+                IsExpanded = true
             };
 
             addedItems.Add(item.ID.ToString(), node);
@@ -75,7 +83,8 @@ namespace SmartcatPlugin.Services
                     {
                         Id = item.ID.ToString(),
                         Name = item.Parent.Name,
-                        ImageUrl = item.Appearance.GetIconPath()
+                        ImageUrl = item.Parent.Appearance.GetIconPath(),
+                        IsExpanded = true
                     };
                     _rootNode = rootNode;
                     addedItems.Add(item.ParentID.ToString(), rootNode);
@@ -97,9 +106,10 @@ namespace SmartcatPlugin.Services
             {
                 parentNode = new TreeNodeDto
                 {
-                    Id = item.ID.ToString(),
+                    Id = item.ParentID.ToString(),
                     Name = parentItem.Name,
-                    ImageUrl = item.Appearance.GetIconPath()
+                    ImageUrl = item.Parent.Appearance.GetIconPath(),
+                    IsExpanded = true
                 };
                 addedItems.Add(item.ParentID.ToString(), parentNode);
                 parentNode.Children.Add(childNode);

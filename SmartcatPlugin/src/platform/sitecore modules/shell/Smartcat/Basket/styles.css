@@ -1,26 +1,10 @@
-﻿body, html, #app {
+﻿body, html {
     height: 100%;
     margin: 0;
     padding: 0;
 }
 
-.el-aside {
-    height: 100%;
-}
-
 .tree-container {
     height: calc(100vh - 80px);
     overflow-y: auto;
-}
-
-.tree-node-content {
-    display: flex;
-    align-items: center;
-}
-
-.tree-node-icon {
-    width: 16px;
-    height: 16px;
-    margin-right: 8px;
-    margin-left: 8px;
 }
