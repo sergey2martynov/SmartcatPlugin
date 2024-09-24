@@ -9,7 +9,6 @@ using SmartcatPlugin.Cache;
 using SmartcatPlugin.Extensions;
 using SmartcatPlugin.Interfaces;
 using SmartcatPlugin.Models.Dtos;
-using SmartcatPlugin.Models.Smartcat.GetItemContent;
 using SmartcatPlugin.Services;
 using SmartcatPlugin.Smartcat;
 

@@ -9,6 +9,7 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
     <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <script src="https://unpkg.com/element-ui/lib/umd/locale/en.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
     <link href="styles.css" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="https://unpkg.com/vue2-datepicker/index.css">
@@ -58,9 +59,9 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
         }
 
         .el-step__head.is-finish .el-step__icon {
-            background-color: #7e3ff2 !important;
-            border-color: #7e3ff2 !important;
-            color: white !important;
+            background-color: #d3d3d3 !important;
+            border-color: #d3d3d3 !important;
+            color: gray !important;
             width: 20px;  
             height: 20px;
             font-size: 13px; 
@@ -76,7 +77,7 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
         }
 
         .el-step__title.is-finish {
-            color: #7e3ff2 !important;
+            color: #d3d3d3 !important;
         }
 
         .el-step__icon-inner.is-finish {
@@ -105,7 +106,6 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
 
         .tree {
             flex-grow: 1;
-            margin-left: 20px;
             margin-right: 15px;
             max-height: 410px;
             overflow-y: auto;
@@ -148,7 +148,6 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
 
         .header {
             margin-top: 35px;
-            padding-left: 30px;
         }
 
         .checkbox {
@@ -188,6 +187,8 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
             display: flex;
             flex-direction: column; /* Расположение блоков вертикально */
             gap: 10px; /* Расстояние между заголовком и деревом */
+            padding-bottom: 15px;
+            margin-left: 30px;
         }
 
         .footer-container {
@@ -248,6 +249,30 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
             color: white;
         }
 
+        .project-field-label {
+            font-weight: bold;
+        }
+
+        .project-field {
+            padding-top: 8px;
+            margin-right: 35px;
+        }
+
+        .required {
+            color: red;
+        }
+
+        .el-select .el-tag {
+            color: black;
+        }
+
+        .project-field .mx-datepicker .mx-input-wrapper {
+            height: 40px;
+        }
+
+        .el-textarea__inner {
+            resize: none !important;
+        }
     </style>
 </head>
 <body>
@@ -289,81 +314,88 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
                         </div>
                     </div>
                 </div>
-                <el-container v-if="currentStep === 1" style="margin-left: 30px">
-                    <el-col>
-                        <el-row style="margin-top: 15px;" >
-                                <el-col style="width: 150px; text-align: right; padding-right: 15px">
-                                    <el-label for="projectName">
-                                        Project name*
+                <div v-if="currentStep === 1" class="content">
+                        <div>
+                            <h2 class="header">
+                                Project
+                            </h2>
+                        </div>
+                        <div>
+                                <div>
+                                    <el-label class="project-field-label" for="projectName">
+                                        Project name <span class="required">*</span>
                                     </el-label>
-                                </el-col>
-                                <el-col style="width: 300px">
+                                </div>
+                                <div class="project-field">
                                     <el-input 
                                         type="text" 
                                         id="projectName" 
                                         v-model="projectName"
-                                        size="small"
+                                        size="medium"
+                                        
                                     />
-                                </el-col>
-                        </el-row>
-                        <el-row style="padding-top: 15px">
-                            <el-col style="width: 150px; text-align: right; padding-right: 15px">
-                                <el-label for="workflowStagesSelect">
-                                    Workflow Stages*
+                                </div>
+                        </div>
+                        <div>
+                            <div>
+                                <el-label class="project-field-label" for="workflowStagesSelect">
+                                    Workflow Stages <span class="required">*</span>
                                 </el-label>
-                            </el-col>
-                            <el-col style="width: 300px;">
-                                <el-select
-                                    id="workflowStagesSelect"
-                                    value-key="id"
-                                    v-model="selectedWorkFlowStage"
-                                    size="small"
-                                    class="mr-1"
-                                    style="width: 300px">
-                                    <el-option
-                                        v-for="item in workflowStages"
-                                        :key="item.id"
-                                        :label="item.name"
-                                        :value="item.name">
-                                    </el-option>
-                                </el-select>
-                            </el-col>
-                        </el-row>
-                        <el-row style="padding-top: 15px; ">
-                            <el-col style="width: 150px; text-align: right; padding-right: 15px">
-                                <el-label for="deadline" >
-                                    Deadline*
+                            </div>
+                            <div class="project-field">
+                                    <el-select
+                                        v-model="selectedWorkflowStages"
+                                        multiple
+                                        placeholder="Select workflow stages"
+                                        size="medium"
+                                        @remove-tag="handleTagRemove"
+                                        style="width: 100%">
+                                        <el-option
+                                            v-for="item in workflowStages"
+                                            :key="item.id"
+                                            :label="item.name"
+                                            :value="item.name">
+                                        </el-option>
+                                    </el-select>
+                            </div>
+                        </div>
+                        <div>
+                            <div>
+                                <el-label class="project-field-label">
+                                    Deadline
                                 </el-label>
-                            </el-col>
-                            <el-col style="width: 300px">
-                                    <date-picker
-                                        v-model="deadline"
-                                        type="date"
-                                        placeholder="Pick a date"
-                                        :default-value="getTomorrowDate()"
-                                        size="small"
-                                        style="width: 300px"
-                                    />
-                            </el-col>
-                        </el-row>
-                        <el-row style="padding-top: 15px;">
-                            <el-col style="width: 150px; text-align: right; padding-right: 15px;">
-                                <el-label for="comment">
-                                    Comment
+                            </div>
+                            <div class="project-field">
+                                <el-date-picker
+                                    v-model="deadline"
+                                    type="datetime"
+                                    placeholder="Set a deadline"
+                                    size="medium"
+                                    style="width: 100%"
+                                    default-time="12:00:00"
+                                    >
+                                </el-date-picker>
+                            </div>
+                        </div>
+                        <div>
+                            <div>
+                                <el-label class="project-field-label">
+                                    Description <span class="required">*</span>
                                 </el-label>
-                            </el-col>
-                            <el-col style="width: 300px;">
+                            </div>
+                            <div class="project-field">
                                 <el-input 
                                     type="textarea" 
-                                    id="comment" 
-                                    v-model="comment"
+                                    id="description" 
+                                    v-model="description"
                                     rows="4"
-                                    style="width: 100%; height: 100px;"
+                                    :autosize="{ minRows: 4, maxRows: 4 }"
+                                    style="width: 100%;
+                                           height: 100px;"
                                 />
-                            </el-col>
-                        </el-row>
-                    </el-col>
-                </el-container>
+                            </div>
+                        </div>
+                </div>
                 <el-container v-if="currentStep === 2" style="margin-left: 30px; margin-right: 30px; display: grid; grid-template-rows: auto 1fr; grid-template-columns: 1fr 1fr; gap: 20px;">
                     <!-- Текстовая область -->
                     <el-container style="grid-column: 1 / span 2; text-align: center;">
@@ -520,6 +552,8 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
         </el-container>
     </div>
 <script>
+    ELEMENT.locale(ELEMENT.lang.en);
+
     Vue.component('tree-node', {
         props: ['nodes'],
         template: `
@@ -567,9 +601,9 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
             },
 
             projectName: "",
-            selectedWorkFlowStage: "",
-            deadline: "",
-            comment: "",
+            selectedWorkflowStages: [],
+            deadline: '',
+            description: "",
             workflowStages: [
                 {
                     name: "Manual translation",
@@ -625,7 +659,6 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
                         this.treeData = response.data.TreeNodes;
                         this.checkedNodes = response.data.CheckedItems;
                         this.allNodeIds = response.data.ExpandedItems;
-                        console.log(response);
                     })
                     .catch(error => {
                         console.error('There was an error!', error);
@@ -645,10 +678,13 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
             getSavedProjectInfo() {
                 axios.get('/api/basket/get-saved-project-info')
                     .then(response => {
-                        this.projectName = response.data.ProjectName;
-                        this.selectedWorkFlowStage = response.data.WorkflowStage;
-                        this.deadline = new Date(response.data.Deadline);
-                        this.comment = response.data.Comment;
+                        this.projectName = response.data.projectName;
+                        this.selectedWorkflowStages = response.data.workflowStages;
+                        this.description = response.data.description;
+                        console.log(response);
+                        if (response.data.Deadline) {
+                            this.deadline = new Date(response.data.Deadline);
+                        }
                     })
                     .catch(error => {
                         console.error('There was an error!', error);
@@ -657,7 +693,6 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
             getLanguages() {
                 axios.get('/api/basket/get-translation-languages')
                     .then(response => {
-                        console.log(response);
                         this.sourceLanguages = response.data.sourceLanguages;
                         this.targetLanguages = response.data.targetLanguages;
                     })
@@ -668,18 +703,18 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
             nextStep() {
                 if (this.currentStep === 1) {
 
-                    if (!this.projectName || !this.selectedWorkFlowStage || !this.deadline) {
+                    if (!this.projectName || !this.selectedWorkflowStages || !this.description) {
                         alert("Required fields was not filling");
                         return;
                     }
 
                     const data = {
                         projectName: this.projectName,
-                        workflowStage: this.selectedWorkFlowStage,
-                        deadline: this.deadline.toISOString(),
-                        comment: this.comment
+                        workflowStages: this.selectedWorkflowStages,
+                        deadline: this.deadline ? this.deadline.toISOString() : null,
+                        description: this.description
                     };
-                    console.log(data);
+
                     axios.post('/api/basket/save-project-info', data)
                         .then(response => {
 
@@ -715,7 +750,6 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
                 this.selectedSourceLanguage = [];
                 this.selectedSourceLanguageName = selectedLanguage.name;
                 this.selectedSourceLanguage.push(selectedLanguage.code);
-                console.log('Selected source language:', this.selectedSourceLanguage);
             },
             handleTargetLanguageChange(selectedLanguage) {
                 this.selectedTargetLanguageNames.push(selectedLanguage.name);
@@ -743,7 +777,6 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
 
                 axios.post('/api/basket/save-project', data)
                     .then(response => {
-                        console.log(response);
                         if (!response.ok) {
                             return response.text().then(text => { throw new Error(text); });
                         }
@@ -751,7 +784,6 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
                         window.parent.$('.ui-dialog-content:visible').dialog('close');
                     })
                     .catch(error => {
-                        console.log("ERROR", error.response.data.Message);
                         alert("There was an error: " + error.response.data.Message);
                     });
             },
@@ -763,6 +795,23 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
             },
             cancel() {
 
+            },
+            handleTagRemove(tag) {
+                console.log('Tag removed:', tag);
+            },
+            formatDeadline(deadline) {
+                if (!deadline) return '';
+
+                const options = {
+                    year: 'numeric',
+                    month: 'short', // сокращённый месяц
+                    day: 'numeric',
+                    hour: 'numeric',
+                    minute: 'numeric',
+                    timeZoneName: 'short' // UTC-5
+                };
+
+                return new Intl.DateTimeFormat('en-US', options).format(new Date(deadline));
             }
         }
     });
