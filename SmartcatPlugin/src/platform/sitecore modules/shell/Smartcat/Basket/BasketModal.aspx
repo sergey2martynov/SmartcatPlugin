@@ -249,6 +249,30 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
             color: white;
         }
 
+        .cancel-button:focus,
+        .back-button:focus,
+        .next-button:focus,
+        .confirm-button:focus,
+        .cancel-button:active,
+        .back-button:active,
+        .next-button:active,
+        .confirm-button:active {
+            outline: none;
+            background-color: inherit;
+            color: inherit;
+            border-color: inherit;
+        }
+
+        .next-button:focus,
+        .confirm-button:focus,
+        .next-button:active,
+        .confirm-button:active {
+            border-color: black;
+            background-color: black;
+            color: white;
+        }
+
+
         .project-field-label {
             font-weight: bold;
         }
@@ -681,7 +705,6 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
                         this.projectName = response.data.projectName;
                         this.selectedWorkflowStages = response.data.workflowStages;
                         this.description = response.data.description;
-                        console.log(response);
                         if (response.data.Deadline) {
                             this.deadline = new Date(response.data.Deadline);
                         }
