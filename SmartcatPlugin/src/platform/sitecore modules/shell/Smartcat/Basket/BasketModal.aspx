@@ -495,7 +495,7 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
                             </el-row>
                             <el-row>
                                 <label style="text-align: left; font-weight: bold;">
-                                    Comment
+                                    Description
                                 </label>
                             </el-row>
                             <el-row>
@@ -527,7 +527,7 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
                             </el-row>
                             <el-row>
                                 <a style="padding-left: 30px">
-                                    {{ comment }}
+                                    {{ description }}
                                 </a>
                             </el-row>
                             <el-row>
@@ -783,7 +783,7 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
                     ['Project name', this.projectName],
                     ['Workflow stage', this.selectedWorkFlowStage],
                     ['Deadline', formatedDeadline],
-                    ['Comment', this.comment],
+                    ['Description', this.description],
                     ['Source language', this.selectedSourceLanguage],
                     ['Target languages', this.selectedTargetLanguages.join(',')]]);
             },
@@ -791,7 +791,7 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
                 const data = {
                     "integrationType": "string",
                     "name": this.projectName,
-                    "description": this.comment,
+                    "description": this.description,
                     "sourceLanguage": this.selectedSourceLanguage[0],
                     "targetLanguage": this.selectedTargetLanguages[0],
                     "dueDate": this.deadline,
@@ -800,9 +800,6 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
 
                 axios.post('/api/basket/save-project', data)
                     .then(response => {
-                        if (!response.ok) {
-                            return response.text().then(text => { throw new Error(text); });
-                        }
 
                         window.parent.$('.ui-dialog-content:visible').dialog('close');
                     })
