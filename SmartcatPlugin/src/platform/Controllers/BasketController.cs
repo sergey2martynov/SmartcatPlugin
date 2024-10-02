@@ -146,7 +146,7 @@ namespace SmartcatPlugin.Controllers
 
         [Route("save-project")]
         [HttpPost]
-        public async Task<IHttpActionResult> CreateSmartcatProject([FromBody] ProjectDto dto)
+        public async Task<IHttpActionResult> CreateSmartcatProject([FromBody] CreateProjectDto dto)
         {
             //var basketService = new BasketService();
             var user = Sitecore.Context.User.Name;              //todo: cached data by user name

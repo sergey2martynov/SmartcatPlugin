@@ -81,7 +81,7 @@
     <Content Include="sitecore modules\shell\Smartcat\Basket\styles.css" />
     <Content Include="sitecore modules\shell\Smartcat\closeButton.css" />
     <Content Include="sitecore modules\shell\Smartcat\onload.js" />
-    <Content Include="sitecore modules\shell\Smartcat\Projects\ProjectsModal.aspx" />
+    <Content Include="sitecore modules\shell\Smartcat\Projects\ProjectListModal.aspx" />
     <None Include="SmartcatLocales.json" />
     <None Include="Platform.wpp.targets" />
     <None Include="Properties\PublishProfiles\Local.pubxml" />
@@ -101,39 +101,55 @@
     <Compile Include="Commands\ShowBasketCommand.cs" />
     <Compile Include="Commands\ShowProjectsCommand.cs" />
     <Compile Include="Constants\ConstantItemFieldTypes.cs" />
+    <Compile Include="Constants\NumberConstants.cs" />
     <Compile Include="Controllers\AuthController.cs" />
     <Compile Include="Controllers\BasketController.cs" />
     <Compile Include="Controllers\AddItemController.cs" />
+    <Compile Include="Controllers\ProjectListController.cs" />
     <Compile Include="CustomExceptionFilter.cs" />
     <Compile Include="Constants\LogNames.cs" />
     <Compile Include="Extensions\ItemAppearanceExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Extensions\TemplateSectionItemExtension.cs" />
+    <Compile Include="Interfaces\IAuthService.cs" />
     <Compile Include="Interfaces\IBasketService.cs" />
+    <Compile Include="Interfaces\ISmartcatApiClient.cs" />
+    <Compile Include="Interfaces\ITranslationService.cs" />
     <Compile Include="Models\ApiResponse\ApiResponseBase.cs" />
     <Compile Include="Models\Dtos\AddedItemsTreeDto.cs" />
     <Compile Include="Models\Dtos\ApiKeyDto.cs" />
     <Compile Include="Models\Dtos\DocumentDto.cs" />
     <Compile Include="Models\Dtos\DocumentIdDto.cs" />
+    <Compile Include="Models\Dtos\GetProjectDto.cs" />
+    <Compile Include="Models\Dtos\GetProjectListRequest.cs" />
     <Compile Include="Models\Dtos\LanguageDto.cs" />
-    <Compile Include="Models\Dtos\ProjectDto.cs" />
+    <Compile Include="Models\Dtos\CreateProjectDto.cs" />
     <Compile Include="Models\Dtos\ProjectIdDto .cs" />
+    <Compile Include="Models\Dtos\ProjectListDto.cs" />
     <Compile Include="Models\Dtos\SaveItemIdsToCacheDto.cs" />
     <Compile Include="Models\Dtos\SaveProjectInfoDto.cs" />
     <Compile Include="Models\Dtos\TranslationLanguagesDto.cs" />
     <Compile Include="Models\Dtos\TreeNodeDto.cs" />
     <Compile Include="Models\Dtos\ItemsTreeDto.cs" />
     <Compile Include="Models\Dtos\ValidatingItemsDto.cs" />
-    <Compile Include="Models\Smartcat\Authorization\AuthorizationRequest.cs" />
-    <Compile Include="Models\Smartcat\Authorization\SmartcatToken.cs" />
-    <Compile Include="Models\Smartcat\ExternalObjectIdConverter.cs" />
-    <Compile Include="Models\Smartcat\Testing\CreateTestDataDirectoryRequest.cs" />
-    <Compile Include="Models\Smartcat\Testing\DeleteTestDataDirectoryRequest.cs" />
-    <Compile Include="Models\Smartcat\Testing\GetLocalesResponse.cs" />
+    <Compile Include="Models\SitecoreApi\Authorization\AuthorizationRequest.cs" />
+    <Compile Include="Models\SitecoreApi\Authorization\SmartcatToken.cs" />
+    <Compile Include="Models\ExternalObjectIdConverter.cs" />
+    <Compile Include="Models\SitecoreApi\Testing\CreateTestDataDirectoryRequest.cs" />
+    <Compile Include="Models\SitecoreApi\Testing\DeleteTestDataDirectoryRequest.cs" />
+    <Compile Include="Models\SitecoreApi\Testing\GetLocalesResponse.cs" />
+    <Compile Include="Models\SmartcatApi\GetDocumentsByProjectIdRequest.cs" />
+    <Compile Include="Models\SmartcatApi\GetDocumentsByProjectIdResponse.cs" />
+    <Compile Include="Models\SmartcatApi\GetExportIdRequest.cs" />
+    <Compile Include="Models\SmartcatApi\GetExportIdResponse.cs" />
+    <Compile Include="Models\SmartcatApi\GetItemTranslationRequest.cs" />
+    <Compile Include="Models\SmartcatApi\GetItemTranslationResponse.cs" />
+    <Compile Include="Models\SmartcatApi\SmartcatDocument.cs" />
     <Compile Include="Services\AuthenticationService.cs" />
     <Compile Include="Services\BasketService.cs" />
     <Compile Include="Services\ItemService.cs" />
     <Compile Include="Services\AuthService.cs" />
+    <Compile Include="Services\TranslationService.cs" />
     <Compile Include="sitecore modules\shell\Smartcat\AddItem\AddItemModal.aspx.cs">
       <DependentUpon>AddItemModal.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -155,12 +171,12 @@
     <Compile Include="sitecore modules\shell\Smartcat\Basket\BasketModal.aspx.designer.cs">
       <DependentUpon>BasketModal.aspx</DependentUpon>
     </Compile>
-    <Compile Include="sitecore modules\shell\Smartcat\Projects\ProjectsModal.aspx.cs">
-      <DependentUpon>ProjectsModal.aspx</DependentUpon>
+    <Compile Include="sitecore modules\shell\Smartcat\Projects\ProjectListModal.aspx.cs">
+      <DependentUpon>ProjectListModal.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="sitecore modules\shell\Smartcat\Projects\ProjectsModal.aspx.designer.cs">
-      <DependentUpon>ProjectsModal.aspx</DependentUpon>
+    <Compile Include="sitecore modules\shell\Smartcat\Projects\ProjectListModal.aspx.designer.cs">
+      <DependentUpon>ProjectListModal.aspx</DependentUpon>
     </Compile>
     <Compile Include="SmartcatPluginClient.cs" />
     <Compile Include="Commands\ShowAddItemCommand.cs" />
@@ -170,26 +186,26 @@
     <Compile Include="Extensions\ContentSearchExtension.cs" />
     <Compile Include="Models\ApiResponse\ApiResponse.cs" />
     <Compile Include="Models\ItemIdFiledName.cs" />
-    <Compile Include="Models\Smartcat\GetItemById\GetItemByIdRequest.cs" />
-    <Compile Include="Models\Smartcat\GetItemById\GetItemByIdResponse.cs" />
-    <Compile Include="Models\Smartcat\GetItemContent\GetItemContentRequest.cs" />
-    <Compile Include="Models\Smartcat\GetItemContent\GetItemContentResponse.cs" />
-    <Compile Include="Models\Smartcat\GetItemList\DataItem.cs" />
-    <Compile Include="Models\Smartcat\GetItemList\GetItemsListRequest.cs" />
+    <Compile Include="Models\SitecoreApi\GetItemById\GetItemByIdRequest.cs" />
+    <Compile Include="Models\SitecoreApi\GetItemById\GetItemByIdResponse.cs" />
+    <Compile Include="Models\SitecoreApi\GetItemContent\GetItemContentRequest.cs" />
+    <Compile Include="Models\SitecoreApi\GetItemContent\GetItemContentResponse.cs" />
+    <Compile Include="Models\SitecoreApi\GetItemList\DataItem.cs" />
+    <Compile Include="Models\SitecoreApi\GetItemList\GetItemsListRequest.cs" />
     <Compile Include="Extensions\SitecoreExtensions.cs" />
     <Compile Include="Models\ItemField.cs" />
     <Compile Include="Models\ItemModel.cs" />
     <Compile Include="Models\PageModel.cs" />
-    <Compile Include="Models\Smartcat\ExternalObjectId.cs" />
-    <Compile Include="Models\Smartcat\GetFolderList\DataDirectory.cs" />
-    <Compile Include="Models\Smartcat\GetFolderList\GetFolderListRequest.cs" />
-    <Compile Include="Models\Smartcat\GetFolderList\GetFolderListResponse.cs" />
-    <Compile Include="Models\Smartcat\GetItemList\GetItemListResponse.cs" />
-    <Compile Include="Models\Smartcat\GetParentDirectories\GetParentFoldersRequest.cs" />
-    <Compile Include="Models\Smartcat\GetParentDirectories\GetParentFoldersResponse.cs" />
-    <Compile Include="Models\Smartcat\GetParentDirectories\GetParentDirectoriesResponseItem.cs" />
-    <Compile Include="Models\Smartcat\ImportTranslation\TranslationImportRequest.cs" />
-    <Compile Include="Models\Smartcat\LocJsonContent.cs" />
+    <Compile Include="Models\ExternalObjectId.cs" />
+    <Compile Include="Models\SitecoreApi\GetFolderList\DataDirectory.cs" />
+    <Compile Include="Models\SitecoreApi\GetFolderList\GetFolderListRequest.cs" />
+    <Compile Include="Models\SitecoreApi\GetFolderList\GetFolderListResponse.cs" />
+    <Compile Include="Models\SitecoreApi\GetItemList\GetItemListResponse.cs" />
+    <Compile Include="Models\SitecoreApi\GetParentDirectories\GetParentFoldersRequest.cs" />
+    <Compile Include="Models\SitecoreApi\GetParentDirectories\GetParentFoldersResponse.cs" />
+    <Compile Include="Models\SitecoreApi\GetParentDirectories\GetParentDirectoriesResponseItem.cs" />
+    <Compile Include="Models\SitecoreApi\ImportTranslation\TranslationImportRequest.cs" />
+    <Compile Include="Models\LocJsonContent.cs" />
     <Compile Include="Panels\CustomPanel.cs" />
     <Compile Include="Controllers\SmartcatController.cs" />
     <Compile Include="Extensions\ItemExtensions.cs" />

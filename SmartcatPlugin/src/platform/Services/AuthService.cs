@@ -4,12 +4,14 @@ using Sitecore.SecurityModel;
 using System;
 using Sitecore;
 using SmartcatPlugin.Constants;
+using SmartcatPlugin.Interfaces;
 using SmartcatPlugin.Models.Dtos;
 
 namespace SmartcatPlugin.Services
 {
-    public class AuthService
+    public class AuthService : IAuthService
     {
+        private readonly Database _masterDb = Database.GetDatabase("master");
         public TemplateItem CreateApiKeyTemplate(Database database)
         {
             var templatesRoot = database.GetItem("/sitecore/templates/Smartcat");
@@ -113,9 +115,9 @@ namespace SmartcatPlugin.Services
             return apiKeyItem;
         }
 
-        public ApiKeyDto GetApiKey(Database database)
+        public ApiKeyDto GetApiKey()
         {
-            var apiKeyItem = database.GetItem(ConstantIds.ApiKeyItem);
+            var apiKeyItem = _masterDb.GetItem(ConstantIds.ApiKeyItem);
 
             var apiKey = new ApiKeyDto
             {
@@ -124,6 +126,14 @@ namespace SmartcatPlugin.Services
             };
 
             return apiKey;
+        }
+
+        public string GetWorkspaceId()
+        {
+            var apiKeyItem = _masterDb.GetItem(ConstantIds.ApiKeyItem);
+            var workspaceId = apiKeyItem.Fields[StringConstants.WorkSpaceId].Value;
+
+            return workspaceId;
         }
     }
 }

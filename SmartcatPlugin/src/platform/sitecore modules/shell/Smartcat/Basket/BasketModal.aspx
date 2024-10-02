@@ -166,7 +166,7 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
 
         .aside-with-divider {
             position: relative;
-            width: 200px !important;/* Чтобы псевдоэлемент позиционировался относительно aside */
+            width: 200px !important;
             padding: 10px;
             box-sizing: border-box;
             margin-top: 35px;
@@ -176,17 +176,17 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
         .aside-with-divider::after {
             content: '';
             position: absolute;
-            top: 10px; /* Отступ сверху */
-            bottom: 45px; /* Отступ снизу */
-            right: 0; /* Линия справа */
+            top: 10px;
+            bottom: 45px;
+            right: 0;
             width: 1px;
-            background-color: #d3d3d3; /* Цвет линии */
+            background-color: #d3d3d3;
         }
 
         .content {
             display: flex;
-            flex-direction: column; /* Расположение блоков вертикально */
-            gap: 10px; /* Расстояние между заголовком и деревом */
+            flex-direction: column;
+            gap: 10px;
             padding-bottom: 15px;
             margin-left: 30px;
         }
@@ -195,7 +195,7 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
             height: 80px;
             display: flex;
             margin-top: auto;
-            justify-content: space-between; /* Размещает кнопки с обеих сторон */
+            justify-content: space-between;
             align-items: center;
             padding: 10px 30px;
         }
@@ -824,11 +824,11 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
 
                 const options = {
                     year: 'numeric',
-                    month: 'short', // сокращённый месяц
+                    month: 'short',
                     day: 'numeric',
                     hour: 'numeric',
                     minute: 'numeric',
-                    timeZoneName: 'short' // UTC-5
+                    timeZoneName: 'short'
                 };
 
                 return new Intl.DateTimeFormat('en-US', options).format(new Date(deadline));

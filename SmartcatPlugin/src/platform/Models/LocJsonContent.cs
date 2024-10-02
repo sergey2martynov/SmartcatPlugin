@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+﻿using System.Collections.Generic;
 
-namespace SmartcatPlugin.Models.Smartcat
+namespace SmartcatPlugin.Models
 {
     public class LocJsonContent
     {
@@ -13,8 +10,10 @@ namespace SmartcatPlugin.Models.Smartcat
 
     public class Properties
     {
+        public string ItemId { get; set; }
         public List<string> Comments { get; set; }
         public int Version { get; set; }
+        public string TargetLanguage { get; set; }
     }
 
     public class Unit

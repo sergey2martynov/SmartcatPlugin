@@ -11,7 +11,7 @@ namespace SmartcatPlugin.sitecore_modules.shell.Smartcat.Projects
 {
 
 
-    public partial class ProjectsModal
+    public partial class ProjectsListModal
     {
     }
 }

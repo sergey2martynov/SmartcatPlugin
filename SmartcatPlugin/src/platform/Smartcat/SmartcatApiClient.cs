@@ -8,21 +8,62 @@ using SmartcatPlugin.Models.ApiResponse;
 using SmartcatPlugin.Models.Dtos;
 using System.Text;
 using SmartcatPlugin.Services;
-using Sitecore.Data;
-using System.Security.Policy;
 using System.Threading;
-using System.Net;
+using SmartcatPlugin.Constants;
+using System.Web;
+using SmartcatPlugin.Interfaces;
+using SmartcatPlugin.Models.SmartcatApi;
 
 namespace SmartcatPlugin.Smartcat
 {
-    public class SmartcatApiClient
+    public class SmartcatApiClient : ISmartcatApiClient
     {
-        private static readonly HttpClient _httpClient;
+        private static HttpClient _httpClient;
 
         static SmartcatApiClient()
         {
             _httpClient = new HttpClient();
             _httpClient.BaseAddress = new Uri("https://ihub.smartcat.com");
+        }
+
+        public async Task<ApiResponse<ProjectListDto>> GetProjects(GetProjectListRequest request)
+        {
+            FillHttpClientAuthHeaders();
+
+            var builder = new UriBuilder(_httpClient.BaseAddress + "api/v1/projects");
+            var query = HttpUtility.ParseQueryString(builder.Query);
+            query["workspaceId"] = request.WorkspaceId;
+            query["limit"] = NumberConstants.BatchSize.ToString();
+            query["offset"] = request.Offset.ToString();
+            builder.Query = query.ToString();
+
+            var response = await _httpClient.GetAsync(builder.ToString());
+            var result = await HandleResponse<ProjectListDto>(response);
+            return result;
+        }
+
+        public async Task<ApiResponse<GetDocumentsByProjectIdResponse>> GetDocumentsByProjectId(GetDocumentsByProjectIdRequest request)
+        {
+            var response = await _httpClient.GetAsync($"/api/v1/documents?workspaceId={request.WorkspaceId}" +
+                                                      $"&projectId={request.ProjectId}");
+            
+            var result = await HandleResponse<GetDocumentsByProjectIdResponse>(response);
+            return result;
+        }
+
+        public async Task<ApiResponse<GetExportIdResponse>> GetExportId(GetExportIdRequest request)
+        {
+            FillHttpClientAuthHeaders();
+            var response = await _httpClient.PostAsync("/api/v1/documents/export", CreateJsonContent(request));
+            var result = await HandleResponse<GetExportIdResponse>(response);
+            return result;
+        }
+
+        public async Task<ApiResponse<GetItemTranslationResponse>> GetItemTranslation(GetItemTranslationRequest request)
+        {
+            var response = await _httpClient.PostAsync("/api/v1/documents/export-status", CreateJsonContent(request));
+            var result = await HandleResponse<GetItemTranslationResponse>(response);
+            return result;
         }
 
         public async Task<ApiResponse<object>> ValidateApiKeyAsync(ApiKeyDto dto)
@@ -35,26 +76,24 @@ namespace SmartcatPlugin.Smartcat
             return result;
         }
 
-        public async Task<ApiResponse<ProjectIdDto>> CreateProject(ProjectDto dto)
+        public async Task<ApiResponse<ProjectIdDto>> CreateProject(CreateProjectDto dto)
         {
             var authService = new AuthService();
-            var apiKey = authService.GetApiKey(Database.GetDatabase("master"));
+            var apiKey = authService.GetApiKey();
             dto.WorkspaceId = apiKey.WorkspaceId;
             dto.IntegrationType = "sitecore-app";
-            _httpClient.DefaultRequestHeaders.Authorization =
-                new System.Net.Http.Headers.AuthenticationHeaderValue("Basic",
-                    EncodeClientIdSecretToBase64(apiKey.WorkspaceId, apiKey.ApiKey));
+            FillHttpClientAuthHeaders();
             var response = await _httpClient.PostAsync("/api/v1/projects", CreateJsonContent(dto));
             var result = await HandleResponse<ProjectIdDto>(response);
             return result;
         }
 
-        public async Task<List<ApiResponse<DocumentIdDto>>> CreateDocuments(List<DocumentDto> documentDto)
+        public async Task<List<ApiResponse<DocumentIdDto>>> CreateDocuments(List<DocumentDto> documentDtos)      //Todo remove this logic from client
         {
             var result = new List<ApiResponse<DocumentIdDto>>();
             var semaphore = new SemaphoreSlim(10);
 
-            var tasks = documentDto.Select(async dto =>
+            var tasks = documentDtos.Select(async dto =>
             {
                 await semaphore.WaitAsync();
 
@@ -141,7 +180,7 @@ namespace SmartcatPlugin.Smartcat
         private static HttpClient CreateClient()
         {
             var authService = new AuthService();
-            var apiKey = authService.GetApiKey(Database.GetDatabase("master"));
+            var apiKey = authService.GetApiKey();
             var httpClient = new HttpClient();
             httpClient.DefaultRequestHeaders.Add("Authorization",
                 "Basic " + EncodeClientIdSecretToBase64(apiKey.WorkspaceId, apiKey.ApiKey));
@@ -153,6 +192,15 @@ namespace SmartcatPlugin.Smartcat
             var encoding = Encoding.UTF8;
             var toEncode = workspace + ":" + apiKey;
             return Convert.ToBase64String(encoding.GetBytes(toEncode));
+        }
+
+        private void FillHttpClientAuthHeaders()
+        {
+            var authService = new AuthService();
+            var apiKey = authService.GetApiKey();
+            _httpClient.DefaultRequestHeaders.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue("Basic",
+                    EncodeClientIdSecretToBase64(apiKey.WorkspaceId, apiKey.ApiKey));
         }
     }
 }

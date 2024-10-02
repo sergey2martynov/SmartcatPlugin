@@ -9,6 +9,7 @@ using Sitecore.Data.Items;
 using Sitecore.Globalization;
 using Sitecore.Shell.Framework.Commands.TemplateBuilder;
 using SmartcatPlugin.Constants;
+using SmartcatPlugin.Models;
 using SmartcatPlugin.Models.Smartcat;
 using SmartcatPlugin.Models.Smartcat.GetFolderList;
 using SmartcatPlugin.Models.Smartcat.GetItemContent;
@@ -154,10 +155,18 @@ namespace SmartcatPlugin.Extensions
                 Log.Info($"{typeof(Unit)} key:{unit.Key} was created. ItemExtensions.GetItemContent()");
             }
 
-            var locJsonContent = new LocJsonContent { Units = units };
-
             foreach (var targetLanguage in targetLanguages)
             {
+                var locJsonContent = new LocJsonContent
+                {
+                    Units = units,
+                    Properties = new Properties
+                    {
+                        ItemId = parentPage.ID.ToString(),
+                        TargetLanguage = targetLanguage.Name
+                    }
+                };
+
                 locJsonDictionary.Add(targetLanguage.Name, locJsonContent);
 
                 var versions = parentPage.Versions.GetVersions(true);

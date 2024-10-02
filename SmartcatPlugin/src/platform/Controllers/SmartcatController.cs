@@ -15,6 +15,7 @@ using Sitecore.Globalization;
 using Sitecore.SecurityModel;
 using SmartcatPlugin.Constants;
 using SmartcatPlugin.Extensions;
+using SmartcatPlugin.Models;
 using SmartcatPlugin.Models.ApiResponse;
 using SmartcatPlugin.Models.Smartcat;
 using SmartcatPlugin.Models.Smartcat.Authorization;

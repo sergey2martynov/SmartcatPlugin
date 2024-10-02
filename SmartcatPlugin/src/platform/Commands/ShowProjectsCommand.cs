@@ -8,7 +8,7 @@ namespace SmartcatPlugin.Commands
         public override void Execute(CommandContext context)
         {
             SheerResponse.ShowModalDialog(
-                "/sitecore modules/shell/Smartcat/Projects/ProjectsModal.aspx", "1000", "600", "Basket", false);
+                "/sitecore modules/shell/Smartcat/Projects/ProjectListModal.aspx", "1000", "600", "Basket", false);
         }
 
         public override CommandState QueryState(CommandContext context)
