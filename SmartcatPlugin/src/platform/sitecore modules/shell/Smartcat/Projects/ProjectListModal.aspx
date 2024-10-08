@@ -109,8 +109,8 @@
                     axios.get('/api/project/get-item-translations?projectId=' + project.id)
                         .then(response => {
                             console.log(response);
-                            this.projects = response.data.Data.projects;
-
+                            //this.projects = response.data.Data.projects;
+                            window.parent.$('.ui-dialog-content:visible').dialog('close');
                         })
                         .catch(error => {
                             alert('There was an error!', error.response.data.Message);

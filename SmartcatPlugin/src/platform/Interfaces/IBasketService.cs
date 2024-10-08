@@ -13,5 +13,7 @@ namespace SmartcatPlugin.Interfaces
     {
         ItemsTreeDto BuildSelectedItemTree();
         List<Item> GetItemsByIds(Database database, List<string> ids, string language);
+        LanguageDto GetDefaultLanguage();
+        List<LanguageDto> GetAvailableLanguages();
     }
 }

@@ -2,12 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
-using System.ServiceModel.Syndication;
-using System.Threading;
 using System.Threading.Tasks;
 using Sitecore.Data;
-using Sitecore.Data.Items;
 using Sitecore.Globalization;
 using Sitecore.SecurityModel;
 using SmartcatPlugin.Interfaces;
@@ -53,6 +49,7 @@ namespace SmartcatPlugin.Services
 
         public async Task<List<ApiResponse<GetItemTranslationResponse>>> GetTranslatedContent(List<string> exportIds, string workspaceId)
         {
+            await Task.Delay(5000);
             var result = new List<ApiResponse<GetItemTranslationResponse>>();
 
             foreach (var exportId in exportIds)

@@ -319,6 +319,11 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
                             Content
                         </h2>
                     </div>
+                    <div>
+                        <h4>
+                            Invalid items count: {{invalidItemCount}}
+                        </h4>
+                    </div>
                     <div class="tree">
                         <div v-for="node in treeData" :key="node.id">
                             <div class="tree-node">

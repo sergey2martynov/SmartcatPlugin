@@ -103,42 +103,16 @@ namespace SmartcatPlugin.Controllers
         [HttpGet]
         public IHttpActionResult GetTranslationLanguages()
         {
+            var defaultLanguage = _basketService.GetDefaultLanguage();
+            var targetLanguages = _basketService.GetAvailableLanguages();
+
             var result = new TranslationLanguagesDto
             {
                 SourceLanguages = new List<LanguageDto>
                 {
-                    new LanguageDto
-                    {
-                        Name = "English", Code = "en"
-                    },
-                    new LanguageDto
-                    {
-                        Name = "Russian", Code = "ru"
-                    }
+                    defaultLanguage
                 },
-                TargetLanguages = new List<LanguageDto>
-                {
-                    new LanguageDto
-                    {
-                        Name = "English", Code = "en"
-                    },
-                    new LanguageDto
-                    {
-                        Name = "Russian", Code = "ru"
-                    },
-                    new LanguageDto
-                    {
-                        Name = "Spanish", Code = "es"
-                    },
-                    new LanguageDto
-                    {
-                        Name = "French", Code = "fr"
-                    },
-                    new LanguageDto
-                    {
-                        Name = "German", Code = "de"
-                    },
-                }
+                TargetLanguages = targetLanguages
             };
 
             return Ok(result);
@@ -148,7 +122,6 @@ namespace SmartcatPlugin.Controllers
         [HttpPost]
         public async Task<IHttpActionResult> CreateSmartcatProject([FromBody] CreateProjectDto dto)
         {
-            //var basketService = new BasketService();
             var user = Sitecore.Context.User.Name;              //todo: cached data by user name
             string cachedData = CustomCacheManager.GetCache("selectedItems");
             var selectedItemIds = JsonConvert.DeserializeObject<List<string>>(cachedData);

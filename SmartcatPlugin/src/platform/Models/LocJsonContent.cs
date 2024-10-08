@@ -1,10 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using Newtonsoft.Json;
+using System.Collections.Generic;
 
 namespace SmartcatPlugin.Models
 {
     public class LocJsonContent
     {
+        [JsonProperty("properties")]
         public Properties Properties { get; set; }
+        [JsonProperty("units")]
         public List<Unit> Units { get; set; }
     }
 
@@ -27,5 +30,8 @@ namespace SmartcatPlugin.Models
     public class UnitProperties
     {
         public List<string> Comments { get; set; }
+
+        [JsonProperty("x-smartcat-format")]
+        public string SmartcatFormat { get; set; }
     }
 }

@@ -146,7 +146,10 @@ namespace SmartcatPlugin.Extensions
                 var unit = new Unit
                 {
                     Key = field.Key,
-                    Properties = new UnitProperties(),
+                    Properties = new UnitProperties
+                    {
+                        SmartcatFormat = field.Type == ConstantItemFieldTypes.RichText ? "html" : ""
+                    },
                     Source = StringSplitter.SplitStringWithNewlines(field.Value),
                     Target = new List<string>()
                 };
@@ -245,6 +248,13 @@ namespace SmartcatPlugin.Extensions
                 .Where(f => !f.Name.StartsWith("_") && f.Type.IsTranslatedType() && f.HasValue);
 
             return fields;
+        }
+
+        public static List<Field> GetRichTextField(this Item item)
+        {
+            var result = item.Fields
+                .Where(f => f.Type == ConstantItemFieldTypes.RichText && !f.Name.StartsWith("_")).ToList();
+            return result;
         }
     }
 }

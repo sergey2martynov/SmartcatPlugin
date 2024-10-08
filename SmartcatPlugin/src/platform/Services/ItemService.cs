@@ -7,16 +7,18 @@ using SmartcatPlugin.Cache;
 using SmartcatPlugin.Constants;
 using SmartcatPlugin.Extensions;
 using SmartcatPlugin.Models.Dtos;
-using HtmlAgilityPack;
 using Sitecore.SecurityModel;
 using SmartcatPlugin.Models.Smartcat.Testing;
 using Sitecore.Globalization;
+using Sitecore.Data.Validators;
+using Sitecore.Data.Validators.FieldValidators;
 
 namespace SmartcatPlugin.Services
 {
     public class ItemService
     {
         private readonly Database _masterDb = Database.GetDatabase("master");
+        private readonly Database _webDb = Database.GetDatabase("web");
 
         public AddedItemsTreeDto GetContentEditorItemsTree()
         {
@@ -96,11 +98,13 @@ namespace SmartcatPlugin.Services
         public List<string> GetInvalidItemsNames(List<string> itemIds)
         {
             var invalidNames = new List<string>();
+            Sitecore.Context.ContentDatabase = _masterDb;
 
             foreach (var itemId in itemIds)
             {
                 var id = new ID(itemId);
                 var item = _masterDb.GetItem(id);
+                List<FieldDescriptor> fieldDescriptors = new List<FieldDescriptor>();
 
                 if (item.Locking.IsLocked())
                 {
@@ -108,26 +112,29 @@ namespace SmartcatPlugin.Services
                     continue;
                 }
 
-                var fields = item.GetNonSystemFields();
-
-                foreach (var field in fields)
+                var notSystemFields = item.GetNonSystemFields();
+                if (notSystemFields.Any(f => string.IsNullOrEmpty(f.Value)))
                 {
-                    if (field.Type != ConstantItemFieldTypes.RichText)
+                    invalidNames.Add(item.Name);
+                    continue;
+                }
+
+                var richTextFields = item.GetRichTextField();
+                if (richTextFields.Any())
+                {
+                    richTextFields.ForEach(f => fieldDescriptors.Add(new FieldDescriptor(item, f.Name)));
+                }
+
+                ValidatorCollection validatorsForTitle =
+                    ValidatorManager.GetFieldsValidators(ValidatorsMode.ValidateButton, fieldDescriptors, _masterDb);
+
+                foreach (BaseValidator validator in validatorsForTitle)
+                {
+                    validator.Validate(new ValidatorOptions(false));
+
+                    if (validator is XhtmlValidator && !validator.IsValid)
                     {
-                        continue;
-                    }
-
-                    var doc = new HtmlDocument();
-                    doc.OptionFixNestedTags = false;
-
-                    doc.LoadHtml(field.Value);
-
-                    foreach (var error in doc.ParseErrors)
-                    {
-                        if (!invalidNames.Contains(item.Name))
-                        {
-                            invalidNames.Add(item.Name);
-                        }
+                        invalidNames.Add(item.Name);
                     }
                 }
             }

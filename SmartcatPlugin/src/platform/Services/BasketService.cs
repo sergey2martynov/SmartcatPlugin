@@ -4,6 +4,7 @@ using Sitecore.Data;
 using SmartcatPlugin.Cache;
 using SmartcatPlugin.Constants;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Sitecore.Data.Items;
 using SmartcatPlugin.Extensions;
@@ -11,6 +12,7 @@ using SmartcatPlugin.Models.Dtos;
 using SmartcatPlugin.Models;
 using Sitecore.Globalization;
 using SmartcatPlugin.Interfaces;
+using Sitecore.Data.Validators;
 
 namespace SmartcatPlugin.Services
 {
@@ -144,6 +146,43 @@ namespace SmartcatPlugin.Services
             }
 
             return items;
+        }
+
+        public LanguageDto GetDefaultLanguage()
+        {
+            var defaultLanguageCode = Sitecore.Context.Site?.Language == null ? "en" : Sitecore.Context.Site?.Language;
+            var defaultLanguage = Language.Parse(defaultLanguageCode);
+
+            var languageDto = new LanguageDto
+            {
+                Name = defaultLanguage.CultureInfo.EnglishName,
+                Code = defaultLanguage.Name
+            };
+
+            return languageDto;
+        }
+
+        public List<LanguageDto> GetAvailableLanguages()
+        {
+            var languageItems = _masterDb.GetItem("/sitecore/system/Languages");
+            var languageDtos = new List<LanguageDto>();
+
+            if (languageItems != null)
+            {
+                foreach (Item languageItem in languageItems.Children)
+                {
+                    var language = Language.Parse(languageItem.Name);
+
+                    var languageDto = new LanguageDto
+                    {
+                        Name = language.CultureInfo.EnglishName,
+                        Code = language.Name
+                    };
+                    languageDtos.Add(languageDto);
+                }
+            }
+
+            return languageDtos;
         }
     }
 }
