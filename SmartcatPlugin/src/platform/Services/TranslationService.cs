@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Sitecore.Data;
 using Sitecore.Globalization;
@@ -9,7 +9,6 @@ using Sitecore.SecurityModel;
 using SmartcatPlugin.Interfaces;
 using SmartcatPlugin.Models;
 using SmartcatPlugin.Models.ApiResponse;
-using SmartcatPlugin.Models.Dtos;
 using SmartcatPlugin.Models.SmartcatApi;
 
 namespace SmartcatPlugin.Services
@@ -18,53 +17,44 @@ namespace SmartcatPlugin.Services
     {
         private readonly Database _masterDb = Database.GetDatabase("master");
         private readonly ISmartcatApiClient _apiClient;
-        private readonly IAuthService _authService;
-        public TranslationService(ISmartcatApiClient apiClient,
-            IAuthService authService
+        public TranslationService(ISmartcatApiClient apiClient
             )
         {
             _apiClient = apiClient;
-            _authService = authService;
         }
 
-        public async Task<List<ApiResponse<GetExportIdResponse>>> GetExportIds(string projectId, List<string> documentIds, string workspaceId)
+        public async Task<List<ApiResponse<GetExportIdResponse>>> GetExportIds(string projectId, List<string> documentIds,
+            string workspaceId)
         {
-            var result = new List<ApiResponse<GetExportIdResponse>>();
-
-            foreach (var documentId in documentIds)
-            {
-                var request = new GetExportIdRequest
+            var requests = documentIds.Select(documentId => 
+                new GetExportIdRequest
                 {
-                    DocumentId = documentId,
-                    ProjectId = projectId,
+                    DocumentId = documentId, 
+                    ProjectId = projectId, 
                     WorkspaceId = workspaceId
-                };
+                }).ToList();
 
-                var response = await _apiClient.GetExportId(request);
-                result.Add(response);
-            }
+            var responses = await _apiClient.SendRequests<GetExportIdRequest, GetExportIdResponse>(requests,
+                "/api/v1/documents/export", HttpMethod.Post);
 
-            return result;
+            return responses;
         }
 
-        public async Task<List<ApiResponse<GetItemTranslationResponse>>> GetTranslatedContent(List<string> exportIds, string workspaceId)
+        public async Task<List<ApiResponse<GetItemTranslationResponse>>> GetTranslatedContent(List<string> exportIds,
+            string workspaceId)
         {
-            await Task.Delay(5000);
-            var result = new List<ApiResponse<GetItemTranslationResponse>>();
-
-            foreach (var exportId in exportIds)
-            {
-                var request = new GetItemTranslationRequest()
+            var requests = exportIds.Select(exportId => 
+                new GetItemTranslationRequest
                 {
-                    ExportId = exportId,
+                    ExportId = exportId, 
                     WorkspaceId = workspaceId
-                };
+                }).ToList();
 
-                var response = await _apiClient.GetItemTranslation(request);
-                result.Add(response);
-            }
+            var responses = 
+                await _apiClient.SendRequests<GetItemTranslationRequest, GetItemTranslationResponse>(requests,
+                "/api/v1/documents/export-status", HttpMethod.Post);
 
-            return result;
+            return responses;
         }
 
         public void AddNewItemLanguageVersions(LocJsonContent content)      //todo: make retry logic
@@ -99,40 +89,6 @@ namespace SmartcatPlugin.Services
                     newLanguageItem.Editing.EndEdit();
                 }
             }
-        }
-
-        private async Task<ApiResponse<GetExportIdResponse>> SendRequestWithRetryAsync(GetExportIdRequest request)
-        {
-            int maxRetries = 3;
-            int delay = 1000;
-
-            for (int i = 0; i < maxRetries; i++)
-            {
-                var response = await _apiClient.GetExportId(request);
-
-                if (response.IsSuccess)
-                {
-                    return response;
-                }
-
-                if ((int)response.StatusCode == 429)
-                {
-                    await Task.Delay(delay);
-                    delay *= 2;
-                }
-                else
-                {
-
-                    return response;
-                }
-            }
-
-            return new ApiResponse<GetExportIdResponse>
-            {
-                IsSuccess = false,
-                StatusCode = HttpStatusCode.InternalServerError,
-                ErrorMessage = "Failed after retrying due to TooManyRequests"
-            };
         }
     }
 }

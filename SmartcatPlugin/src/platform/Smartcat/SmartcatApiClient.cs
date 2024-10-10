@@ -7,7 +7,6 @@ using Newtonsoft.Json;
 using SmartcatPlugin.Models.ApiResponse;
 using SmartcatPlugin.Models.Dtos;
 using System.Text;
-using SmartcatPlugin.Services;
 using System.Threading;
 using SmartcatPlugin.Constants;
 using System.Web;
@@ -18,12 +17,16 @@ namespace SmartcatPlugin.Smartcat
 {
     public class SmartcatApiClient : ISmartcatApiClient
     {
-        private static HttpClient _httpClient;
+        private readonly HttpClient _httpClient;
+        private readonly ISmartcatLoggingService _logger;
+        private readonly IAuthService _authService;
 
-        static SmartcatApiClient()
+        public SmartcatApiClient(ISmartcatLoggingService logger, IAuthService authService)
         {
             _httpClient = new HttpClient();
             _httpClient.BaseAddress = new Uri("https://ihub.smartcat.com");
+            _logger = logger;
+            _authService = authService;
         }
 
         public async Task<ApiResponse<ProjectListDto>> GetProjects(GetProjectListRequest request)
@@ -51,21 +54,6 @@ namespace SmartcatPlugin.Smartcat
             return result;
         }
 
-        public async Task<ApiResponse<GetExportIdResponse>> GetExportId(GetExportIdRequest request)
-        {
-            FillHttpClientAuthHeaders();
-            var response = await _httpClient.PostAsync("/api/v1/documents/export", CreateJsonContent(request));
-            var result = await HandleResponse<GetExportIdResponse>(response);
-            return result;
-        }
-
-        public async Task<ApiResponse<GetItemTranslationResponse>> GetItemTranslation(GetItemTranslationRequest request)
-        {
-            var response = await _httpClient.PostAsync("/api/v1/documents/export-status", CreateJsonContent(request));
-            var result = await HandleResponse<GetItemTranslationResponse>(response);
-            return result;
-        }
-
         public async Task<ApiResponse<object>> ValidateApiKeyAsync(ApiKeyDto dto)
         {
             _httpClient.DefaultRequestHeaders.Authorization =
@@ -78,8 +66,7 @@ namespace SmartcatPlugin.Smartcat
 
         public async Task<ApiResponse<ProjectIdDto>> CreateProject(CreateProjectDto dto)
         {
-            var authService = new AuthService();
-            var apiKey = authService.GetApiKey();
+            var apiKey = _authService.GetApiKey();
             dto.WorkspaceId = apiKey.WorkspaceId;
             dto.IntegrationType = "sitecore-app";
             FillHttpClientAuthHeaders();
@@ -88,18 +75,28 @@ namespace SmartcatPlugin.Smartcat
             return result;
         }
 
-        public async Task<List<ApiResponse<DocumentIdDto>>> CreateDocuments(List<DocumentDto> documentDtos)      //Todo remove this logic from client
+        public async Task<List<ApiResponse<TResponse>>> SendRequests<TRequest, TResponse>(List<TRequest> requestDtos,
+            string endpoint, HttpMethod method)
         {
-            var result = new List<ApiResponse<DocumentIdDto>>();
+            if (requestDtos == null || !requestDtos.Any())
+            {
+                throw new ArgumentException("RequestDtos parameter cant be null or empty");
+            }
+
+            FillHttpClientAuthHeaders();
+            var result = new List<ApiResponse<TResponse>>();
             var semaphore = new SemaphoreSlim(10);
 
-            var tasks = documentDtos.Select(async dto =>
+            var tasks = requestDtos.Select(async dto =>
             {
                 await semaphore.WaitAsync();
 
                 try
                 {
-                    return await SendWithRetry(dto);
+                    var request = new HttpRequestMessage(method, endpoint);
+                    var json = JsonConvert.SerializeObject(dto);
+                    request.Content = new StringContent(json, Encoding.UTF8, "application/json");
+                    return await SendRequest<TRequest, TResponse>(request);
                 }
                 finally
                 {
@@ -113,33 +110,35 @@ namespace SmartcatPlugin.Smartcat
             return result;
         }
 
-        private async Task<ApiResponse<DocumentIdDto>> SendWithRetry(DocumentDto dto)
+        private async Task<ApiResponse<TResponse>> SendRequest<TRequest, TResponse>(HttpRequestMessage request)
         {
             int maxRetries = 3;
             int delay = 1000;
 
             for (int i = 0; i < maxRetries; i++)
             {
-                var response = await _httpClient.PostAsync("/api/v1/documents", CreateJsonContent(dto));
-
+                _logger.LogInfo($"Calling smartcat API, method: {request.Method} endpoint: {request.RequestUri}," +
+                                $" requestData: {request.Content}.");
+                var response = await _httpClient.SendAsync(request);
+                
                 if (response.IsSuccessStatusCode)
                 {
-                    return await HandleResponse<DocumentIdDto>(response);
+                    return await HandleResponse<TResponse>(response);
                 }
 
-                if ((int)response.StatusCode == 429)
+                if ((int)response.StatusCode == NumberConstants.ToManyRequests)
                 {
+                    _logger.LogInfo($"Retrying API call. Attempt {i}.");
                     await Task.Delay(delay);
                     delay *= 2;
                 }
                 else
                 {
-
-                    return await HandleResponse<DocumentIdDto>(response);
+                    return await HandleResponse<TResponse>(response);
                 }
             }
 
-            return new ApiResponse<DocumentIdDto>
+            return new ApiResponse<TResponse>
             {
                 IsSuccess = false,
                 ErrorMessage = "Failed after retrying due to TooManyRequests"
@@ -154,10 +153,13 @@ namespace SmartcatPlugin.Smartcat
 
         private async Task<ApiResponse<T>> HandleResponse<T>(HttpResponseMessage response)
         {
+            _logger.LogInfo($"Smartcat API response: StatusCode = {response.StatusCode}, Content = {response.Content}");
+
             if (response.IsSuccessStatusCode)
             {
                 var content = await response.Content.ReadAsStringAsync();
                 var data = JsonConvert.DeserializeObject<T>(content);
+                
                 return new ApiResponse<T>
                 {
                     Data = data,
@@ -177,16 +179,6 @@ namespace SmartcatPlugin.Smartcat
             }
         }
 
-        private static HttpClient CreateClient()
-        {
-            var authService = new AuthService();
-            var apiKey = authService.GetApiKey();
-            var httpClient = new HttpClient();
-            httpClient.DefaultRequestHeaders.Add("Authorization",
-                "Basic " + EncodeClientIdSecretToBase64(apiKey.WorkspaceId, apiKey.ApiKey));
-            return httpClient;
-        }
-
         private static string EncodeClientIdSecretToBase64(string workspace, string apiKey)
         {
             var encoding = Encoding.UTF8;
@@ -196,8 +188,7 @@ namespace SmartcatPlugin.Smartcat
 
         private void FillHttpClientAuthHeaders()
         {
-            var authService = new AuthService();
-            var apiKey = authService.GetApiKey();
+            var apiKey = _authService.GetApiKey();
             _httpClient.DefaultRequestHeaders.Authorization =
                 new System.Net.Http.Headers.AuthenticationHeaderValue("Basic",
                     EncodeClientIdSecretToBase64(apiKey.WorkspaceId, apiKey.ApiKey));

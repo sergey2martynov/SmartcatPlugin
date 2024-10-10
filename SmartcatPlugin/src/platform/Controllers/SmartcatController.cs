@@ -6,7 +6,6 @@ using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using System.Web.Http;
-using log4net;
 using Newtonsoft.Json;
 using Sitecore.Data;
 using Sitecore.Data.Items;
@@ -15,6 +14,7 @@ using Sitecore.Globalization;
 using Sitecore.SecurityModel;
 using SmartcatPlugin.Constants;
 using SmartcatPlugin.Extensions;
+using SmartcatPlugin.Interfaces;
 using SmartcatPlugin.Models;
 using SmartcatPlugin.Models.ApiResponse;
 using SmartcatPlugin.Models.Smartcat;
@@ -33,8 +33,16 @@ namespace SmartcatPlugin.Controllers
     [RoutePrefix("smartcat")]
     public class SmartcatController : ApiController
     {
+        private readonly IItemService _itemService;
         private readonly Database _masterDb = Database.GetDatabase("master");
-        private readonly ILog _log = LogManager.GetLogger(LogNames.SmartcatApi);
+        private readonly ISmartcatLoggingService _logger;
+
+        public SmartcatController(IItemService itemService,
+            ISmartcatLoggingService logger)
+        {
+            _itemService = itemService;
+            _logger = logger;
+        }
 
         [Route("authorize")]
         [HttpPost]
@@ -72,7 +80,7 @@ namespace SmartcatPlugin.Controllers
 
             authenticateService.SaveToken(token.SmartcatAuthKey);
 
-            _log.Info("Authorization was success completed");
+            _logger.LogInfo("Authorization was success completed");
 
             return Json(ApiResponseBase.Error(HttpStatusCode.OK, "Authenticated"));
         }
@@ -105,7 +113,7 @@ namespace SmartcatPlugin.Controllers
                 Directories = rootItem.GetChildDirectories()
             };
 
-            _log.Info("SmartcatApi method \"directory-list\" was success completed");
+            _logger.LogInfo("SmartcatApi method \"directory-list\" was success completed");
             return Json(getDataDirectoriesResponse);
         }
 
@@ -144,7 +152,7 @@ namespace SmartcatPlugin.Controllers
                 Items = rootItem.GetChildPages(request.SearchQuery, _masterDb)
             };
 
-            _log.Info("SmartcatApi method \"file-list\" was success completed");
+            _logger.LogInfo("SmartcatApi method \"file-list\" was success completed");
             return Json(getDataItemsResponse);
         }
 
@@ -157,13 +165,13 @@ namespace SmartcatPlugin.Controllers
 
             if (!item.IsHasContentFields())
             {
-                _log.Error($"Item {item.Name} with {item.ID} is not Item");
+                _logger.LogError($"Item {item.Name} with {item.ID} is not Item");
                 return Json(new Dictionary<string, LocJsonContent>());
             }
 
             var result = item.GetItemContent(_masterDb, request.TargetLocales);
 
-            _log.Info("SmartcatApi method \"file-content\" was success completed");
+            _logger.LogInfo("SmartcatApi method \"file-content\" was success completed");
             return Json(new GetItemContentResponse { LocaleContent = result });
         }
 
@@ -198,14 +206,14 @@ namespace SmartcatPlugin.Controllers
                         newLanguageItem.Fields[fieldName].Value = string.Join(string.Empty, unit.Target);
                         newLanguageItem.Editing.EndEdit();
 
-                        _log.Info($"{typeof(Item)} with Id {newLanguageItem.ID}," +
-                                  $" locale {newLanguageItem.Language}," +
-                                  $" new version {newLanguageItem.Version} was created");
+                        _logger.LogInfo($"{typeof(Item)} with Id {newLanguageItem.ID}," +
+                                        $" locale {newLanguageItem.Language}," +
+                                        $" new version {newLanguageItem.Version} was created");
                     }
                 }
             }
 
-            _log.Info("SmartcatApi method \"import-translation\" was success completed");
+            _logger.LogInfo("SmartcatApi method \"import-translation\" was success completed");
             return Json(ApiResponseBase.Success);
         }
 
@@ -237,7 +245,7 @@ namespace SmartcatPlugin.Controllers
                 });
             }
 
-            _log.Info("SmartcatApi method \"parent-directories-by-id\" was success completed");
+            _logger.LogInfo("SmartcatApi method \"parent-directories-by-id\" was success completed");
             return Json(new GetParentFoldersResponse { Items = parentFolders });
         }
 
@@ -279,7 +287,7 @@ namespace SmartcatPlugin.Controllers
                 itemsData.Add(itemData);
             }
 
-            _log.Info("SmartcatApi method \"files-by-id\" was success completed");
+            _logger.LogInfo("SmartcatApi method \"files-by-id\" was success completed");
             return Json(new GetItemByIdResponse { Items = itemsData });
         }
 
@@ -330,8 +338,7 @@ namespace SmartcatPlugin.Controllers
         [HttpPost]
         public IHttpActionResult CreateTestData([FromBody] CreateTestDataDirectoryRequest request)
         {
-            var itemService = new ItemService();
-            itemService.CreateContentItem(request.RootDirectory);
+            _itemService.CreateContentItem(request.RootDirectory);
             return Json(ApiResponseBase.Success);
         }
 

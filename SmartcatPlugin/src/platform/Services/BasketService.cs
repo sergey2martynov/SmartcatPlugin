@@ -1,29 +1,32 @@
 ﻿using System;
 using Newtonsoft.Json;
 using Sitecore.Data;
-using SmartcatPlugin.Cache;
 using SmartcatPlugin.Constants;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using Sitecore.Data.Items;
 using SmartcatPlugin.Extensions;
 using SmartcatPlugin.Models.Dtos;
-using SmartcatPlugin.Models;
 using Sitecore.Globalization;
 using SmartcatPlugin.Interfaces;
-using Sitecore.Data.Validators;
 
 namespace SmartcatPlugin.Services
 {
     public class BasketService : IBasketService
     {
+        private readonly ICacheService _cacheService;
         private readonly Database _masterDb = Database.GetDatabase("master");
         private TreeNodeDto _rootNode;
+        
+        public BasketService(ICacheService cacheService)
+        {
+            _cacheService = cacheService;
+        }
 
         public ItemsTreeDto BuildSelectedItemTree()
         {
-            string cachedData = CustomCacheManager.GetCache("selectedItems");
+            var userName = Sitecore.Context.User.Name;
+            string cachedData = _cacheService.GetValue($"{userName}:{StringConstants.SelectedItems}");
             if (string.IsNullOrEmpty(cachedData))
             {
                 return new ItemsTreeDto(); // todo: exception

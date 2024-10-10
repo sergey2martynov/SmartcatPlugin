@@ -72,7 +72,7 @@
     <Content Include="App_Config\Include\Routes\PageRoutes.config" />
     <Content Include="App_Config\Include\Authentication\SmartcatAuthentication.config" />
     <Content Include="App_Config\Include\WebApiInit.config" />
-    <Content Include="App_Config\Log4net.config" />
+    <Content Include="App_Config\Include\Log4net.config" />
     <Content Include="sitecore modules\shell\Smartcat\AddItem\AddItemModal.aspx" />
     <Content Include="sitecore modules\shell\Smartcat\AddItem\styles.css" />
     <Content Include="sitecore modules\shell\Smartcat\Authorization\AuthorizationModal.aspx" />
@@ -95,7 +95,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Cache\CustomCacheManager.cs" />
+    <Compile Include="Cache\CacheService.cs" />
     <Compile Include="Cache\CustomCache.cs" />
     <Compile Include="Commands\ShowAuthorizationCommand.cs" />
     <Compile Include="Commands\ShowBasketCommand.cs" />
@@ -113,7 +113,10 @@
     <Compile Include="Extensions\TemplateSectionItemExtension.cs" />
     <Compile Include="Interfaces\IAuthService.cs" />
     <Compile Include="Interfaces\IBasketService.cs" />
+    <Compile Include="Interfaces\ICacheService.cs" />
+    <Compile Include="Interfaces\IItemService.cs" />
     <Compile Include="Interfaces\ISmartcatApiClient.cs" />
+    <Compile Include="Interfaces\ISmartcatLoggingService.cs" />
     <Compile Include="Interfaces\ITranslationService.cs" />
     <Compile Include="Models\ApiResponse\ApiResponseBase.cs" />
     <Compile Include="Models\Dtos\AddedItemsTreeDto.cs" />
@@ -149,6 +152,7 @@
     <Compile Include="Services\BasketService.cs" />
     <Compile Include="Services\ItemService.cs" />
     <Compile Include="Services\AuthService.cs" />
+    <Compile Include="Services\SmartcatLoggingService.cs" />
     <Compile Include="Services\TranslationService.cs" />
     <Compile Include="sitecore modules\shell\Smartcat\AddItem\AddItemModal.aspx.cs">
       <DependentUpon>AddItemModal.aspx</DependentUpon>

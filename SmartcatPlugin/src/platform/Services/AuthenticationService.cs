@@ -5,7 +5,7 @@ using Sitecore.SecurityModel;
 
 namespace SmartcatPlugin.Services
 {
-    public class AuthenticationService
+    public class AuthenticationService          //todo: remove it
     {
         private readonly Database _masterDb = Database.GetDatabase("master");
 

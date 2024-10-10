@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Sitecore.DependencyInjection;
 using System.Windows.Forms.Design;
+using SmartcatPlugin.Cache;
 using SmartcatPlugin.Interfaces;
 using SmartcatPlugin.Services;
 using SmartcatPlugin.Smartcat;
@@ -27,8 +28,11 @@ namespace SmartcatPlugin.Controllers
             serviceCollection.AddScoped(typeof(IBasketService), typeof(BasketService));
             serviceCollection.AddScoped(typeof(IAuthService), typeof(AuthService));
             serviceCollection.AddScoped(typeof(ITranslationService), typeof(TranslationService));
+            serviceCollection.AddScoped(typeof(IItemService), typeof(ItemService));
 
-            serviceCollection.AddScoped(typeof(ISmartcatApiClient), typeof(SmartcatApiClient));
+            serviceCollection.AddSingleton(typeof(ISmartcatApiClient), typeof(SmartcatApiClient));
+            serviceCollection.AddSingleton(typeof(ISmartcatLoggingService), typeof(SmartcatLoggingService));
+            serviceCollection.AddSingleton(typeof(ICacheService), typeof(CacheService));
         }
     }
 }

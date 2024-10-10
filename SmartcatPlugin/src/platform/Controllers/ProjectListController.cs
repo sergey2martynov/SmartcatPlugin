@@ -14,14 +14,18 @@ namespace SmartcatPlugin.Controllers
         private readonly ISmartcatApiClient _apiClient;
         private readonly IAuthService _authService;
         private readonly ITranslationService _translationService;
+        private readonly ISmartcatLoggingService _logging;
+
         public ProjectListController(ISmartcatApiClient apiClient,
             IAuthService authService,
-            ITranslationService translationService
+            ITranslationService translationService,
+            ISmartcatLoggingService logging
             )
         {
             _apiClient = apiClient;
             _authService = authService;
             _translationService = translationService;
+            _logging = logging;
         }
 
         [Route("get-projects")]
@@ -50,6 +54,7 @@ namespace SmartcatPlugin.Controllers
         [HttpGet]
         public async Task<IHttpActionResult> GetItemTranslations([FromUri] string projectId)        //todo: make retry logic
         {
+            _logging.LogInfo($"Translation process started for project with id:{projectId}");
             var workspaceId = _authService.GetWorkspaceId();
             var response = await _apiClient.GetDocumentsByProjectId(new GetDocumentsByProjectIdRequest
             {
@@ -85,7 +90,7 @@ namespace SmartcatPlugin.Controllers
             }
 
             //Todo return success & failed count
-
+            _logging.LogInfo($"Translation process ended for project with id:{projectId}");
             return Ok(exportIds);
         }
 

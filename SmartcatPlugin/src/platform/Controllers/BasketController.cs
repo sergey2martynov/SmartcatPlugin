@@ -1,16 +1,15 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http;
 using Newtonsoft.Json;
 using Sitecore.Data;
-using SmartcatPlugin.Cache;
+using SmartcatPlugin.Constants;
 using SmartcatPlugin.Extensions;
 using SmartcatPlugin.Interfaces;
 using SmartcatPlugin.Models.Dtos;
-using SmartcatPlugin.Services;
-using SmartcatPlugin.Smartcat;
 
 namespace SmartcatPlugin.Controllers
 {
@@ -18,19 +17,27 @@ namespace SmartcatPlugin.Controllers
     public class BasketController : ApiController
     {
         private readonly IBasketService _basketService;
+        private readonly ISmartcatApiClient _apiClient;
+        private readonly ICacheService _cacheService;
+        private readonly IItemService _itemService;
         private readonly Database _masterDb = Database.GetDatabase("master");
-        public BasketController(IBasketService basketService)
+
+        public BasketController(IBasketService basketService,
+            ISmartcatApiClient apiClient,
+            ICacheService cacheService,
+            IItemService itemService)
         {
             _basketService = basketService;
+            _apiClient = apiClient;
+            _cacheService = cacheService;
+            _itemService = itemService;
         }
 
         [Route("get-selected-items")]
         [HttpGet]
         public IHttpActionResult GetSelectedItems()
         {
-            var basketService = new BasketService();
-
-            var result = basketService.BuildSelectedItemTree();
+            var result = _basketService.BuildSelectedItemTree();
 
             return Json(result);
         }
@@ -49,16 +56,15 @@ namespace SmartcatPlugin.Controllers
         [HttpGet]
         public IHttpActionResult GetValidatingInfo()
         {
-            string cachedData = CustomCacheManager.GetCache("selectedItems");
+            var userName = Sitecore.Context.User.Name;
+            string cachedData = _cacheService.GetValue($"{userName}:{StringConstants.SelectedItems}");
             if (string.IsNullOrEmpty(cachedData))
             {
                 return Ok(new List<string>()); // todo: exception
             }
 
             var itemIds = JsonConvert.DeserializeObject<List<string>>(cachedData);
-            var itemService = new ItemService();
-
-            var invalidItemNames = itemService.GetInvalidItemsNames(itemIds);
+            var invalidItemNames = _itemService.GetInvalidItemsNames(itemIds);
 
             var validatingInfo = new ValidatingInfoDto
             {
@@ -78,8 +84,10 @@ namespace SmartcatPlugin.Controllers
             {
                 return BadRequest("Fill required fields");
             }
+
+            var userName = Sitecore.Context.User.Name;
             var projectInfo = JsonConvert.SerializeObject(dto);
-            CustomCacheManager.SetCache("projectInfo", projectInfo);
+            _cacheService.SetValue($"{userName}:{StringConstants.ProjectInfo}", projectInfo);
 
             return Ok();
         }
@@ -88,10 +96,11 @@ namespace SmartcatPlugin.Controllers
         [HttpGet]
         public IHttpActionResult GetSavedProjectInfo()
         {
-            string cachedData = CustomCacheManager.GetCache("projectInfo");
+            var userName = Sitecore.Context.User.Name;
+            string cachedData = _cacheService.GetValue($"{userName}:{StringConstants.ProjectInfo}");
             if (string.IsNullOrEmpty(cachedData))
             {
-                return Ok(new List<string>()); // todo: exception
+                return BadRequest("Cash was now found");
             }
 
             var projectInfo = JsonConvert.DeserializeObject<SaveProjectInfoDto>(cachedData);
@@ -122,13 +131,10 @@ namespace SmartcatPlugin.Controllers
         [HttpPost]
         public async Task<IHttpActionResult> CreateSmartcatProject([FromBody] CreateProjectDto dto)
         {
-            var user = Sitecore.Context.User.Name;              //todo: cached data by user name
-            string cachedData = CustomCacheManager.GetCache("selectedItems");
+            var userName = Sitecore.Context.User.Name;
+            string cachedData = _cacheService.GetValue($"{userName}:{StringConstants.SelectedItems}");
             var selectedItemIds = JsonConvert.DeserializeObject<List<string>>(cachedData);
-            var items = _basketService.GetItemsByIds(_masterDb, selectedItemIds, dto.SourceLanguage);
-
-            var client = new SmartcatApiClient();
-            var response = await client.CreateProject(dto);
+            var response = await _apiClient.CreateProject(dto);
 
             if (!response.IsSuccess)
             {
@@ -136,6 +142,7 @@ namespace SmartcatPlugin.Controllers
             }
 
             var documentDtos = new List<DocumentDto>();
+            var items = _basketService.GetItemsByIds(_masterDb, selectedItemIds, dto.SourceLanguage);
 
             foreach (var item in items)
             {
@@ -148,12 +155,15 @@ namespace SmartcatPlugin.Controllers
                     Title = item.Name,
                     Content = itemContent.Values.First()
                 };
+
                 documentDtos.Add(documentDto);
             }
 
-            var results = await client.CreateDocuments(documentDtos);
+            var results = await _apiClient
+                .SendRequests<DocumentDto, DocumentIdDto>(documentDtos, "/api/v1/documents" ,
+                    HttpMethod.Post).ConfigureAwait(false);
 
-            if (results.Any(r => !r.IsSuccess))
+            if (results.Exists(r => !r.IsSuccess))
             {
                 var failedDocumentCount = results.Count(r => !r.IsSuccess);
                 return BadRequest($"{failedDocumentCount}th document was failed");

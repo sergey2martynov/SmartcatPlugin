@@ -3,30 +3,37 @@ using System.Web.Http;
 using Sitecore.Data;
 using Sitecore.SecurityModel;
 using SmartcatPlugin.Constants;
+using SmartcatPlugin.Interfaces;
 using SmartcatPlugin.Models.Dtos;
-using SmartcatPlugin.Services;
-using SmartcatPlugin.Smartcat;
 
 namespace SmartcatPlugin.Controllers
 {
     [RoutePrefix("api/auth")]
     public class AuthController : ApiController
     {
+        private readonly ISmartcatApiClient _apiClient;
+        private readonly IAuthService _authService;
         private readonly Database _masterDb = Database.GetDatabase("master");
+
+        public AuthController(ISmartcatApiClient apiClient,
+            IAuthService authService)
+        {
+            _apiClient = apiClient;
+            _authService = authService;
+        }
 
         [Route("save-apikey")]
         [HttpPost]
         public async Task<IHttpActionResult> SaveCredentials(ApiKeyDto dto)
         {
-            var client = new SmartcatApiClient();
-            var result = await client.ValidateApiKeyAsync(dto);
+            var result = await _apiClient.ValidateApiKeyAsync(dto);
 
             if (!result.IsSuccess)
             {
                 return BadRequest("Authorization was failed");
             }
-            var authService = new AuthService();
-            var apiKeyItem = authService.GetApiKeyItem(_masterDb);
+
+            var apiKeyItem = _authService.GetApiKeyItem(_masterDb);
 
             using (new SecurityDisabler())
             {

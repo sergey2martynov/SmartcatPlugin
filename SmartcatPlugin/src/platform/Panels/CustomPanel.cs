@@ -1,22 +1,27 @@
 ﻿using System.Collections.Generic;
 using System.Web.UI;
+using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using Sitecore.Data.Items;
+using Sitecore.DependencyInjection;
 using Sitecore.Shell.Framework.Commands;
 using Sitecore.Shell.Web.UI.WebControls;
 using Sitecore.Web.UI.WebControls.Ribbons;
 using SmartcatPlugin.Cache;
+using SmartcatPlugin.Interfaces;
 
 namespace SmartcatPlugin.Panels
 {
     public class CustomPanel : RibbonPanel
     {
+        private readonly ICacheService _cacheService = ServiceLocator.ServiceProvider.GetService<ICacheService>();
+
         public override void Render(HtmlTextWriter output,
                                     Ribbon ribbon,
                                     Item button,
                                     CommandContext context)
         {
-            string cachedData = CustomCacheManager.GetCache("selectedItems");
+            string cachedData = _cacheService.GetValue("selectedItems");
 
             if (cachedData == null)
             {

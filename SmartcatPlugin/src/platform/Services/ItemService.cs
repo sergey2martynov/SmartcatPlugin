@@ -3,7 +3,6 @@ using System.Linq;
 using Newtonsoft.Json;
 using Sitecore.Data;
 using Sitecore.Data.Items;
-using SmartcatPlugin.Cache;
 using SmartcatPlugin.Constants;
 using SmartcatPlugin.Extensions;
 using SmartcatPlugin.Models.Dtos;
@@ -12,18 +11,26 @@ using SmartcatPlugin.Models.Smartcat.Testing;
 using Sitecore.Globalization;
 using Sitecore.Data.Validators;
 using Sitecore.Data.Validators.FieldValidators;
+using SmartcatPlugin.Interfaces;
 
 namespace SmartcatPlugin.Services
 {
-    public class ItemService
+    public class ItemService : IItemService
     {
+        private readonly ICacheService _cacheService;
         private readonly Database _masterDb = Database.GetDatabase("master");
         private readonly Database _webDb = Database.GetDatabase("web");
+
+        public ItemService(ICacheService cacheService)
+        {
+            _cacheService = cacheService;
+        }
 
         public AddedItemsTreeDto GetContentEditorItemsTree()
         {
             var rootItem = _masterDb.GetItem("/sitecore/content");
-            string cachedData = CustomCacheManager.GetCache("selectedItems");
+            var userName = Sitecore.Context.User.Name;
+            string cachedData = _cacheService.GetValue($"{userName}:{StringConstants.SelectedItems}");
             var selectedItemIds = cachedData == null ? new List<string>()
                 : JsonConvert.DeserializeObject<List<string>>(cachedData);
 

@@ -1,4 +1,6 @@
-﻿using System.Web.Http;
+﻿using Microsoft.Extensions.DependencyInjection;
+using SmartcatPlugin.Interfaces;
+using System.Web.Http;
 
 namespace SmartcatPlugin
 {
@@ -6,7 +8,8 @@ namespace SmartcatPlugin
     {
         public static void Register(HttpConfiguration config)
         {
-            config.Filters.Add(new CustomExceptionFilter());
+            var logger = Sitecore.DependencyInjection.ServiceLocator.ServiceProvider.GetService<ISmartcatLoggingService>();
+            config.Filters.Add(new CustomExceptionFilter(logger));
         }
     }
 }

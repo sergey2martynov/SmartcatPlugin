@@ -6,13 +6,15 @@
         {
 
         }
-        public new void SetString(string key, string value)
+
+        public void SetValue(string key, string value)
         {
-            base.SetString(key, value);
+            SetString(key, value);
         }
-        public new string GetString(string key)
+
+        public string GetValue(string key)
         {
-            return base.GetString(key);
+            return GetString(key);
         }
     }
 }
