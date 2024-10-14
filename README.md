@@ -1,21 +1,21 @@
-#Plugin installation
+# Plugin installation
 
+1. Download latest release file
+2. Desktop ->
+3. Development Tools ->
+4. Instalation Wizard -> 
+5. Upload Package -> 
+6. Choose file ->
+7. OverWrite existing files - check ->
+8. Choose package -> 
+9. Next -> 
+10. Install ->
+11. (if it no first installation) overwrite - yes to all ->
+12. (if it no first installation) for items overWrite - apply to all -> 
+13. Restart the Sitecore client - check
+14. Close
 
-1. Desktop ->
-2. Development Tools ->
-3. Instalation Wizard -> 
-4. Upload Package -> 
-5. Choose file ->
-6. OverWrite existing files - check ->
-7. Choose package -> 
-8. Next -> 
-9. Install ->
-10. (if it no first installation) overwrite - yes to all ->
-11. (if it no first installation) for items overWrite - apply to all -> 
-12. Restart the Sitecore client - check
-13. Close
-
-#Установка sitecore
+# Установка sitecore
 Ссылка на туториал по установке https://dev.to/esdanielgomez/install-sitecore-10-step-by-step-using-sia-2f2j 
 
 Локальная базу в mssql нужно сделать с аутентификацией по логину и паролю, юзер sa 
