@@ -12,6 +12,7 @@ namespace SmartcatPlugin.Interfaces
         Task<ApiResponse<ProjectListDto>> GetProjects(GetProjectListRequest request);
         Task<ApiResponse<object>> ValidateApiKeyAsync(ApiKeyDto dto);
         Task<ApiResponse<ProjectIdDto>> CreateProject(CreateProjectDto dto);
+        Task<ApiResponse<GetItemTranslationResponse>> GetItemTranslation(GetItemTranslationRequest request);
         Task<ApiResponse<GetDocumentsByProjectIdResponse>> GetDocumentsByProjectId(
             GetDocumentsByProjectIdRequest request);
 

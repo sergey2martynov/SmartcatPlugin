@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Sitecore.Data;
 using Sitecore.Globalization;
 using Sitecore.SecurityModel;
+using SmartcatPlugin.Constants;
 using SmartcatPlugin.Interfaces;
 using SmartcatPlugin.Models;
 using SmartcatPlugin.Models.ApiResponse;
@@ -17,6 +18,7 @@ namespace SmartcatPlugin.Services
     {
         private readonly Database _masterDb = Database.GetDatabase("master");
         private readonly ISmartcatApiClient _apiClient;
+
         public TranslationService(ISmartcatApiClient apiClient
             )
         {
@@ -40,19 +42,56 @@ namespace SmartcatPlugin.Services
             return responses;
         }
 
-        public async Task<List<ApiResponse<GetItemTranslationResponse>>> GetTranslatedContent(List<string> exportIds,
-            string workspaceId)
+        public async Task<List<ApiResponse<GetItemTranslationResponse>>> GetTranslatedContent(List<string> exportIds, string workspaceId)
         {
-            var requests = exportIds.Select(exportId => 
-                new GetItemTranslationRequest
-                {
-                    ExportId = exportId, 
-                    WorkspaceId = workspaceId
-                }).ToList();
+            if (exportIds == null || !exportIds.Any())
+            {
+                throw new ArgumentException("ExportIds parameter cant be null or empty");
+            }
 
-            var responses = 
-                await _apiClient.SendRequests<GetItemTranslationRequest, GetItemTranslationResponse>(requests,
-                "/api/v1/documents/export-status", HttpMethod.Post);
+            var responses = new List<ApiResponse<GetItemTranslationResponse>>();
+
+            foreach (var exportId in exportIds)
+            {
+                var request = new GetItemTranslationRequest
+                {
+                    ExportId = exportId,
+                    WorkspaceId = workspaceId
+                };
+                
+                int maxRetries = 3;
+                int delay = 2000;
+
+                for (int i = 0; i < maxRetries; i++)
+                {
+                    var response = await _apiClient.GetItemTranslation(request);
+
+                    if (response.IsSuccess && response.Data.Content == null)
+                    {
+                        await Task.Delay(delay);
+                        delay *= 2;
+                        continue;
+                    }
+
+                    if ((int)response.StatusCode == NumberConstants.ToManyRequests)
+                    {
+                        await Task.Delay(delay);
+                        delay *= 2;
+                        continue;
+                    }
+
+                    if (!response.IsSuccess)
+                    {
+                        await Task.Delay(delay);
+                        delay *= 2;
+                        continue;
+                    }
+                        
+                    responses.Add(response);
+                    break;
+
+                }
+            }
 
             return responses;
         }
@@ -66,7 +105,7 @@ namespace SmartcatPlugin.Services
             }
 
             Language newLanguage = Language.Parse(content.Properties.TargetLanguage);
-            var newVersionItemIds = new List<ID>();  // What is This?
+            var newVersionItemIds = new List<ID>();
             foreach (var unit in content.Units)
             {
                 var fieldName = unit.Key;
@@ -78,7 +117,7 @@ namespace SmartcatPlugin.Services
 
                 using (new SecurityDisabler())
                 {
-                    if (languageVersionExists && !newVersionItemIds.Contains(newLanguageItem.ID))  // What is This?
+                    if (languageVersionExists && !newVersionItemIds.Contains(newLanguageItem.ID))
                     {
                         newLanguageItem = newLanguageItem.Versions.AddVersion();
                     }

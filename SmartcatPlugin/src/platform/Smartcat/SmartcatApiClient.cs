@@ -1,7 +1,9 @@
 ﻿using System.Net.Http;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using SmartcatPlugin.Models.ApiResponse;
@@ -75,6 +77,13 @@ namespace SmartcatPlugin.Smartcat
             return result;
         }
 
+        public async Task<ApiResponse<GetItemTranslationResponse>> GetItemTranslation(GetItemTranslationRequest request)
+        {
+            var response = await _httpClient.PostAsync("/api/v1/documents/export-status", CreateJsonContent(request));
+            var result = await HandleResponse<GetItemTranslationResponse>(response);
+            return result;
+        }
+
         public async Task<List<ApiResponse<TResponse>>> SendRequests<TRequest, TResponse>(List<TRequest> requestDtos,
             string endpoint, HttpMethod method)
         {
@@ -123,7 +132,8 @@ namespace SmartcatPlugin.Smartcat
                 
                 if (response.IsSuccessStatusCode)
                 {
-                    return await HandleResponse<TResponse>(response);
+                    var successResult = await HandleResponse<TResponse>(response);
+                        return successResult;
                 }
 
                 if ((int)response.StatusCode == NumberConstants.ToManyRequests)
@@ -159,7 +169,6 @@ namespace SmartcatPlugin.Smartcat
             {
                 var content = await response.Content.ReadAsStringAsync();
                 var data = JsonConvert.DeserializeObject<T>(content);
-                
                 return new ApiResponse<T>
                 {
                     Data = data,

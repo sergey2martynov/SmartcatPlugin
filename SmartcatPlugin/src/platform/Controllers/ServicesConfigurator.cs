@@ -25,6 +25,9 @@ namespace SmartcatPlugin.Controllers
             serviceCollection.Replace(ServiceDescriptor.Scoped(typeof(ProjectListController),
                 typeof(ProjectListController)));
 
+            serviceCollection.Replace(ServiceDescriptor.Scoped(typeof(AuthController),
+                typeof(AuthController)));
+
             serviceCollection.AddScoped(typeof(IBasketService), typeof(BasketService));
             serviceCollection.AddScoped(typeof(IAuthService), typeof(AuthService));
             serviceCollection.AddScoped(typeof(ITranslationService), typeof(TranslationService));

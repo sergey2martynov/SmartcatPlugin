@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Http;
@@ -52,7 +53,7 @@ namespace SmartcatPlugin.Controllers
 
         [Route("get-item-translations")]
         [HttpGet]
-        public async Task<IHttpActionResult> GetItemTranslations([FromUri] string projectId)        //todo: make retry logic
+        public async Task<IHttpActionResult> GetItemTranslations([FromUri] string projectId)
         {
             _logging.LogInfo($"Translation process started for project with id:{projectId}");
             var workspaceId = _authService.GetWorkspaceId();
@@ -63,7 +64,7 @@ namespace SmartcatPlugin.Controllers
             });
 
             var documentIds = response.Data.Documents.Select(d => d.Id).ToList();
-            var getExportIdsResponses = 
+            var getExportIdsResponses =
                 await _translationService.GetExportIds(projectId, documentIds, workspaceId).ConfigureAwait(false);
 
             if (!getExportIdsResponses.All(e => e.IsSuccess))
@@ -72,12 +73,14 @@ namespace SmartcatPlugin.Controllers
             }
 
             var exportIds = getExportIdsResponses.Select(r => r.Data.ExportId).ToList();
-            var getTranslatedContentResponses = 
+
+            await Task.Delay(5000);
+            var getTranslatedContentResponses =
                 await _translationService.GetTranslatedContent(exportIds, workspaceId).ConfigureAwait(false);
 
             if (!getTranslatedContentResponses.All(e => e.IsSuccess))
             {
-                getTranslatedContentResponses = 
+                getTranslatedContentResponses =
                     getTranslatedContentResponses.Where(e => e.IsSuccess).ToList();
             }
 
