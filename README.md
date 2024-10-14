@@ -1,6 +1,6 @@
 # Plugin installation
 
-1. Download latest release file
+1. Download latest release file .zip
 2. Desktop ->
 3. Development Tools ->
 4. Instalation Wizard -> 
