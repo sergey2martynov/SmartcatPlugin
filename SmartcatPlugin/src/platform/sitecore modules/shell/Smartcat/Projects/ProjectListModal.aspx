@@ -109,7 +109,7 @@
                     axios.get('/api/project/get-item-translations?projectId=' + project.id)
                         .then(response => {
                             console.log(response);
-                            //this.projects = response.data.Data.projects;
+                            alert("Success: " + response.data);
                             window.parent.$('.ui-dialog-content:visible').dialog('close');
                         })
                         .catch(error => {

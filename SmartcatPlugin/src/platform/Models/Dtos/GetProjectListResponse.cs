@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+﻿using System.Collections.Generic;
 using Newtonsoft.Json;
+using SmartcatPlugin.Models.SmartcatApi.Base;
 
 namespace SmartcatPlugin.Models.Dtos
 {
-    public class ProjectListDto
+    public class GetProjectListResponse : ResponseData
     {
         [JsonProperty("projects")]
         public List<GetProjectDto> Projects { get; set; }

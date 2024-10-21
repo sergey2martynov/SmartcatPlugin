@@ -132,28 +132,28 @@ namespace SmartcatPlugin.Controllers
 
         [Route("save-project")]
         [HttpPost]
-        public async Task<IHttpActionResult> CreateSmartcatProject([FromBody] CreateProjectDto dto)
+        public async Task<IHttpActionResult> CreateSmartcatProject([FromBody] CreateProjectRequest request)
         {
             var userName = Sitecore.Context.User.Name;
             string cachedData = _cacheService.GetValue($"{userName}:{StringConstants.SelectedItems}");
             var selectedItemIds = JsonConvert.DeserializeObject<List<string>>(cachedData);
-            var response = await _apiClient.CreateProject(dto);
+            var response = await _apiClient.CreateProject(request);
 
             if (!response.IsSuccess)
             {
                 return BadRequest("Project creating failed");
             }
 
-            var documentDtos = new List<DocumentDto>();
-            var items = _basketService.GetItemsByIds(_masterDb, selectedItemIds, dto.SourceLanguage);
+            var documentDtos = new List<CreateDocumentRequest>();
+            var items = _basketService.GetItemsByIds(_masterDb, selectedItemIds, request.SourceLanguage);
 
             foreach (var item in items)
             {
-                var itemContent = item.GetItemContent(_masterDb, new [] { dto.TargetLanguage });
+                var itemContent = item.GetItemContent(_masterDb, new [] { request.TargetLanguage });
 
-                var documentDto = new DocumentDto
+                var documentDto = new CreateDocumentRequest
                 {
-                    WorkSpaceId = dto.WorkspaceId,
+                    WorkSpaceId = request.WorkspaceId,
                     ProjectId = response.Data.ProjectId,
                     Title = item.Name,
                     Content = itemContent.Values.First()
@@ -163,7 +163,7 @@ namespace SmartcatPlugin.Controllers
             }
 
             var results = await _apiClient
-                .SendRequests<DocumentDto, DocumentIdDto>(documentDtos, "/api/v1/documents" ,
+                .SendRequests<CreateDocumentRequest, CreateDocumentResponse>(documentDtos, "/api/v1/documents" ,
                     HttpMethod.Post).ConfigureAwait(false);
 
             if (results.Exists(r => !r.IsSuccess))

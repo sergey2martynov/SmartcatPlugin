@@ -2,8 +2,8 @@
 
 namespace SmartcatPlugin.Models.Dtos
 {
-    public class CreateProjectResponse : ResponseData
+    public class CreateDocumentResponse : ResponseData
     {
-        public string ProjectId { get; set; }
+        public string DocumentId { get; set; }
     }
 }

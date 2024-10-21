@@ -2,7 +2,7 @@
 
 namespace SmartcatPlugin.Models.Dtos
 {
-    public class CreateProjectDto
+    public class CreateProjectRequest
     {
         public string IntegrationType { get; set; }
         public string WorkspaceId { get; set; }

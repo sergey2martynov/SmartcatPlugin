@@ -2,8 +2,7 @@
 
 namespace SmartcatPlugin.Models.SmartcatApi
 {
-    public class GetExportIdResponse : ResponseData
+    public class SuccessResponse : ResponseData
     {
-        public string ExportId { get; set; }
     }
 }

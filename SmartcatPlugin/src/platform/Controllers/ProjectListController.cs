@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
 using SmartcatPlugin.Interfaces;
@@ -63,23 +64,30 @@ namespace SmartcatPlugin.Controllers
                 ProjectId = projectId
             });
 
+            if (!response.IsSuccess)
+            {
+                throw new HttpRequestException($"{response.ErrorMessage}");
+            }
+
             var documentIds = response.Data.Documents.Select(d => d.Id).ToList();
             var getExportIdsResponses =
                 await _translationService.GetExportIds(projectId, documentIds, workspaceId).ConfigureAwait(false);
 
+            int failedDocuments = 0;
             if (!getExportIdsResponses.All(e => e.IsSuccess))
             {
+                failedDocuments = getExportIdsResponses.Count(e => !e.IsSuccess);
                 getExportIdsResponses = getExportIdsResponses.Where(e => e.IsSuccess).ToList();
             }
 
             var exportIds = getExportIdsResponses.Select(r => r.Data.ExportId).ToList();
 
-            await Task.Delay(5000);
             var getTranslatedContentResponses =
                 await _translationService.GetTranslatedContent(exportIds, workspaceId).ConfigureAwait(false);
 
             if (!getTranslatedContentResponses.All(e => e.IsSuccess))
             {
+                failedDocuments += getTranslatedContentResponses.Count(r => !r.IsSuccess);
                 getTranslatedContentResponses =
                     getTranslatedContentResponses.Where(e => e.IsSuccess).ToList();
             }
@@ -92,10 +100,11 @@ namespace SmartcatPlugin.Controllers
                 _translationService.AddNewItemLanguageVersions(locJson);
             }
 
-            //Todo return success & failed count
-            _logging.LogInfo($"Translation process ended for project with id:{projectId}");
-            return Ok(exportIds);
+            var notification = $"Translation process ended for project with\nid:{projectId},\n" +
+                               $" documents success:{documentIds.Count - failedDocuments},\n" +
+                               $" failed{failedDocuments}";
+            _logging.LogInfo(notification);
+            return Ok(notification);
         }
-
     }
 }

@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
+using IdentityModel.Client;
 using Sitecore.Data;
 using Sitecore.Globalization;
 using Sitecore.SecurityModel;
@@ -10,7 +12,9 @@ using SmartcatPlugin.Constants;
 using SmartcatPlugin.Interfaces;
 using SmartcatPlugin.Models;
 using SmartcatPlugin.Models.ApiResponse;
+using SmartcatPlugin.Models.Dtos;
 using SmartcatPlugin.Models.SmartcatApi;
+using static Sitecore.Shell.Applications.Globalization.ExportLanguage.ExportLanguageForm;
 
 namespace SmartcatPlugin.Services
 {
@@ -49,51 +53,54 @@ namespace SmartcatPlugin.Services
                 throw new ArgumentException("ExportIds parameter cant be null or empty");
             }
 
-            var responses = new List<ApiResponse<GetItemTranslationResponse>>();
+            var requests = exportIds.Select(exportId =>
+                new GetItemTranslationRequest
+                {
+                    WorkspaceId = workspaceId,
+                    ExportId = exportId
+                }).ToList();
 
-            foreach (var exportId in exportIds)
+            var results = await _apiClient
+                .SendRequests<GetItemTranslationRequest, GetItemTranslationResponse>(requests, "/api/v1/documents/export-status",
+                    HttpMethod.Post).ConfigureAwait(false);
+
+            return results;
+        }
+
+        public async Task<ApiResponse<GetItemTranslationResponse>> GetItemTranslation(GetItemTranslationRequest request)
+        {
+            int maxRetries = 3;
+            int delay = 2000;
+
+            for (int i = 0; i < maxRetries; i++)
             {
-                var request = new GetItemTranslationRequest
+                var response = await _apiClient.GetItemTranslation(request);
+
+                if (response.IsSuccess && response.Data.Content == null)
                 {
-                    ExportId = exportId,
-                    WorkspaceId = workspaceId
-                };
-                
-                int maxRetries = 3;
-                int delay = 2000;
-
-                for (int i = 0; i < maxRetries; i++)
-                {
-                    var response = await _apiClient.GetItemTranslation(request);
-
-                    if (response.IsSuccess && response.Data.Content == null)
-                    {
-                        await Task.Delay(delay);
-                        delay *= 2;
-                        continue;
-                    }
-
-                    if ((int)response.StatusCode == NumberConstants.ToManyRequests)
-                    {
-                        await Task.Delay(delay);
-                        delay *= 2;
-                        continue;
-                    }
-
-                    if (!response.IsSuccess)
-                    {
-                        await Task.Delay(delay);
-                        delay *= 2;
-                        continue;
-                    }
-                        
-                    responses.Add(response);
-                    break;
-
+                    await Task.Delay(delay);
+                    delay *= 2;
+                    continue;
                 }
+
+                if ((int)response.StatusCode == NumberConstants.ToManyRequests)
+                {
+                    await Task.Delay(delay);
+                    delay *= 2;
+                    continue;
+                }
+
+                if (!response.IsSuccess)
+                {
+                    await Task.Delay(delay);
+                    delay *= 2;
+                    continue;
+                }
+
+                return response;
             }
 
-            return responses;
+            return new ApiResponse<GetItemTranslationResponse> { IsSuccess = false, ErrorMessage = "Could not get response" };
         }
 
         public void AddNewItemLanguageVersions(LocJsonContent content)      //todo: make retry logic

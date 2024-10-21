@@ -5,21 +5,21 @@ namespace SmartcatPlugin.Cache
 {
     public class CacheService : ICacheService
     {
-        private readonly CustomCache Cache;
+        private readonly CustomCache _cache;
 
         public CacheService()
         {
-            Cache = new CustomCache("OwnCustomCache", StringUtil.ParseSizeString("500KB"));
+            _cache = new CustomCache("OwnCustomCache", StringUtil.ParseSizeString("500KB"));
         }
 
         public string GetValue(string key)
         {
-            return Cache.GetValue(key);
+            return _cache.GetValue(key);
         }
 
         public void SetValue(string key, string value)
         {
-            Cache.SetValue(key, value);
+            _cache.SetValue(key, value);
         }
     }
 }

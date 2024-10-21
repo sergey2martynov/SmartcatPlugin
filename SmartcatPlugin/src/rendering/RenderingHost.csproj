@@ -17,6 +17,7 @@
     <PackageReference Include="Sitecore.AspNet.Tracking.VisitorIdentification" />
     <PackageReference Include="Sitecore.LayoutService.Client" />
     <PackageReference Include="Sitecore.AspNet.RenderingEngine" />
+    <PackageReference Include="Sitecore.XmCloud.ExperienceEditor.Speak"/>
   </ItemGroup>
 
   <ItemGroup>

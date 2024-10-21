@@ -63,16 +63,14 @@
     <PackageReference Include="Sitecore.LayoutService" />
     <PackageReference Include="Sitecore.Assemblies.Platform" />
     <PackageReference Include="Sitecore.Assemblies.SitecoreHeadlessServicesServer" />
+    <PackageReference Include="Sitecore.XmCloud.ExperienceEditor.Speak" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="App_Config\Include\Sitecore.LoadBalancing.config" />
     <Content Include="App_Config\Include\Sitecore.Media.config" />
     <Content Include="App_Config\Include\SmartcatPlugin.config" />
-    <Content Include="App_Config\Include\Commands.config" />
-    <Content Include="App_Config\Include\Routes\PageRoutes.config" />
-    <Content Include="App_Config\Include\Authentication\SmartcatAuthentication.config" />
-    <Content Include="App_Config\Include\WebApiInit.config" />
-    <Content Include="App_Config\Include\Log4net.config" />
+    <Content Include="sitecore modules\shell\Smartcat\scripts\showBasketExperienceEditor.js" />
+    <Content Include="sitecore modules\shell\Smartcat\scripts\showAddItemExperienceEditor.js" />
     <Content Include="sitecore modules\shell\Smartcat\AddItem\AddItemModal.aspx" />
     <Content Include="sitecore modules\shell\Smartcat\AddItem\styles.css" />
     <Content Include="sitecore modules\shell\Smartcat\Authorization\AuthorizationModal.aspx" />
@@ -82,6 +80,8 @@
     <Content Include="sitecore modules\shell\Smartcat\closeButton.css" />
     <Content Include="sitecore modules\shell\Smartcat\onload.js" />
     <Content Include="sitecore modules\shell\Smartcat\Projects\ProjectListModal.aspx" />
+    <Content Include="App_Config\Include\Smartcat.config" />
+    <Content Include="sitecore modules\shell\Smartcat\scripts\showProjectsExperienceEditor.js" />
     <None Include="SmartcatLocales.json" />
     <None Include="Platform.wpp.targets" />
     <None Include="Properties\PublishProfiles\Local.pubxml" />
@@ -97,9 +97,13 @@
   <ItemGroup>
     <Compile Include="Cache\CacheService.cs" />
     <Compile Include="Cache\CustomCache.cs" />
+    <Compile Include="Commands\ShowAddItemExperienceEditor.cs" />
     <Compile Include="Commands\ShowAuthorizationCommand.cs" />
+    <Compile Include="Commands\ShowAuthorizationExperienceEditor.cs" />
     <Compile Include="Commands\ShowBasketCommand.cs" />
+    <Compile Include="Commands\ShowBasketExperienceEditor.cs" />
     <Compile Include="Commands\ShowProjectsCommand.cs" />
+    <Compile Include="Commands\ShowProjectsExperienceEditor.cs" />
     <Compile Include="Constants\ConstantItemFieldTypes.cs" />
     <Compile Include="Constants\NumberConstants.cs" />
     <Compile Include="Controllers\AuthController.cs" />
@@ -121,14 +125,16 @@
     <Compile Include="Models\ApiResponse\ApiResponseBase.cs" />
     <Compile Include="Models\Dtos\AddedItemsTreeDto.cs" />
     <Compile Include="Models\Dtos\ApiKeyDto.cs" />
-    <Compile Include="Models\Dtos\DocumentDto.cs" />
-    <Compile Include="Models\Dtos\DocumentIdDto.cs" />
+    <Compile Include="Models\Dtos\CreateDocumentRequest.cs" />
+    <Compile Include="Models\Dtos\CreateDocumentResponse.cs" />
     <Compile Include="Models\Dtos\GetProjectDto.cs" />
-    <Compile Include="Models\Dtos\GetProjectListRequest.cs" />
+    <Compile Include="Models\SmartcatApi\Base\ResponseData.cs" />
+    <Compile Include="Models\SmartcatApi\ErrorResponse.cs" />
+    <Compile Include="Models\SmartcatApi\GetProjectListRequest.cs" />
     <Compile Include="Models\Dtos\LanguageDto.cs" />
-    <Compile Include="Models\Dtos\CreateProjectDto.cs" />
+    <Compile Include="Models\Dtos\CreateProjectRequest.cs" />
     <Compile Include="Models\Dtos\ProjectIdDto .cs" />
-    <Compile Include="Models\Dtos\ProjectListDto.cs" />
+    <Compile Include="Models\Dtos\GetProjectListResponse.cs" />
     <Compile Include="Models\Dtos\SaveItemIdsToCacheDto.cs" />
     <Compile Include="Models\Dtos\SaveProjectInfoDto.cs" />
     <Compile Include="Models\Dtos\TranslationLanguagesDto.cs" />
@@ -148,6 +154,8 @@
     <Compile Include="Models\SmartcatApi\GetItemTranslationRequest.cs" />
     <Compile Include="Models\SmartcatApi\GetItemTranslationResponse.cs" />
     <Compile Include="Models\SmartcatApi\SmartcatDocument.cs" />
+    <Compile Include="Models\SmartcatApi\SuccessResponse.cs" />
+    <Compile Include="Pipelines\ShowAddItemPipeline.cs" />
     <Compile Include="Services\AuthenticationService.cs" />
     <Compile Include="Services\BasketService.cs" />
     <Compile Include="Services\ItemService.cs" />
@@ -182,6 +190,7 @@
     <Compile Include="sitecore modules\shell\Smartcat\Projects\ProjectListModal.aspx.designer.cs">
       <DependentUpon>ProjectListModal.aspx</DependentUpon>
     </Compile>
+    <Content Include="sitecore modules\shell\Smartcat\scripts\showAuthorizationExperienceEditor.js" />
     <Compile Include="SmartcatPluginClient.cs" />
     <Compile Include="Commands\ShowAddItemCommand.cs" />
     <Compile Include="Constants\ConstantsIds.cs" />

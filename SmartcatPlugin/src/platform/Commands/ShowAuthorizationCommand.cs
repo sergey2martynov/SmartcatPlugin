@@ -7,8 +7,8 @@ namespace SmartcatPlugin.Commands
     {
         public override void Execute(CommandContext context)
         {
-            SheerResponse.ShowModalDialog(
-                "/sitecore modules/shell/Smartcat/Authorization/AuthorizationModal.aspx", "600", "300", "Authorization", false);
+            SheerResponse.ShowModalDialog("/sitecore modules/shell/Smartcat/Authorization/AuthorizationModal.aspx",
+                "600", "300", "Authorization", false);
         }
 
         public override CommandState QueryState(CommandContext context)

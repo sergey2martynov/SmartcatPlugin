@@ -2,7 +2,7 @@
 
 namespace SmartcatPlugin.Models.Dtos
 {
-    public class DocumentDto
+    public class CreateDocumentRequest
     {
         public string WorkSpaceId { get; set; }
         public string Title { get; set; }

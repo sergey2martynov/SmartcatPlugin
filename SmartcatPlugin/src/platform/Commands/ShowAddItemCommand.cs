@@ -8,7 +8,7 @@ namespace SmartcatPlugin.Commands
         public override void Execute(CommandContext context)
         {
             SheerResponse.ShowModalDialog(
-                "/sitecore modules/shell/Smartcat/AddItem/AddItemModal.aspx", "900", "600", "AddItem", false);
+                "/sitecore modules/shell/Smartcat/AddItem/AddItemModal.aspx", "900", "600", "ShowSmartcatModalPipeline", false);
         }
 
         public override CommandState QueryState(CommandContext context)

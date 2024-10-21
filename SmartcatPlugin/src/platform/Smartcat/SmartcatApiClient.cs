@@ -1,9 +1,7 @@
 ﻿using System.Net.Http;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using SmartcatPlugin.Models.ApiResponse;
@@ -14,6 +12,7 @@ using SmartcatPlugin.Constants;
 using System.Web;
 using SmartcatPlugin.Interfaces;
 using SmartcatPlugin.Models.SmartcatApi;
+using SmartcatPlugin.Models.SmartcatApi.Base;
 
 namespace SmartcatPlugin.Smartcat
 {
@@ -31,7 +30,7 @@ namespace SmartcatPlugin.Smartcat
             _authService = authService;
         }
 
-        public async Task<ApiResponse<ProjectListDto>> GetProjects(GetProjectListRequest request)
+        public async Task<ApiResponse<GetProjectListResponse>> GetProjects(GetProjectListRequest request)
         {
             FillHttpClientAuthHeaders();
 
@@ -43,7 +42,7 @@ namespace SmartcatPlugin.Smartcat
             builder.Query = query.ToString();
 
             var response = await _httpClient.GetAsync(builder.ToString());
-            var result = await HandleResponse<ProjectListDto>(response);
+            var result = await HandleResponse<GetProjectListResponse>(response);
             return result;
         }
 
@@ -56,24 +55,24 @@ namespace SmartcatPlugin.Smartcat
             return result;
         }
 
-        public async Task<ApiResponse<object>> ValidateApiKeyAsync(ApiKeyDto dto)
+        public async Task<ApiResponse<ErrorResponse>> ValidateApiKeyAsync(ApiKeyDto dto)
         {
             _httpClient.DefaultRequestHeaders.Authorization =
                 new System.Net.Http.Headers.AuthenticationHeaderValue("Basic",
                     EncodeClientIdSecretToBase64(dto.WorkspaceId, dto.ApiKey));
             var response = await _httpClient.PostAsync("/api/v1/workspaces/validate-api-key", CreateJsonContent(dto));
-            var result = await HandleResponse<object>(response);
+            var result = await HandleResponse<ErrorResponse>(response);
             return result;
         }
 
-        public async Task<ApiResponse<ProjectIdDto>> CreateProject(CreateProjectDto dto)
+        public async Task<ApiResponse<CreateProjectResponse>> CreateProject(CreateProjectRequest request)
         {
             var apiKey = _authService.GetApiKey();
-            dto.WorkspaceId = apiKey.WorkspaceId;
-            dto.IntegrationType = "sitecore-app";
+            request.WorkspaceId = apiKey.WorkspaceId;
+            request.IntegrationType = "sitecore-app";
             FillHttpClientAuthHeaders();
-            var response = await _httpClient.PostAsync("/api/v1/projects", CreateJsonContent(dto));
-            var result = await HandleResponse<ProjectIdDto>(response);
+            var response = await _httpClient.PostAsync("/api/v1/projects", CreateJsonContent(request));
+            var result = await HandleResponse<CreateProjectResponse>(response);
             return result;
         }
 
@@ -85,7 +84,7 @@ namespace SmartcatPlugin.Smartcat
         }
 
         public async Task<List<ApiResponse<TResponse>>> SendRequests<TRequest, TResponse>(List<TRequest> requestDtos,
-            string endpoint, HttpMethod method)
+            string endpoint, HttpMethod method) where TResponse : ResponseData
         {
             if (requestDtos == null || !requestDtos.Any())
             {
@@ -102,10 +101,8 @@ namespace SmartcatPlugin.Smartcat
 
                 try
                 {
-                    var request = new HttpRequestMessage(method, endpoint);
-                    var json = JsonConvert.SerializeObject(dto);
-                    request.Content = new StringContent(json, Encoding.UTF8, "application/json");
-                    return await SendRequest<TRequest, TResponse>(request);
+                    
+                    return await SendRequest<TRequest, TResponse>(dto, endpoint, method);
                 }
                 finally
                 {
@@ -119,21 +116,28 @@ namespace SmartcatPlugin.Smartcat
             return result;
         }
 
-        private async Task<ApiResponse<TResponse>> SendRequest<TRequest, TResponse>(HttpRequestMessage request)
+        private async Task<ApiResponse<TResponse>> SendRequest<TRequest, TResponse>(TRequest request, string endpoint,
+            HttpMethod method, int maxRetries = 3, int delay = 1000)
+            where TResponse : ResponseData
         {
-            int maxRetries = 3;
-            int delay = 1000;
-
             for (int i = 0; i < maxRetries; i++)
             {
-                _logger.LogInfo($"Calling smartcat API, method: {request.Method} endpoint: {request.RequestUri}," +
-                                $" requestData: {request.Content}.");
-                var response = await _httpClient.SendAsync(request);
-                
-                if (response.IsSuccessStatusCode)
+                var httpRequestMessage = new HttpRequestMessage(method, endpoint);
+                var json = JsonConvert.SerializeObject(request);
+                httpRequestMessage.Content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                _logger.LogInfo($"Calling smartcat API, method: {httpRequestMessage.Method} endpoint: {httpRequestMessage.RequestUri}," +
+                                $" requestData: {httpRequestMessage.Content}.");
+
+                var httpResponseMessage = await _httpClient.SendAsync(httpRequestMessage);
+                var response = await HandleResponse<TResponse>(httpResponseMessage);
+
+                if (response.IsSuccess && !response.Data.IsValid())
                 {
-                    var successResult = await HandleResponse<TResponse>(response);
-                        return successResult;
+                    _logger.LogInfo($"Retrying API call. Attempt {i}.");
+                    await Task.Delay(delay);
+                    delay *= 2;
+                    continue;
                 }
 
                 if ((int)response.StatusCode == NumberConstants.ToManyRequests)
@@ -141,11 +145,18 @@ namespace SmartcatPlugin.Smartcat
                     _logger.LogInfo($"Retrying API call. Attempt {i}.");
                     await Task.Delay(delay);
                     delay *= 2;
+                    continue;
                 }
-                else
+
+                if (!response.IsSuccess)
                 {
-                    return await HandleResponse<TResponse>(response);
+                    _logger.LogInfo($"Retrying API call. Attempt {i}.");
+                    await Task.Delay(delay);
+                    delay *= 2;
+                    continue;
                 }
+                
+                return response;
             }
 
             return new ApiResponse<TResponse>
@@ -162,6 +173,7 @@ namespace SmartcatPlugin.Smartcat
         }
 
         private async Task<ApiResponse<T>> HandleResponse<T>(HttpResponseMessage response)
+            where T : ResponseData
         {
             _logger.LogInfo($"Smartcat API response: StatusCode = {response.StatusCode}, Content = {response.Content}");
 
