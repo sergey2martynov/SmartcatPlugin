@@ -69,6 +69,8 @@
     <Content Include="App_Config\Include\Sitecore.LoadBalancing.config" />
     <Content Include="App_Config\Include\Sitecore.Media.config" />
     <Content Include="App_Config\Include\SmartcatPlugin.config" />
+    <Content Include="sitecore modules\shell\Smartcat\common.css" />
+    <Content Include="sitecore modules\shell\Smartcat\Projects\styles.css" />
     <Content Include="sitecore modules\shell\Smartcat\scripts\showBasketExperienceEditor.js" />
     <Content Include="sitecore modules\shell\Smartcat\scripts\showAddItemExperienceEditor.js" />
     <Content Include="sitecore modules\shell\Smartcat\AddItem\AddItemModal.aspx" />
@@ -82,6 +84,7 @@
     <Content Include="sitecore modules\shell\Smartcat\Projects\ProjectListModal.aspx" />
     <Content Include="App_Config\Include\Smartcat.config" />
     <Content Include="sitecore modules\shell\Smartcat\scripts\showProjectsExperienceEditor.js" />
+    <Content Include="sitecore modules\shell\Smartcat\SmartcatLocales.json" />
     <None Include="SmartcatLocales.json" />
     <None Include="Platform.wpp.targets" />
     <None Include="Properties\PublishProfiles\Local.pubxml" />
@@ -119,6 +122,7 @@
     <Compile Include="Interfaces\IBasketService.cs" />
     <Compile Include="Interfaces\ICacheService.cs" />
     <Compile Include="Interfaces\IItemService.cs" />
+    <Compile Include="Interfaces\ISitecoreDbService.cs" />
     <Compile Include="Interfaces\ISmartcatApiClient.cs" />
     <Compile Include="Interfaces\ISmartcatLoggingService.cs" />
     <Compile Include="Interfaces\ITranslationService.cs" />
@@ -128,7 +132,10 @@
     <Compile Include="Models\Dtos\CreateDocumentRequest.cs" />
     <Compile Include="Models\Dtos\CreateDocumentResponse.cs" />
     <Compile Include="Models\Dtos\GetProjectDto.cs" />
+    <Compile Include="Models\Dtos\FieldDto.cs" />
+    <Compile Include="Models\Dtos\ProjectDto.cs" />
     <Compile Include="Models\SmartcatApi\Base\ResponseData.cs" />
+    <Compile Include="Models\SmartcatApi\DeleteProjectRequest.cs" />
     <Compile Include="Models\SmartcatApi\ErrorResponse.cs" />
     <Compile Include="Models\SmartcatApi\GetProjectListRequest.cs" />
     <Compile Include="Models\Dtos\LanguageDto.cs" />
@@ -153,6 +160,8 @@
     <Compile Include="Models\SmartcatApi\GetExportIdResponse.cs" />
     <Compile Include="Models\SmartcatApi\GetItemTranslationRequest.cs" />
     <Compile Include="Models\SmartcatApi\GetItemTranslationResponse.cs" />
+    <Compile Include="Models\SmartcatApi\GetTemplatesRequest.cs" />
+    <Compile Include="Models\SmartcatApi\GetTemplatesResponse.cs" />
     <Compile Include="Models\SmartcatApi\SmartcatDocument.cs" />
     <Compile Include="Models\SmartcatApi\SuccessResponse.cs" />
     <Compile Include="Pipelines\ShowAddItemPipeline.cs" />
@@ -160,6 +169,7 @@
     <Compile Include="Services\BasketService.cs" />
     <Compile Include="Services\ItemService.cs" />
     <Compile Include="Services\AuthService.cs" />
+    <Compile Include="Services\SitecoreDbService.cs" />
     <Compile Include="Services\SmartcatLoggingService.cs" />
     <Compile Include="Services\TranslationService.cs" />
     <Compile Include="sitecore modules\shell\Smartcat\AddItem\AddItemModal.aspx.cs">

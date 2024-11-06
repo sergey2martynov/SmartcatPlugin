@@ -7,8 +7,17 @@ namespace SmartcatPlugin.Commands
     {
         public override void Execute(CommandContext context)
         {
-            SheerResponse.ShowModalDialog("/sitecore modules/shell/Smartcat/Basket/BasketModal.aspx",
-                "900", "600", "Basket", false);
+            var options = new ModalDialogOptions("/sitecore modules/shell/Smartcat/Basket/BasketModal.aspx")
+            {
+                Resizable = false,
+                Width = "800",
+                Height = "550",
+                Header = "Create project",
+                Response = false,
+                Maximizable = false
+            };
+
+            SheerResponse.ShowModalDialog(options);
         }
 
         public override CommandState QueryState(CommandContext context)

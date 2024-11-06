@@ -32,7 +32,7 @@ namespace SmartcatPlugin.Controllers
 
         [Route("get-projects")]
         [HttpGet]
-        public async Task<IHttpActionResult> GetSmartcatProjects([FromUri] int offset)
+        public async Task<IHttpActionResult> GetSmartcatProjects([FromUri] int currentPageNumber)
         {
             var apiKey = _authService.GetApiKey();
 
@@ -43,11 +43,37 @@ namespace SmartcatPlugin.Controllers
 
             var request = new GetProjectListRequest
             {
-                Offset = offset,
+                Offset = currentPageNumber * 10,
                 WorkspaceId = apiKey.WorkspaceId
             };
 
             var result = await _apiClient.GetProjects(request).ConfigureAwait(false);
+
+            var projectDtos = result.Data.Projects.Select(p => new ProjectDto
+            {
+                Id = p.Id,
+                Name = p.Name,
+                Status = p.Status == "inProgress" ? "In progress" : "Completed",
+                Languages = $"{p.SourceLanguage} -> {string.Join(", ", p.TargetLanguages)}",
+            });
+
+            return Ok(new {projects = projectDtos });
+        }
+
+        [Route("get-documents")]
+        [HttpGet]
+        public async Task<IHttpActionResult> GetDocuments(string projectId)
+        {
+            var apiKey = _authService.GetApiKey();
+            var request = new GetDocumentsByProjectIdRequest
+            {
+                WorkspaceId = apiKey.WorkspaceId,
+                ProjectId = projectId
+            };
+
+            var result = await _apiClient.GetDocumentsByProjectId(request);
+
+            result.Data.Documents.ForEach(d => d.Status = d.Status == "inProgress" ? "In progress" : "Completed");
 
             return Ok(result.Data);
         }
@@ -105,6 +131,27 @@ namespace SmartcatPlugin.Controllers
                                $" failed{failedDocuments}";
             _logging.LogInfo(notification);
             return Ok(notification);
+        }
+
+        [Route("delete-project")]
+        [HttpDelete]
+        public async Task<IHttpActionResult> DeleteProject(string id)
+        {
+            var apiKey = _authService.GetApiKey();
+            var request = new DeleteProjectRequest
+            {
+                WorkspaceId = apiKey.WorkspaceId,
+                ProjectId = id
+            };
+
+            var result = await _apiClient.DeleteProject(request);
+
+            if (result.IsSuccess)
+            {
+                return Ok();
+            }
+
+            return BadRequest();
         }
     }
 }

@@ -11,12 +11,13 @@ namespace SmartcatPlugin.Interfaces
     public interface ISmartcatApiClient
     {
         Task<ApiResponse<GetProjectListResponse>> GetProjects(GetProjectListRequest request);
-        Task<ApiResponse<ErrorResponse>> ValidateApiKeyAsync(ApiKeyDto dto);
+        Task<ApiResponse<ResponseData>> ValidateApiKeyAsync(ApiKeyDto dto);
         Task<ApiResponse<CreateProjectResponse>> CreateProject(CreateProjectRequest request);
         Task<ApiResponse<GetItemTranslationResponse>> GetItemTranslation(GetItemTranslationRequest request);
+        Task<ApiResponse<GetTemplateResponse>> GetTemplates(GetTemplatesRequest request);
         Task<ApiResponse<GetDocumentsByProjectIdResponse>> GetDocumentsByProjectId(
             GetDocumentsByProjectIdRequest request);
-
+        Task<ApiResponse<ResponseData>> DeleteProject(DeleteProjectRequest request);
         Task<List<ApiResponse<TResponse>>> SendRequests<TRequest, TResponse>(List<TRequest> requestDtos,
             string endpoint, HttpMethod method) where TResponse : ResponseData;
     }

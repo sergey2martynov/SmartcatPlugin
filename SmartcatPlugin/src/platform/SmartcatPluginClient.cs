@@ -11,6 +11,7 @@ using System;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using SmartcatPlugin.Models.SitecoreApi.GetItemContent;
 
 namespace SmartcatPlugin
 {

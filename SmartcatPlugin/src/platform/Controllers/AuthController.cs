@@ -1,7 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using System.Web.Http;
-using Sitecore.Data;
-using Sitecore.SecurityModel;
 using SmartcatPlugin.Constants;
 using SmartcatPlugin.Interfaces;
 using SmartcatPlugin.Models.Dtos;
@@ -13,13 +12,15 @@ namespace SmartcatPlugin.Controllers
     {
         private readonly ISmartcatApiClient _apiClient;
         private readonly IAuthService _authService;
-        private readonly Database _masterDb = Database.GetDatabase("master");
+        private readonly ISitecoreDbService _sitecoreDbService;
 
         public AuthController(ISmartcatApiClient apiClient,
-            IAuthService authService)
+            IAuthService authService,
+            ISitecoreDbService sitecoreDbService)
         {
             _apiClient = apiClient;
             _authService = authService;
+            _sitecoreDbService = sitecoreDbService;
         }
 
         [Route("save-apikey")]
@@ -28,26 +29,43 @@ namespace SmartcatPlugin.Controllers
         {
             var result = await _apiClient.ValidateApiKeyAsync(dto);
 
+            var apiKeyItem = _authService.GetApiKeyItem();
+
+            var itemFields = new List<FieldDto>
+            {
+                new FieldDto
+                {
+                    Name = StringConstants.ApiKey,
+                    Value = dto.ApiKey
+                },
+                new FieldDto
+                {
+                    Name = StringConstants.WorkSpaceId,
+                    Value = dto.WorkspaceId
+                }
+            };
+
+            _sitecoreDbService.UpdateFieldValues(apiKeyItem, itemFields);
+
             if (!result.IsSuccess)
             {
                 return BadRequest("Authorization was failed");
             }
 
-            var apiKeyItem = _authService.GetApiKeyItem(_masterDb);
+            return Ok(result);
+        }
 
-            using (new SecurityDisabler())
+        [Route("get-apikey")]
+        [HttpGet]
+        public IHttpActionResult GetCredentials()
+        {
+            var apiKeyItem = _authService.GetApiKeyItem();
+
+            var result = new ApiKeyDto
             {
-                try
-                {
-                    apiKeyItem.Editing.BeginEdit();
-                    apiKeyItem.Fields[StringConstants.WorkSpaceId].Value = dto.WorkspaceId;
-                    apiKeyItem.Fields[StringConstants.ApiKey].Value = dto.ApiKey;
-                }
-                finally
-                {
-                    apiKeyItem.Editing.EndEdit();
-                }
-            }
+                WorkspaceId = apiKeyItem.Fields[StringConstants.WorkSpaceId].Value,
+                ApiKey = apiKeyItem.Fields[StringConstants.ApiKey].Value
+            };
 
             return Ok(result);
         }

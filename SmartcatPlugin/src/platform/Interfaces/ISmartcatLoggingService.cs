@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace SmartcatPlugin.Interfaces
 {
@@ -6,5 +7,6 @@ namespace SmartcatPlugin.Interfaces
     {
         void LogInfo(string message);
         void LogError(string message, Exception ex = null);
+        Task UpdateContextItem();
     }
 }

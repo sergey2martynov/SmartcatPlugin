@@ -8,6 +8,7 @@ using Sitecore.Shell.Framework.Commands;
 using Sitecore.Shell.Web.UI.WebControls;
 using Sitecore.Web.UI.WebControls.Ribbons;
 using SmartcatPlugin.Cache;
+using SmartcatPlugin.Constants;
 using SmartcatPlugin.Interfaces;
 
 namespace SmartcatPlugin.Panels
@@ -21,7 +22,8 @@ namespace SmartcatPlugin.Panels
                                     Item button,
                                     CommandContext context)
         {
-            string cachedData = _cacheService.GetValue("selectedItems");
+            var userName = Sitecore.Context.User.Name;
+            string cachedData = _cacheService.GetValue($"{userName}:{StringConstants.SelectedItems}");
 
             if (cachedData == null)
             {

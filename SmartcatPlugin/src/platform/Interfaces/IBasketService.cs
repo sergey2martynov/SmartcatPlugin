@@ -11,8 +11,8 @@ namespace SmartcatPlugin.Interfaces
 {
     public interface IBasketService
     {
-        ItemsTreeDto BuildSelectedItemTree();
-        List<Item> GetItemsByIds(Database database, List<string> ids, string language);
+        //ItemsTreeDto BuildSelectedItemTree();
+        List<Item> GetItemsByIds(List<string> ids, string language);
         LanguageDto GetDefaultLanguage();
         List<LanguageDto> GetAvailableLanguages();
     }

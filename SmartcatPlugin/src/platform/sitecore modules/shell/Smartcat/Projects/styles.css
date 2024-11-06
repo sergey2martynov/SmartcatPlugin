@@ -1,0 +1,98 @@
+﻿body, html {
+    font-family: 'Open Sans', sans-serif;
+    margin: 0;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    font-size: 12px;
+}
+
+.tool-panel {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    min-height: 66px;
+    margin-left: 15px;
+    margin-right: 15px;
+    gap: 20px;
+}
+
+.sort-section {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#sort-select {
+    padding: 5px 10px;
+    width: 250px;
+}
+
+.search-input {
+    font-size: 14px;
+    width: 200px;
+}
+
+.translate-all-button-wrapper {
+    width: 200px;
+    margin-left: auto;
+}
+
+.footer {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    display: flex;
+    flex-direction: row;
+    justify-content: right;
+    margin-top: auto;
+    height: 58px;
+    border-top: 1px solid #ddd;
+    background-color: white;
+}
+
+.footer-content {
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    justify-items: right;
+    margin-right: 15px;
+}
+
+.table-header {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid #ddd;
+    border-top: 1px solid #ddd;
+    font-weight: bold;
+}
+
+
+.project-list {
+    overflow-y: auto;
+    height: 360px;
+}
+
+.project {
+    border-bottom: 1px solid #ddd;
+    padding: 0 10px;
+    align-items: center;
+}
+
+.project-header {
+    display: flex;
+    justify-content: space-between;
+    cursor: pointer;
+    align-items: center;
+}
+
+.document {
+    display: flex;
+    justify-content: space-between;
+    height: 35.2px;
+    align-items: center;
+    border-bottom: 1px solid #ddd;
+}

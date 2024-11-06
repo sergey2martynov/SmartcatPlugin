@@ -3,16 +3,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http;
-using System.Web.UI.WebControls;
 using Newtonsoft.Json;
-using Sitecore.Data;
-using SmartcatPlugin.Constants;
-using SmartcatPlugin.Extensions;
 using SmartcatPlugin.Interfaces;
 using SmartcatPlugin.Models.Dtos;
+using SmartcatPlugin.Models.SmartcatApi;
 
 namespace SmartcatPlugin.Controllers
 {
@@ -21,94 +17,18 @@ namespace SmartcatPlugin.Controllers
     {
         private readonly IBasketService _basketService;
         private readonly ISmartcatApiClient _apiClient;
-        private readonly ICacheService _cacheService;
         private readonly IItemService _itemService;
-        private readonly Database _masterDb = Database.GetDatabase("master");
+        private readonly IAuthService _authService;
 
         public BasketController(IBasketService basketService,
             ISmartcatApiClient apiClient,
-            ICacheService cacheService,
-            IItemService itemService)
+            IItemService itemService,
+            IAuthService authService)
         {
             _basketService = basketService;
             _apiClient = apiClient;
-            _cacheService = cacheService;
             _itemService = itemService;
-        }
-
-        [Route("get-selected-items")]
-        [HttpGet]
-        public IHttpActionResult GetSelectedItems()
-        {
-            var result = _basketService.BuildSelectedItemTree();
-
-            return Json(result);
-        }
-
-        [Route("update-ribbon")]
-        [HttpGet]
-        public IHttpActionResult UpdateRibbon()
-        {
-            Thread.Sleep(5000);
-            Sitecore.Context.ClientPage.ClientResponse.Timer("item:refresh", 2000);
-
-            return Ok();
-        }
-
-        [Route("get-validating-info")]
-        [HttpGet]
-        public IHttpActionResult GetValidatingInfo()
-        {
-            var userName = Sitecore.Context.User.Name;
-            string cachedData = _cacheService.GetValue($"{userName}:{StringConstants.SelectedItems}");
-            if (string.IsNullOrEmpty(cachedData))
-            {
-                return Ok(new List<string>()); // todo: exception
-            }
-
-            var itemIds = JsonConvert.DeserializeObject<List<string>>(cachedData);
-            var invalidItemNames = _itemService.GetInvalidItemsNames(itemIds);
-
-            var validatingInfo = new ValidatingInfoDto
-            {
-                InvalidItemNames = string.Join(", ", invalidItemNames),
-                InvalidItemCount = invalidItemNames.Count,
-                ValidItemCount = itemIds.Count - invalidItemNames.Count
-            };
-
-            return Ok(validatingInfo);
-        }
-
-        [Route("save-project-info")]
-        [HttpPost]
-        public IHttpActionResult SaveProjectInfo([FromBody] SaveProjectInfoDto dto)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest("Fill required fields");
-            }
-
-            var userName = Sitecore.Context.User.Name;
-            var projectInfo = JsonConvert.SerializeObject(dto);
-            _cacheService.SetValue($"{userName}:{StringConstants.ProjectInfo}", projectInfo);
-
-            return Ok();
-        }
-
-        [Route("get-saved-project-info")]
-        [HttpGet]
-        public IHttpActionResult GetSavedProjectInfo()
-        {
-            var userName = Sitecore.Context.User.Name;
-            string cachedData = _cacheService.GetValue($"{userName}:{StringConstants.ProjectInfo}");
-            if (string.IsNullOrEmpty(cachedData))
-            {
-                return BadRequest("Cash was now found");
-            }
-
-            var projectInfo = JsonConvert.DeserializeObject<SaveProjectInfoDto>(cachedData);
-
-            return Ok(projectInfo);
+            _authService = authService;
         }
 
         [Route("get-translation-languages")]
@@ -117,6 +37,15 @@ namespace SmartcatPlugin.Controllers
         {
             var defaultLanguage = _basketService.GetDefaultLanguage();
             var targetLanguages = _basketService.GetAvailableLanguages();
+            string filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory,
+                "sitecore modules/Shell/Smartcat/SmartcatLocales.json");
+            var smartcatLanguages = new List<string>();
+
+            using (StreamReader reader = new StreamReader(filePath))
+            {
+                var jsonData = reader.ReadToEnd();
+                smartcatLanguages = JsonConvert.DeserializeObject<List<string>>(jsonData);
+            }
 
             var result = new TranslationLanguagesDto
             {
@@ -124,10 +53,26 @@ namespace SmartcatPlugin.Controllers
                 {
                     defaultLanguage
                 },
-                TargetLanguages = targetLanguages
+                TargetLanguages = targetLanguages,
+                SmartcatLanguageCodes = smartcatLanguages
             };
 
             return Ok(result);
+        }
+
+        [Route("get-templates")]
+        [HttpGet]
+        public async Task<IHttpActionResult> GetTemplates()
+        {
+            var apiKey = _authService.GetApiKey();
+            var request = new GetTemplatesRequest
+            {
+                WorkSpaceId = apiKey.WorkspaceId
+            };
+
+            var result = await _apiClient.GetTemplates(request);
+
+            return Ok(result.Data);
         }
 
         [Route("save-project")]
@@ -135,8 +80,6 @@ namespace SmartcatPlugin.Controllers
         public async Task<IHttpActionResult> CreateSmartcatProject([FromBody] CreateProjectRequest request)
         {
             var userName = Sitecore.Context.User.Name;
-            string cachedData = _cacheService.GetValue($"{userName}:{StringConstants.SelectedItems}");
-            var selectedItemIds = JsonConvert.DeserializeObject<List<string>>(cachedData);
             var response = await _apiClient.CreateProject(request);
 
             if (!response.IsSuccess)
@@ -145,11 +88,11 @@ namespace SmartcatPlugin.Controllers
             }
 
             var documentDtos = new List<CreateDocumentRequest>();
-            var items = _basketService.GetItemsByIds(_masterDb, selectedItemIds, request.SourceLanguage);
+            var items = _basketService.GetItemsByIds(request.SelectedItemIds, request.SourceLanguage);
 
             foreach (var item in items)
             {
-                var itemContent = item.GetItemContent(_masterDb, new [] { request.TargetLanguage });
+                var itemContent = _itemService.GetItemContent(item,  request.TargetLanguages );
 
                 var documentDto = new CreateDocumentRequest
                 {

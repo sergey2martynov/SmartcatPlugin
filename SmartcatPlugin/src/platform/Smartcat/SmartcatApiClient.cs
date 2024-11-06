@@ -13,6 +13,7 @@ using System.Web;
 using SmartcatPlugin.Interfaces;
 using SmartcatPlugin.Models.SmartcatApi;
 using SmartcatPlugin.Models.SmartcatApi.Base;
+using System.Web.Helpers;
 
 namespace SmartcatPlugin.Smartcat
 {
@@ -55,13 +56,13 @@ namespace SmartcatPlugin.Smartcat
             return result;
         }
 
-        public async Task<ApiResponse<ErrorResponse>> ValidateApiKeyAsync(ApiKeyDto dto)
+        public async Task<ApiResponse<ResponseData>> ValidateApiKeyAsync(ApiKeyDto dto)
         {
             _httpClient.DefaultRequestHeaders.Authorization =
                 new System.Net.Http.Headers.AuthenticationHeaderValue("Basic",
                     EncodeClientIdSecretToBase64(dto.WorkspaceId, dto.ApiKey));
             var response = await _httpClient.PostAsync("/api/v1/workspaces/validate-api-key", CreateJsonContent(dto));
-            var result = await HandleResponse<ErrorResponse>(response);
+            var result = await HandleResponse<ResponseData>(response);
             return result;
         }
 
@@ -80,6 +81,25 @@ namespace SmartcatPlugin.Smartcat
         {
             var response = await _httpClient.PostAsync("/api/v1/documents/export-status", CreateJsonContent(request));
             var result = await HandleResponse<GetItemTranslationResponse>(response);
+            return result;
+        }
+
+        public async Task<ApiResponse<GetTemplateResponse>> GetTemplates(GetTemplatesRequest request)
+        {
+            FillHttpClientAuthHeaders();
+            var response = await _httpClient.PostAsync("/api/v1/workspaces/template-list", CreateJsonContent(request));
+            var result = await HandleResponse<GetTemplateResponse>(response);
+            return result;
+        }
+
+        public async Task<ApiResponse<ResponseData>> DeleteProject(DeleteProjectRequest request)
+        {
+            FillHttpClientAuthHeaders();
+            var httpRequestMessage = new HttpRequestMessage(HttpMethod.Delete, "/api/v1/projects");
+            var content = JsonConvert.SerializeObject(request);
+            httpRequestMessage.Content = new StringContent(content, Encoding.UTF8, "application/json");
+            var httpResponseMessage = await _httpClient.SendAsync(httpRequestMessage);
+            var result = await HandleResponse<ResponseData>(httpResponseMessage);
             return result;
         }
 

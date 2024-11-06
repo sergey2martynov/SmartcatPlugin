@@ -1,5 +1,6 @@
 ﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="AddItemModal.aspx.cs" Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.AddItem.AddItemModal" %>
-
+<%@ Register Assembly="Sitecore.Kernel" Namespace="Sitecore.Web.UI.HtmlControls" TagPrefix="sc" %>
+<%@ Register Assembly="Sitecore.Kernel" Namespace="Sitecore.Web.UI.WebControls" TagPrefix="sc" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,6 +13,11 @@
     <script src="../onload.js"></script>
     <link href="../closeButton.css" rel="stylesheet" type="text/css" />
     <link href="styles.css" rel="stylesheet" type="text/css"/>
+    <script type="text/javascript" language="javascript">
+        function onClose() {
+            scForm.postRequest("", "", "", "item:open(id={0DE95AE4-41AB-4D01-9EB0-67441B7C2450})");
+        }
+    </script>
 </head>
 <body>
 <div id="app">
@@ -136,6 +142,7 @@
                 }
             },
             closeWindow() {
+                onClose();
                 window.parent.$('.ui-dialog-content:visible').dialog('close');
             }
         }

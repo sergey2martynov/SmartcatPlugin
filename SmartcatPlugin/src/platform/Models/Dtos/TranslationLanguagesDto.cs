@@ -10,7 +10,11 @@ namespace SmartcatPlugin.Models.Dtos
     {
         [JsonProperty("sourceLanguages")]
         public List<LanguageDto> SourceLanguages { get; set; }
+
         [JsonProperty("targetLanguages")]
         public List<LanguageDto> TargetLanguages { get; set; }
+
+        [JsonProperty("smartcatLanguageCodes")]
+        public List<string> SmartcatLanguageCodes { get; set; }
     }
 }

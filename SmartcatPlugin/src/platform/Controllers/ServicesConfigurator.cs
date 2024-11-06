@@ -32,6 +32,7 @@ namespace SmartcatPlugin.Controllers
             serviceCollection.AddScoped(typeof(IAuthService), typeof(AuthService));
             serviceCollection.AddScoped(typeof(ITranslationService), typeof(TranslationService));
             serviceCollection.AddScoped(typeof(IItemService), typeof(ItemService));
+            serviceCollection.AddScoped(typeof(ISitecoreDbService), typeof(SitecoreDbService));
 
             serviceCollection.AddSingleton(typeof(ISmartcatApiClient), typeof(SmartcatApiClient));
             serviceCollection.AddSingleton(typeof(ISmartcatLoggingService), typeof(SmartcatLoggingService));

@@ -7,8 +7,17 @@ namespace SmartcatPlugin.Commands
     {
         public override void Execute(CommandContext context)
         {
-            SheerResponse.ShowModalDialog("/sitecore modules/shell/Smartcat/Authorization/AuthorizationModal.aspx",
-                "600", "300", "Authorization", false);
+            var options = new ModalDialogOptions("/sitecore modules/shell/Smartcat/Authorization/AuthorizationModal.aspx")
+            {
+                Resizable = false,
+                Width = "500",
+                Height = "330",
+                Header = "Connect workspace",
+                Response = false,
+                Maximizable = false
+            };
+
+            SheerResponse.ShowModalDialog(options);
         }
 
         public override CommandState QueryState(CommandContext context)

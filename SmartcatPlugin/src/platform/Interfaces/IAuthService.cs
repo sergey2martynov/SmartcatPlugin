@@ -6,8 +6,8 @@ namespace SmartcatPlugin.Interfaces
 {
     public interface IAuthService
     {
-        TemplateItem CreateApiKeyTemplate(Database database);
-        Item GetApiKeyItem(Database database);
+        TemplateItem CreateApiKeyTemplate();
+        Item GetApiKeyItem();
         ApiKeyDto GetApiKey();
         string GetWorkspaceId();
     }

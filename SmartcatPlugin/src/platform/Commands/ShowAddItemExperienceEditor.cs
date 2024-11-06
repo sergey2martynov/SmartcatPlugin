@@ -1,4 +1,5 @@
-﻿using Sitecore.Shell.Framework.Commands;
+﻿using Sitecore;
+using Sitecore.Shell.Framework.Commands;
 using Sitecore.Web.UI.Sheer;
 
 namespace SmartcatPlugin.Commands
@@ -16,7 +17,11 @@ namespace SmartcatPlugin.Commands
             {
                 SheerResponse.ShowModalDialog("/sitecore modules/shell/Smartcat/AddItem/AddItemModal.aspx",
                     "900", "600", "AddItem", false);
-                args.WaitForPostBack();
+                //args.WaitForPostBack();
+            }
+            else
+            {
+                Context.ClientPage.ClientResponse.Timer("item:refresh", 500);
             }
         }
     }

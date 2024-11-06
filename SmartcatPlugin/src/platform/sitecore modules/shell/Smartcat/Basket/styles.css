@@ -2,9 +2,271 @@
     height: 100%;
     margin: 0;
     padding: 0;
+    font-family: sans-serif;
+    overflow: hidden;
+}
+
+.header-wrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 65px;
+    border-bottom: 1px solid #d3d3d3;
+}
+
+.header {
+    margin-left: 15px;
+    font-size: 18px;
+    font-weight: bold;
 }
 
 .tree-container {
     height: calc(100vh - 80px);
     overflow-y: auto;
+}
+
+#app {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.custom-stepper {
+    height: 100px;
+}
+
+    .custom-stepper .el-step {
+        padding-bottom: 15px;
+    }
+
+    .custom-stepper .el-step__head {
+        border-color: transparent;
+    }
+
+    .custom-stepper .el-step__line {
+        display: none;
+    }
+
+    .custom-stepper .el-steps__step {
+        margin-bottom: 10px;
+    }
+
+.el-step__head.is-process .el-step__icon {
+    background-color: #333333 !important;
+    border-color: #333333 !important;
+    color: white !important;
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+    line-height: 20px;
+}
+
+.el-step__head.is-finish .el-step__icon {
+    background-color: #d3d3d3 !important;
+    border-color: #d3d3d3 !important;
+    color: gray !important;
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+    line-height: 20px;
+}
+
+.el-step__title.is-process {
+    color: #333333 !important;
+}
+
+.el-step__title.is-wait {
+    color: #d3d3d3 !important;
+}
+
+.el-step__title.is-finish {
+    color: #d3d3d3 !important;
+}
+
+.el-step__icon-inner.is-finish {
+    color: white;
+}
+
+.el-step__icon-inner.is-process {
+    color: white;
+}
+
+.el-step__icon-inner.is-process {
+    color: black;
+}
+
+.el-step__head.is-wait .el-step__icon {
+    background-color: #d3d3d3 !important;
+    border-color: #d3d3d3 !important;
+    color: gray !important;
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+    line-height: 20px;
+}
+
+.el-step__head.is-wait .el-step__title {
+    color: black !important;
+}
+
+.tree {
+    flex-grow: 1;
+    margin-right: 5px;
+    max-height: 420px;
+    overflow-y: auto;
+    margin-left: 15px;
+}
+
+.tree-node {
+    height: 30px;
+    display: flex;
+    align-items: center;
+    padding: 5px 10px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.tree-node img {
+    width: 16px;
+    height: 16px;
+    padding-right: 10px;
+}
+
+.tree-node .toggle-icon {
+    cursor: pointer;
+    padding-right: 10px;
+}
+
+.tree-node-content {
+    display: flex;
+    align-items: center;
+    flex-grow: 1;
+}
+
+.tree-children {
+    margin-left: 20px;
+    display: none;
+}
+
+.tree-children.active {
+    display: block;
+}
+
+.checkbox {
+    padding-right: 10px;
+}
+
+
+.el-checkbox.is-checked .el-checkbox__inner {
+    background-color: black !important;
+    border-color: black !important;
+}
+
+.el-checkbox.is-checked .el-checkbox__inner:hover {
+    background-color: black !important;
+    border-color: black !important;
+}
+
+.el-checkbox.is-checked + .el-checkbox__label {
+    color: black;
+}
+
+.el-checkbox .el-checkbox__inner {
+    border-color: gray !important;
+}
+
+.el-checkbox .el-checkbox__inner:hover {
+    border-color: gray !important;
+}
+
+.aside-with-divider {
+    position: relative;
+    width: 185px !important;
+    padding: 10px;
+    box-sizing: border-box;
+    margin-top: 13px;
+    margin-left: 20px;
+}
+
+    .aside-with-divider::after {
+        content: '';
+        position: absolute;
+        top: 1px;
+        bottom: 1px;
+        right: 0;
+        width: 1px;
+        background-color: #d3d3d3;
+    }
+
+.content {
+    display: flex;
+    flex-direction: column;
+}
+
+.footer-container {
+    display: flex;
+    margin-top: auto;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 30px;
+    border-top: 1px solid #d3d3d3;
+}
+
+.left-buttons {
+    display: flex;
+    align-items: center;
+}
+
+.right-buttons {
+    display: flex;
+    align-items: center;
+}
+
+
+.project-field-label {
+    /*font-weight: bold;*/
+}
+
+.project-field {
+    padding-top: 10px;
+}
+
+.datetime-picker-wrapper {
+    display: flex;
+    flex-direction: row;
+    gap: 15px;
+}
+
+.el-select .el-tag {
+    color: black;
+}
+
+.project-field .mx-datepicker .mx-input-wrapper {
+    height: 40px;
+}
+
+.el-textarea__inner {
+    resize: none !important;
+}
+
+.custom-placeholder input::placeholder {
+    font-size: 12px;
+}
+
+/* Стили для плейсхолдера в select */
+.custom-placeholder .el-input__inner::placeholder {
+    font-size: 12px;
+}
+
+.project-info-field-name {
+    padding-top: 20px;
+    text-align: left;
+    font-weight: bold;
+    margin-left: 15px;
+}
+
+.project-info-field-value {
+    padding-top: 20px;
+    padding-left: 30px;
 }

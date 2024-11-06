@@ -17,6 +17,7 @@ using SmartcatPlugin.Extensions;
 using SmartcatPlugin.Interfaces;
 using SmartcatPlugin.Models;
 using SmartcatPlugin.Models.ApiResponse;
+using SmartcatPlugin.Models.SitecoreApi.GetItemContent;
 using SmartcatPlugin.Models.Smartcat;
 using SmartcatPlugin.Models.Smartcat.Authorization;
 using SmartcatPlugin.Models.Smartcat.GetFolderList;
@@ -169,7 +170,7 @@ namespace SmartcatPlugin.Controllers
                 return Json(new Dictionary<string, LocJsonContent>());
             }
 
-            var result = item.GetItemContent(_masterDb, request.TargetLocales);
+            var result = _itemService.GetItemContent(item, request.TargetLocales);
 
             _logger.LogInfo("SmartcatApi method \"file-content\" was success completed");
             return Json(new GetItemContentResponse { LocaleContent = result });
@@ -297,7 +298,7 @@ namespace SmartcatPlugin.Controllers
         {
             var sitecoreLanguageCodes = Sitecore.Globalization.LanguageDefinitions.Definitions.Select(d => d.Name);
             List<string> smartcatLanguages;
-            string filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "sitecore modules/Shell/SmartcatLocales.json");
+            string filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "sitecore modules/Shell/Smartcat/SmartcatLocales.json");
             using (StreamReader reader = new StreamReader(filePath))
             {
                 var jsonData = reader.ReadToEnd();

@@ -123,74 +123,7 @@ namespace SmartcatPlugin.Extensions
             return locales;
         }
 
-        public static Dictionary<string, LocJsonContent> GetItemContent(this Item parentPage, Database masterDb,
-            string[] targetLocales)
-        {
-            if (parentPage == null || masterDb == null || targetLocales == null)
-            {
-                throw new NullReferenceException("Invalid inner data");
-            }
-
-            var targetLanguages = targetLocales
-                .Select(Language.Parse)
-                .ToList();
-
-            var locJsonDictionary = new Dictionary<string, LocJsonContent>();
-
-            var units = new List<Unit>();
-
-            var fields = parentPage.GetNonSystemFields();
-
-            foreach (var field in fields)
-            {
-                var unit = new Unit
-                {
-                    Key = field.Key,
-                    Properties = new UnitProperties
-                    {
-                        SmartcatFormat = field.Type == ConstantItemFieldTypes.RichText ? "html" : ""
-                    },
-                    Source = StringSplitter.SplitStringWithNewlines(field.Value),
-                    Target = new List<string>()
-                };
-                
-                units.Add(unit);
-                Log.Info($"{typeof(Unit)} key:{unit.Key} was created. ItemExtensions.GetItemContent()");
-            }
-
-            foreach (var targetLanguage in targetLanguages)
-            {
-                var locJsonContent = new LocJsonContent
-                {
-                    Units = units,
-                    Properties = new Properties
-                    {
-                        ItemId = parentPage.ID.ToString(),
-                        TargetLanguage = targetLanguage.Name
-                    }
-                };
-
-                locJsonDictionary.Add(targetLanguage.Name, locJsonContent);
-
-                var versions = parentPage.Versions.GetVersions(true);
-                var isItemHaveTargetLanguages = versions.Any(v => v.Language == targetLanguage);
-
-                if (!isItemHaveTargetLanguages)
-                {
-                    continue;
-                }
-
-                var targetVersionItem = masterDb.GetItem(parentPage.ID, targetLanguage);
-
-                foreach (var unit in locJsonContent.Units)
-                {
-                    var field = targetVersionItem.Fields[unit.Key];
-                    unit.Target = StringSplitter.SplitStringWithNewlines(field.Value);
-                }
-            }
-
-            return locJsonDictionary;
-        }
+        
 
         public static List<Item> GetAllChildrenPages(this Item item)
         {

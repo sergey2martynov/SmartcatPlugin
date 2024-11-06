@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Newtonsoft.Json;
 using Sitecore.Data;
 using Sitecore.Data.Items;
 using SmartcatPlugin.Constants;
@@ -9,37 +8,39 @@ using SmartcatPlugin.Models.Dtos;
 using Sitecore.SecurityModel;
 using SmartcatPlugin.Models.Smartcat.Testing;
 using Sitecore.Globalization;
-using Sitecore.Data.Validators;
-using Sitecore.Data.Validators.FieldValidators;
 using SmartcatPlugin.Interfaces;
+using SmartcatPlugin.Models;
+using SmartcatPlugin.Tools;
+using System;
 
 namespace SmartcatPlugin.Services
 {
     public class ItemService : IItemService
     {
-        private readonly ICacheService _cacheService;
-        private readonly Database _masterDb = Database.GetDatabase("master");
-        private readonly Database _webDb = Database.GetDatabase("web");
+        //private readonly ICacheService _cacheService;
+        //private readonly Database _masterDb = Database.GetDatabase("master");
+        //private readonly Database _webDb = Database.GetDatabase("web");
+        private readonly ISitecoreDbService _sitecoreDbService;
 
-        public ItemService(ICacheService cacheService)
+        public ItemService(ISitecoreDbService sitecoreDbService)
         {
-            _cacheService = cacheService;
+            _sitecoreDbService = sitecoreDbService;
         }
 
         public AddedItemsTreeDto GetContentEditorItemsTree()
         {
-            var rootItem = _masterDb.GetItem("/sitecore/content");
+            var rootItem = _sitecoreDbService.GetItemByPath("/sitecore/content");
             var userName = Sitecore.Context.User.Name;
-            string cachedData = _cacheService.GetValue($"{userName}:{StringConstants.SelectedItems}");
+            /*string cachedData = _cacheService.GetValue($"{userName}:{StringConstants.SelectedItems}");
             var selectedItemIds = cachedData == null ? new List<string>()
-                : JsonConvert.DeserializeObject<List<string>>(cachedData);
+                : JsonConvert.DeserializeObject<List<string>>(cachedData);*/
 
-            var selectedNodes = new Dictionary<string, TreeNodeDto>();
+            /*var selectedNodes = new Dictionary<string, TreeNodeDto>();
 
             foreach (var id in selectedItemIds)
             {
                 selectedNodes[id] = null;
-            }
+            }*/
 
             var rootNode = new TreeNodeDto
             {
@@ -47,29 +48,28 @@ namespace SmartcatPlugin.Services
                 Name = rootItem.Name,
                 ShowCheckBox = false,
                 ImageUrl = rootItem.Appearance.GetIconPath(),
-                IsChecked = selectedItemIds.Contains(rootItem.ID.ToString()),
                 IsExpanded = true
             };
 
-            AddChildNodes(rootItem, rootNode, selectedNodes);
+            AddChildNodes(rootItem, rootNode/*, selectedNodes*/);
 
             var result = new AddedItemsTreeDto
             {
                 TreeNodes = new List<TreeNodeDto> { rootNode },
-                CheckedItems = selectedNodes.Values.ToList(),
-                ExpandedItems = selectedNodes.Values.ToList(),
+                CheckedItems = new List<TreeNodeDto>(),
+                ExpandedItems = new List<TreeNodeDto>(),
             };
 
             return result;
         }
 
-        private void AddChildNodes(Item parentItem, TreeNodeDto parentNode, Dictionary<string, TreeNodeDto> selectedNodes)
+        private void AddChildNodes(Item parentItem, TreeNodeDto parentNode/*, Dictionary<string, TreeNodeDto> selectedNodes*/)
         {
             foreach (Item child in parentItem.Children)
             {
                 var childId = child.ID.ToString();
 
-                var isContain = selectedNodes.Keys.Contains(childId);
+                //var isContain = selectedNodes.Keys.Contains(childId);
 
                 var childNode = new TreeNodeDto
                 {
@@ -77,14 +77,14 @@ namespace SmartcatPlugin.Services
                     Name = child.Name,
                     ShowCheckBox = true,
                     ImageUrl = child.Appearance.GetIconPath(),
-                    IsChecked = isContain,
-                    IsExpanded = isContain
+                    //IsChecked = isContain,
+                    //IsExpanded = isContain
                 };
 
-                if (isContain)
+                /*if (isContain)
                 {
                     selectedNodes[childId] = childNode;
-                }
+                }*/
 
                 if (child.IsFolder() || child.Fields.All(f => f.Name.StartsWith("_"))) //todo: validation step
                 {
@@ -93,7 +93,7 @@ namespace SmartcatPlugin.Services
 
                 parentNode.Children.Add(childNode);
 
-                AddChildNodes(child, childNode, selectedNodes);
+                AddChildNodes(child, childNode/*, selectedNodes*/);
 
                 if (childNode.IsExpanded)
                 {
@@ -102,7 +102,7 @@ namespace SmartcatPlugin.Services
             }
         }
 
-        public List<string> GetInvalidItemsNames(List<string> itemIds)
+        /*public List<string> GetInvalidItemsNames(List<string> itemIds)
         {
             var invalidNames = new List<string>();
             Sitecore.Context.ContentDatabase = _masterDb;
@@ -147,16 +147,16 @@ namespace SmartcatPlugin.Services
             }
 
             return invalidNames;
-        }
+        }*/
 
         public void CreateContentItem(TestDirectory rootDirectory)
         {
-            var folderTemplateItem = _masterDb.GetItem(ConstantIds.FolderTemplate);
+            var folderTemplateItem = _sitecoreDbService.GetItemById(ConstantIds.FolderTemplate);
             Item newDirectoryItem;
 
             using (new SecurityDisabler())
             {
-                var contentDirectory = _masterDb.GetItem(ConstantIds.ContentDirectory);
+                var contentDirectory = _sitecoreDbService.GetItemById(ConstantIds.ContentDirectory);
 
                 newDirectoryItem = contentDirectory.Add(rootDirectory.Title, new TemplateID(folderTemplateItem.ID));
             }
@@ -172,7 +172,7 @@ namespace SmartcatPlugin.Services
 
         private void CreateChildrenDirectory(TestDirectory parentDirectory, Item parentDirectoryItem)
         {
-            var templateItem = _masterDb.GetItem(ConstantIds.FolderTemplate);
+            var templateItem = _sitecoreDbService.GetItemById(ConstantIds.FolderTemplate);
             if (parentDirectory.Children != null)
             {
                 foreach (var child in parentDirectory.Children)
@@ -213,7 +213,7 @@ namespace SmartcatPlugin.Services
 
         private Item CreatePage(Item parentItem, TestPage page)
         {
-            var pageTemplateItem = _masterDb.GetItem(ConstantIds.SampleItem);
+            var pageTemplateItem = _sitecoreDbService.GetItemById(ConstantIds.SampleItem);
             Language ruLanguage = Language.Parse("ru");
             Language esLanguage = Language.Parse("es");
 
@@ -232,7 +232,7 @@ namespace SmartcatPlugin.Services
 
                 if (!string.IsNullOrEmpty(page.Title.RussianValue))
                 {
-                    newItem = _masterDb.GetItem(newItem.ID, ruLanguage);
+                    newItem = _sitecoreDbService.GetItemByIdAndLanguage(newItem.ID, ruLanguage);
 
                     newItem.Editing.BeginEdit();
                     newItem.Fields["Title"].Value = page.Title.RussianValue;
@@ -241,7 +241,7 @@ namespace SmartcatPlugin.Services
                 }
                 if (!string.IsNullOrEmpty(page.Title.SpanishValue))
                 {
-                    newItem = _masterDb.GetItem(newItem.ID, esLanguage);
+                    newItem = _sitecoreDbService.GetItemByIdAndLanguage(newItem.ID, esLanguage);
 
                     newItem.Editing.BeginEdit();
                     newItem.Fields["Title"].Value = page.Title.SpanishValue;
@@ -251,6 +251,74 @@ namespace SmartcatPlugin.Services
             }
 
             return childItem;
+        }
+
+        public Dictionary<string, LocJsonContent> GetItemContent(Item parentPage, List<string> targetLocales)
+        {
+            if (parentPage == null || targetLocales == null)
+            {
+                throw new NullReferenceException("Invalid inner data");
+            }
+
+            var targetLanguages = targetLocales
+                .Select(Language.Parse)
+                .ToList();
+
+            var locJsonDictionary = new Dictionary<string, LocJsonContent>();
+
+            var units = new List<Unit>();
+
+            var fields = parentPage.GetNonSystemFields();
+
+            foreach (var field in fields)
+            {
+                var unit = new Unit
+                {
+                    Key = field.Key,
+                    Properties = new UnitProperties
+                    {
+                        SmartcatFormat = field.Type == ConstantItemFieldTypes.RichText ? "html" : ""
+                    },
+                    Source = StringSplitter.SplitStringWithNewlines(field.Value),
+                    Target = new List<string>()
+                };
+
+                units.Add(unit);
+                //Log.Info($"{typeof(Unit)} key:{unit.Key} was created. ItemExtensions.GetItemContent()");
+            }
+
+            foreach (var targetLanguage in targetLanguages)
+            {
+                var locJsonContent = new LocJsonContent
+                {
+                    Units = units,
+                    Properties = new Properties
+                    {
+                        ItemId = parentPage.ID.ToString(),
+                        TargetLanguage = targetLanguage.Name
+                    }
+                };
+
+                locJsonDictionary.Add(targetLanguage.Name, locJsonContent);
+
+                var versions = parentPage.Versions.GetVersions(true);
+                var isItemHaveTargetLanguages = versions.Any(v => v.Language == targetLanguage);
+
+                if (!isItemHaveTargetLanguages)
+                {
+                    continue;
+                }
+
+                var targetVersionItem = _sitecoreDbService.GetItemByIdAndLanguage(parentPage.ID, targetLanguage);
+
+                foreach (var unit in locJsonContent.Units)
+                {
+                    var field = targetVersionItem.Fields[unit.Key];
+                    unit.Target = StringSplitter.SplitStringWithNewlines(field.Value);
+                }
+            }
+
+            return locJsonDictionary;
         }
     }
 }

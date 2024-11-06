@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace SmartcatPlugin.Models.Dtos
 {
@@ -6,11 +7,20 @@ namespace SmartcatPlugin.Models.Dtos
     {
         [JsonProperty("id")]
         public string Id { get; set; }
+
         [JsonProperty("name")]
         public string Name { get; set; }
+
         [JsonProperty("status")]
         public string Status { get; set; }
+
         [JsonProperty("description")]
         public string Description { get; set; }
+
+        [JsonProperty("sourceLanguage")]
+        public string SourceLanguage { get; set; }
+
+        [JsonProperty("targetLanguages")]
+        public List<string> TargetLanguages { get; set; }
     }
 }

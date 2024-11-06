@@ -1,11 +1,7 @@
 ﻿using System;
-using Newtonsoft.Json;
 using Sitecore.Data;
-using SmartcatPlugin.Constants;
 using System.Collections.Generic;
-using System.Linq;
 using Sitecore.Data.Items;
-using SmartcatPlugin.Extensions;
 using SmartcatPlugin.Models.Dtos;
 using Sitecore.Globalization;
 using SmartcatPlugin.Interfaces;
@@ -14,16 +10,17 @@ namespace SmartcatPlugin.Services
 {
     public class BasketService : IBasketService
     {
-        private readonly ICacheService _cacheService;
-        private readonly Database _masterDb = Database.GetDatabase("master");
-        private TreeNodeDto _rootNode;
+        //private readonly ICacheService _cacheService;
+        //private readonly Database _masterDb = Database.GetDatabase("master");
+        //private TreeNodeDto _rootNode;
+        private readonly ISitecoreDbService _sitecoreDbService;
         
-        public BasketService(ICacheService cacheService)
+        public BasketService(ISitecoreDbService sitecoreDbService)
         {
-            _cacheService = cacheService;
+            _sitecoreDbService = sitecoreDbService;
         }
 
-        public ItemsTreeDto BuildSelectedItemTree()
+        /*public ItemsTreeDto BuildSelectedItemTree()
         {
             var userName = Sitecore.Context.User.Name;
             string cachedData = _cacheService.GetValue($"{userName}:{StringConstants.SelectedItems}");
@@ -58,9 +55,9 @@ namespace SmartcatPlugin.Services
             };
 
             return result;
-        }
+        }*/
 
-        private void AddNodeWithParents(Item item, Dictionary<string, TreeNodeDto> addedItems)
+        /*private void AddNodeWithParents(Item item, Dictionary<string, TreeNodeDto> addedItems)
         {
             var node = new TreeNodeDto
             {
@@ -127,9 +124,9 @@ namespace SmartcatPlugin.Services
             }
 
             AddParentNodes(parentItem, addedItems, parentNode);
-        }
+        }*/
 
-        public List<Item> GetItemsByIds(Database database, List<string> ids, string language)
+        public List<Item> GetItemsByIds(List<string> ids, string language)
         {
             List<Item> items = new List<Item>();
             Language itemLanguage = Language.Parse(language);
@@ -137,7 +134,7 @@ namespace SmartcatPlugin.Services
             foreach (var id in ids)
             {
                 ID itemId = new ID(id);
-                Item item = database.GetItem(itemId, itemLanguage);
+                Item item = _sitecoreDbService.GetItemByIdAndLanguage(itemId, itemLanguage);
 
                 if (item == null || item.Versions.Count == 0)
                 {
@@ -167,7 +164,7 @@ namespace SmartcatPlugin.Services
 
         public List<LanguageDto> GetAvailableLanguages()
         {
-            var languageItems = _masterDb.GetItem("/sitecore/system/Languages");
+            var languageItems = _sitecoreDbService.GetItemByPath("/sitecore/system/Languages");
             var languageDtos = new List<LanguageDto>();
 
             if (languageItems != null)

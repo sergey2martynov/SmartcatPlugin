@@ -1,9 +1,5 @@
-﻿using System;
-using SmartcatPlugin.Services;
-using System.Web.Http;
+﻿using System.Web.Http;
 using Newtonsoft.Json;
-using Sitecore.Security.Accounts;
-using SmartcatPlugin.Cache;
 using SmartcatPlugin.Constants;
 using SmartcatPlugin.Models.Dtos;
 using SmartcatPlugin.Interfaces;
@@ -15,12 +11,18 @@ namespace SmartcatPlugin.Controllers
     {
         private readonly ICacheService _cacheService;
         private readonly IItemService _itemService;
+        private readonly ISitecoreDbService _sitecoreDbService;
+        private readonly ISmartcatLoggingService _logger;
 
         public AddItemController(ICacheService cacheService,
-            IItemService itemService)
+            IItemService itemService,
+            ISmartcatLoggingService logger,
+            ISitecoreDbService sitecoreDbService)
         {
             _cacheService = cacheService;
             _itemService = itemService;
+            _sitecoreDbService = sitecoreDbService;
+            _logger = logger;
         }
 
         [Route("get-items-tree")]
@@ -36,10 +38,11 @@ namespace SmartcatPlugin.Controllers
         [HttpPost]
         public IHttpActionResult SaveItemIdsToCache([FromBody] SaveItemIdsToCacheDto selectedItemIds)
         {
-            var userName = Sitecore.Context.User.Name;
+            var userName = _sitecoreDbService.GetCurrentUser().Name;
             var serializedList = JsonConvert.SerializeObject(selectedItemIds.SelectedItemIds);
-            _cacheService.SetValue($"{userName}:{StringConstants.SelectedItems}", serializedList);
-
+            var cacheKey = $"{userName}:{StringConstants.SelectedItems}";
+            _cacheService.SetValue(cacheKey, serializedList);
+            _logger.LogInfo($"Item ids added to cache: {cacheKey}");
             return Ok();
         }
     }

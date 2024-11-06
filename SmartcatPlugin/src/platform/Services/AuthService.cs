@@ -11,23 +11,29 @@ namespace SmartcatPlugin.Services
 {
     public class AuthService : IAuthService
     {
-        private readonly Database _masterDb = Database.GetDatabase("master");
-        public TemplateItem CreateApiKeyTemplate(Database database)
+        private readonly ISitecoreDbService _sitecoreDbService;
+
+        public AuthService(ISitecoreDbService sitecoreDbService)
         {
-            var templatesRoot = database.GetItem("/sitecore/templates/Smartcat");
+            _sitecoreDbService = sitecoreDbService;
+        }
+
+        public TemplateItem CreateApiKeyTemplate()
+        {
+            var templatesRoot = _sitecoreDbService.GetItemByPath("/sitecore/templates/Smartcat");
 
             if (templatesRoot == null)
             {
-                var templatesDirectory = database.GetItem("/sitecore/templates");
+                var templatesDirectory = _sitecoreDbService.GetItemByPath("/sitecore/templates");
                 templatesDirectory.Add("Smartcat", new TemplateID(ConstantIds.FolderTemplate));
-                templatesRoot = database.GetItem("/sitecore/templates/Smartcat");
+                templatesRoot = _sitecoreDbService.GetItemByPath("/sitecore/templates/Smartcat");
             }
 
             Item newTemplate;
 
             using (new SecurityDisabler())
             {
-                TemplateItem baseTemplate = database.GetItem(TemplateIDs.Template);
+                TemplateItem baseTemplate = _sitecoreDbService.GetItemById(TemplateIDs.Template);
                 if (baseTemplate == null)
                 {
                     throw new InvalidOperationException("Base template not found.");
@@ -88,21 +94,21 @@ namespace SmartcatPlugin.Services
             return newTemplate;
         }
 
-        public Item GetApiKeyItem(Database database)
+        public Item GetApiKeyItem()
         {
-            TemplateItem templateItem = database.GetItem("/sitecore/templates/Smartcat/SmartcatApiKeyTemplate");
+            TemplateItem templateItem = _sitecoreDbService.GetItemByPath("/sitecore/templates/Smartcat/SmartcatApiKeyTemplate");
 
             if (templateItem == null)
             {
-                templateItem = CreateApiKeyTemplate(database);
+                templateItem = CreateApiKeyTemplate();
             }
 
-            var apiKeyItem = database.GetItem(ConstantIds.ApiKeyItem);
+            var apiKeyItem = _sitecoreDbService.GetItemById(ConstantIds.ApiKeyItem);
 
             if (apiKeyItem == null)
             {
-                var settingsDirectory = database.GetItem("/sitecore/system/Settings");
-                var smartcatDirectory = database.GetItem("/sitecore/system/Settings/Smartcat");
+                var settingsDirectory = _sitecoreDbService.GetItemByPath("/sitecore/system/Settings");
+                var smartcatDirectory = _sitecoreDbService.GetItemByPath("/sitecore/system/Settings/Smartcat");
 
                 if (smartcatDirectory == null)
                 {
@@ -117,7 +123,7 @@ namespace SmartcatPlugin.Services
 
         public ApiKeyDto GetApiKey()
         {
-            var apiKeyItem = _masterDb.GetItem(ConstantIds.ApiKeyItem);
+            var apiKeyItem = _sitecoreDbService.GetItemById(ConstantIds.ApiKeyItem);
 
             var apiKey = new ApiKeyDto
             {
@@ -130,7 +136,7 @@ namespace SmartcatPlugin.Services
 
         public string GetWorkspaceId()
         {
-            var apiKeyItem = _masterDb.GetItem(ConstantIds.ApiKeyItem);
+            var apiKeyItem = _sitecoreDbService.GetItemById(ConstantIds.ApiKeyItem);
             var workspaceId = apiKeyItem.Fields[StringConstants.WorkSpaceId].Value;
 
             return workspaceId;
