@@ -2,7 +2,7 @@
     height: 100%;
     margin: 0;
     padding: 0;
-    font-family: sans-serif;
+    font-family: 'Open Sans', sans-serif;
     overflow: hidden;
 }
 
@@ -18,7 +18,7 @@
 
 .header {
     margin-left: 15px;
-    font-size: 18px;
+    font-size: 16px;
     font-weight: bold;
 }
 
@@ -57,20 +57,20 @@
     background-color: #333333 !important;
     border-color: #333333 !important;
     color: white !important;
-    width: 20px;
-    height: 20px;
+    width: 15px;
+    height: 15px;
     font-size: 12px;
-    line-height: 20px;
+    line-height: 16px;
 }
 
 .el-step__head.is-finish .el-step__icon {
     background-color: #d3d3d3 !important;
     border-color: #d3d3d3 !important;
     color: gray !important;
-    width: 20px;
-    height: 20px;
+    width: 15px;
+    height: 15px;
     font-size: 12px;
-    line-height: 20px;
+    line-height: 16px;
 }
 
 .el-step__title.is-process {
@@ -101,8 +101,8 @@
     background-color: #d3d3d3 !important;
     border-color: #d3d3d3 !important;
     color: gray !important;
-    width: 20px;
-    height: 20px;
+    width: 15px;
+    height: 15px;
     font-size: 12px;
     line-height: 20px;
 }
@@ -111,10 +111,23 @@
     color: black !important;
 }
 
+.el-step__title {
+    font-size: 12px;
+}
+
+.el-step__title.is-process {
+    font-weight: 400;
+    color: #303133;
+}
+
+.el-step.is-vertical .el-step__head {
+    width: 14px;
+}
+
 .tree {
     flex-grow: 1;
     margin-right: 5px;
-    max-height: 420px;
+    max-height: 405px;
     overflow-y: auto;
     margin-left: 15px;
 }
@@ -123,8 +136,9 @@
     height: 30px;
     display: flex;
     align-items: center;
-    padding: 5px 10px;
+    padding: 2.6px 10px;
     border-bottom: 1px solid #f0f0f0;
+    font-size: 12px;
 }
 
 .tree-node img {
@@ -157,6 +171,13 @@
     padding-right: 10px;
 }
 
+.el-checkbox__label {
+    font-size: 12px;
+}
+
+.el-checkbox {
+    color: black;
+}
 
 .el-checkbox.is-checked .el-checkbox__inner {
     background-color: black !important;
@@ -172,6 +193,10 @@
     color: black;
 }
 
+.el-checkbox__input.is-checked + .el-checkbox__label {
+    color: black;
+}
+
 .el-checkbox .el-checkbox__inner {
     border-color: gray !important;
 }
@@ -182,7 +207,7 @@
 
 .aside-with-divider {
     position: relative;
-    width: 185px !important;
+    width: 200px !important;
     padding: 10px;
     box-sizing: border-box;
     margin-top: 13px;

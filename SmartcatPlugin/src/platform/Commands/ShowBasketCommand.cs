@@ -11,7 +11,7 @@ namespace SmartcatPlugin.Commands
             {
                 Resizable = false,
                 Width = "800",
-                Height = "550",
+                Height = "540",
                 Header = "Create project",
                 Response = false,
                 Maximizable = false

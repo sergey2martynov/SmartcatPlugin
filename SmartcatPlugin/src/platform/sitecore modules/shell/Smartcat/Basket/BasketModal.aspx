@@ -15,6 +15,7 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
     <link href="../common.css" rel="stylesheet" type="text/css"/>
     <script src="https://unpkg.com/vue2-datepicker"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
 </head>
 <body>
     <div id="app">
@@ -93,7 +94,7 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
                         </el-col>
                     </el-container>
                     <el-col>
-                        <label style="padding-top: 15px; font-weight: bold; margin-left: 15px; font-size: 14px">Target language</label>
+                        <label style="padding-top: 15px; font-weight: bold; margin-left: 15px; font-size: 12px">Target language</label>
                         <el-row style="padding-top: 15px; margin-left: 15px;" v-for="targetLanguage in targetLanguages" :key="targetLanguage.code">
                             <el-checkbox
                                 v-model="selectedTargetLanguages"
@@ -104,14 +105,18 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
                         </el-row>
                     </el-col>
                     <el-col>
-                        <label style="padding-top: 15px; font-weight: bold; font-size: 14px" >Source language</label>
-                        <el-row style="padding-top: 15px;" v-for="sourceLanguage in sourceLanguages" :key="sourceLanguage.code">
+                        <label style="padding-top: 15px; font-weight: bold; font-size: 12px" >Source language</label>
+                        <el-row style="padding-top: 15px; font-size: 12px;" v-for="sourceLanguage in sourceLanguages" :key="sourceLanguage.code">
+                            <label>{{ sourceLanguage.name }}</label>
+                            <!--
                             <el-checkbox
                                 :checked="selectedSourceLanguage.includes(sourceLanguage.code)"
                                 :label="sourceLanguage.code"
                                 @change="handleSourceLanguageChange(sourceLanguage)">
                                 {{ sourceLanguage.name }}
                             </el-checkbox>
+                            -->
+                            
                         </el-row>
                     </el-col>
                 </div>
@@ -320,7 +325,8 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
                     <button
                         v-if="currentStep === 3"
                         class="common-button submit-button"
-                        @click="confirmProject">
+                        @click="confirmProject"
+                        style="width: 140px">
                         Confirm project
                     </button>
                 </div>
@@ -472,6 +478,7 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
                 axios.get('/api/basket/get-translation-languages')
                     .then(response => {
                         this.sourceLanguages = response.data.sourceLanguages;
+                        this.selectedSourceLanguage = this.sourceLanguages.map(l => l.code);
                         this.targetLanguages = response.data.targetLanguages;
                         this.smartcatLanguageCodes = response.data.smartcatLanguageCodes;
                     })
@@ -598,11 +605,8 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
                         alert("There was an error: " + error.response.data.Message);
                     });
             },
-            closeWindow() {
-                window.parent.$('.ui-dialog-content:visible').dialog('close');
-            },
             cancel() {
-
+                window.parent.$('.ui-dialog-content:visible').dialog('close');
             },
             formatDeadline() {
                 if (!this.deadlineDate || !this.deadlineTime) {
