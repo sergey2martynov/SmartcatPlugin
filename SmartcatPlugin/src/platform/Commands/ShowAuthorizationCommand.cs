@@ -11,7 +11,7 @@ namespace SmartcatPlugin.Commands
             {
                 Resizable = false,
                 Width = "500",
-                Height = "330",
+                Height = "300",
                 Header = "Connect workspace",
                 Response = false,
                 Maximizable = false

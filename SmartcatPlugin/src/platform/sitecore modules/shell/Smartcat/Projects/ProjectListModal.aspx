@@ -92,13 +92,20 @@
                                 <span style="width: 36px;"></span>
                             </div>
                             <div class="document" v-for="doc in project.documents" :key="doc.id">
-                                <span style="padding-left: 24px; width: 318px;">{{ doc.name }}</span>
+                                <span style="padding-left: 24px; width: 338px;">{{ doc.name }}</span>
                                 <span style="width: 200px;">English test</span>
                                 <span style="width: 292px;" :style="{ 
                                                                       color: getStatusColor(doc.status) 
                                                                     }" >
                                     {{ doc.status }}</span>
-                                <span style="width: 36px;"></span>
+                                <span style="width: 68px;">
+                                    <svg style="padding-right: 15px; cursor: pointer;" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M13.6564 2.05078L5.20648 10.5007M5.20648 10.5007L9.85781 10.5007M5.20648 10.5007V5.84936M13.6564 13.9508H2.34375" stroke="#474747" stroke-width="1.5" stroke-linecap="square"/>
+                                    </svg>
+                                    <svg @click="deleteDocument(doc, project)"width="16" style="cursor: pointer;" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M2.71094 4.69523H13.2887M6.6776 7.33966V11.3063M9.32211 7.33966V11.3063M3.37212 4.85568L4.03319 12.6286C4.03319 12.9792 4.1725 13.3155 4.42046 13.5635C4.66843 13.8115 5.00474 13.9508 5.35542 13.9508H10.6443C10.995 13.9508 11.3313 13.8115 11.5793 13.5635C11.8272 13.3155 11.9665 12.9792 11.9665 12.6286L12.6277 4.85568M6.01652 4.69522V2.71189C6.01652 2.53655 6.08618 2.3684 6.21016 2.24442C6.33414 2.12043 6.5023 2.05078 6.67763 2.05078H9.32208C9.49741 2.05078 9.66557 2.12043 9.78955 2.24442C9.91354 2.3684 9.98319 2.53655 9.98319 2.71189V4.69522" stroke="#474747" stroke-width="1.5" stroke-linecap="square"/>
+                                    </svg>
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -225,8 +232,14 @@
                             alert('There was an error!', error.response.data.Message);
                         });
                 },
-                deleteDocument() {
-                    
+                deleteDocument(document, project) {
+                    axios.delete(`/api/project/delete-document?id=${document.id}&projectId=${project.id}`)
+                        .then(response => {
+                            project.documents = project.documents.filter(doc => doc.id !== document.id);
+                        })
+                        .catch(error => {
+                            alert('There was an error!', error.response.data.Message);
+                        });
                 }
             }
         });

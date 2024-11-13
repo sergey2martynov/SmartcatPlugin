@@ -76,7 +76,8 @@
                 isLoading: false,
                 isDisableConnectButton: false,
                 inputType: "text",
-                isFirstTrying: true
+                isFirstTrying: true,
+                isFieldValidated: false
             },
             computed: {
             },  
@@ -113,6 +114,7 @@
                             this.isFirstTrying = false;
                             this.isValidWorkspaceId = false;
                             this.isValidApiKey = false;
+                            this.isFieldValidated = false;
                             this.changeDisablingConnectButton();
                         })
                         .finally(() => {
@@ -126,7 +128,8 @@
                         this.isValidWorkspaceId = true;
                         this.changeDisablingConnectButton();
 
-                        if (!this.isFirstTrying) {
+                        if (!this.isFirstTrying && !this.isFieldValidated) {
+                            this.isFieldValidated = true;
                             this.validateApiKey();
                         }
 
@@ -143,7 +146,8 @@
                         this.isValidApiKey = true;
                         this.changeDisablingConnectButton();
 
-                        if (!this.isFirstTrying) {
+                        if (!this.isFirstTrying && !this.isFieldValidated) {
+                            this.isFieldValidated = true;
                             this.validateWorkspaceId();
                         }
 

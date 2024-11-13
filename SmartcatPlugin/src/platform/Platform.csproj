@@ -131,10 +131,12 @@
     <Compile Include="Models\Dtos\ApiKeyDto.cs" />
     <Compile Include="Models\Dtos\CreateDocumentRequest.cs" />
     <Compile Include="Models\Dtos\CreateDocumentResponse.cs" />
+    <Compile Include="Models\Dtos\CreateProjectRequestRequest.cs" />
     <Compile Include="Models\Dtos\GetProjectDto.cs" />
     <Compile Include="Models\Dtos\FieldDto.cs" />
     <Compile Include="Models\Dtos\ProjectDto.cs" />
     <Compile Include="Models\SmartcatApi\Base\ResponseData.cs" />
+    <Compile Include="Models\SmartcatApi\DeleteDocumentRequest.cs" />
     <Compile Include="Models\SmartcatApi\DeleteProjectRequest.cs" />
     <Compile Include="Models\SmartcatApi\ErrorResponse.cs" />
     <Compile Include="Models\SmartcatApi\GetProjectListRequest.cs" />

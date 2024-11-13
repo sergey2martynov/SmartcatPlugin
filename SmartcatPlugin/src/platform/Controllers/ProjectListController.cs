@@ -153,5 +153,27 @@ namespace SmartcatPlugin.Controllers
 
             return BadRequest();
         }
+
+        [Route("delete-document")]
+        [HttpDelete]
+        public async Task<IHttpActionResult> DeleteDocument(string id, string projectId)
+        {
+            var apiKey = _authService.GetApiKey();
+            var request = new DeleteDocumentRequest
+            {
+                WorkspaceId = apiKey.WorkspaceId,
+                ProjectId = projectId,
+                DocumentId = id
+            };
+
+            var result = await _apiClient.DeleteDocument(request);
+
+            if (result.IsSuccess)
+            {
+                return Ok();
+            }
+
+            return BadRequest();
+        }
     }
 }

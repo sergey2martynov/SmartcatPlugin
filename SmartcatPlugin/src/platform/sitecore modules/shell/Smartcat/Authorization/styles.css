@@ -17,7 +17,7 @@ body, p, h1, h2, h3, h4, h5, h6, a, li, span, div, input, button {
 
 .input-wrapper {
     margin: 0 20px 0 20px;
-    font-size: 14px;
+    font-size: 12px;
 }
 
 .el-input__inner {
@@ -32,7 +32,7 @@ body, p, h1, h2, h3, h4, h5, h6, a, li, span, div, input, button {
     justify-content: right;
     align-items: center;
     gap: 15px;
-    height: 60px;
+    height: 52px;
 }
 
 

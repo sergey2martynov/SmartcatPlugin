@@ -18,6 +18,7 @@ namespace SmartcatPlugin.Interfaces
         Task<ApiResponse<GetDocumentsByProjectIdResponse>> GetDocumentsByProjectId(
             GetDocumentsByProjectIdRequest request);
         Task<ApiResponse<ResponseData>> DeleteProject(DeleteProjectRequest request);
+        Task<ApiResponse<ResponseData>> DeleteDocument(DeleteDocumentRequest request);
         Task<List<ApiResponse<TResponse>>> SendRequests<TRequest, TResponse>(List<TRequest> requestDtos,
             string endpoint, HttpMethod method) where TResponse : ResponseData;
     }

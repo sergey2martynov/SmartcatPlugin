@@ -202,13 +202,13 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
                             </el-select>
                         </div>
                     </div>
-                    <div v-else style="margin-left: 15px; margin-right: 15px;">
+                    <div v-if="!isUseTemplates" style="padding-top: 20px; margin-left: 15px; margin-right: 15px;">
                         <div>
                             <el-label class="project-field-label" for="workflowStagesSelect">
                                 Workflow Stages <span class="required">*</span>
                             </el-label>
                         </div>
-                        <div v-else class="project-field">
+                        <div class="project-field">
                             <el-select
                                 v-model="selectedWorkflowStage"
                                 size="medium"
@@ -293,7 +293,7 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
                                 </el-row>
                                 <el-row v-else class="project-info-field-value">
                                     <a>
-                                        {{ selectedWorkFlowStage }}
+                                        {{ selectedWorkFlowStage.name }}
                                     </a>
                                 </el-row>
                             </div>
@@ -396,15 +396,15 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
             workflowStages: [
                 {
                     name: "Translation",
-                    id: 0
+                    id: "0"
                 },
                 {
                     name: "AI Translation",
-                    id: 1
+                    id: "1"
                 },
                 {
                     name: "AI Translation + Translation review",
-                    id: 2
+                    id: "2"
                 }
             ],
             defaultTemplate: null,
@@ -489,9 +489,9 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
             async getTemplates() {
                 axios.get('/api/basket/get-templates')
                     .then(response => {
-
+                        console.log("get-templates", response);
                         this.templates = response.data.templates;
-                        this.isUseTemplates = response.data.projectTemplatesAreEnabled;
+                        this.isUseTemplates = response.data.templates.length > 0;
                         if (this.isUseTemplates) {
                             this.selectedTemplateId = this.templates[0].templateId;
                             const defaultTemplate = {
@@ -504,7 +504,7 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
                             this.templates.push(defaultTemplate);
                         } else {
 
-                            this.selectedWorkFlowStage = this.workflowStages[0];
+                            this.selectedWorkFlowStage = this.workflowStages[2];
                         }
                     })
                     .catch(error => {
@@ -512,6 +512,10 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
                     });
             },
             validateLanguages(templateId) {
+                if (!this.isUseTemplates) {
+                    return;
+                }
+
                 const template = this.templates.find(item => item.templateId === templateId);
                 let sourceLanguageMessage = "";
                 this.isValidSelectedLanguages = true;

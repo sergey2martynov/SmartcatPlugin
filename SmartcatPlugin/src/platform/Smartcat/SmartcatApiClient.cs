@@ -14,6 +14,7 @@ using SmartcatPlugin.Interfaces;
 using SmartcatPlugin.Models.SmartcatApi;
 using SmartcatPlugin.Models.SmartcatApi.Base;
 using System.Web.Helpers;
+using DocumentFormat.OpenXml.Wordprocessing;
 
 namespace SmartcatPlugin.Smartcat
 {
@@ -26,7 +27,7 @@ namespace SmartcatPlugin.Smartcat
         public SmartcatApiClient(ISmartcatLoggingService logger, IAuthService authService)
         {
             _httpClient = new HttpClient();
-            _httpClient.BaseAddress = new Uri("https://ihub.smartcat.com");
+            _httpClient.BaseAddress = new Uri("https://ihub-ea.smartcat.com");
             _logger = logger;
             _authService = authService;
         }
@@ -72,7 +73,22 @@ namespace SmartcatPlugin.Smartcat
             request.WorkspaceId = apiKey.WorkspaceId;
             request.IntegrationType = "sitecore-app";
             FillHttpClientAuthHeaders();
-            var response = await _httpClient.PostAsync("/api/v1/projects", CreateJsonContent(request));
+
+            //
+            var tempRequest = new CreateProjectRequestRequest
+            {
+                IntegrationType = request.IntegrationType,
+                WorkspaceId = apiKey.WorkspaceId,
+                Name = request.Name,
+                Description = "desc",
+                SourceLanguage = request.SourceLanguage,
+                TargetLanguage = request.TargetLanguages[0],
+                DueDate = null,
+                ProjectTemplateId = request.ProjectTemplateId,
+                SelectedItemIds = request.SelectedItemIds
+            };
+            //
+            var response = await _httpClient.PostAsync("/api/v1/projects", CreateJsonContent(tempRequest));
             var result = await HandleResponse<CreateProjectResponse>(response);
             return result;
         }
@@ -96,6 +112,17 @@ namespace SmartcatPlugin.Smartcat
         {
             FillHttpClientAuthHeaders();
             var httpRequestMessage = new HttpRequestMessage(HttpMethod.Delete, "/api/v1/projects");
+            var content = JsonConvert.SerializeObject(request);
+            httpRequestMessage.Content = new StringContent(content, Encoding.UTF8, "application/json");
+            var httpResponseMessage = await _httpClient.SendAsync(httpRequestMessage);
+            var result = await HandleResponse<ResponseData>(httpResponseMessage);
+            return result;
+        }
+
+        public async Task<ApiResponse<ResponseData>> DeleteDocument(DeleteDocumentRequest request)
+        {
+            FillHttpClientAuthHeaders();
+            var httpRequestMessage = new HttpRequestMessage(HttpMethod.Delete, "/api/v1/documents");
             var content = JsonConvert.SerializeObject(request);
             httpRequestMessage.Content = new StringContent(content, Encoding.UTF8, "application/json");
             var httpResponseMessage = await _httpClient.SendAsync(httpRequestMessage);
