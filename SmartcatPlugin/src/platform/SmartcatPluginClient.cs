@@ -2,7 +2,6 @@
 using SmartcatPlugin.Models.ApiResponse;
 using SmartcatPlugin.Models.Smartcat.GetFolderList;
 using SmartcatPlugin.Models.Smartcat.GetItemById;
-using SmartcatPlugin.Models.Smartcat.GetItemContent;
 using SmartcatPlugin.Models.Smartcat.GetItemList;
 using SmartcatPlugin.Models.Smartcat.GetParentDirectories;
 using SmartcatPlugin.Models.Smartcat.ImportTranslation;

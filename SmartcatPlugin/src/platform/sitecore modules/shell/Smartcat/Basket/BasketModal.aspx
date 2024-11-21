@@ -388,6 +388,7 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
             showHelpModal: false,
             projectName: "",
             selectedWorkflowStage: null,
+            selectedWorkFlowStage: "",
             selectedTemplateId: "",
             deadlineDate: null,
             deadlineTime: null,
@@ -396,15 +397,15 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
             workflowStages: [
                 {
                     name: "Translation",
-                    id: "0"
+                    id: "2"
                 },
                 {
                     name: "AI Translation",
-                    id: "1"
+                    id: "3"
                 },
                 {
                     name: "AI Translation + Translation review",
-                    id: "2"
+                    id: "1"
                 }
             ],
             defaultTemplate: null,
@@ -453,7 +454,7 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
         created() {
             this.getTreeData();
             this.getLanguages();
-            this.getTemplates();
+            //this.getTemplates();
             this.generateTimeOptions();
         },
         methods: {
@@ -549,6 +550,7 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
                 if (this.currentStep === 2) {
                     this.formatDeadline();
                     this.handleSelectedLanguages();
+                    console.log("this.selectedWorkflowStage", this.selectedWorkflowStage);
                 }
                 if (this.currentStep < this.totalSteps - 1) {
                     this.currentStep += 1;
@@ -597,7 +599,7 @@ Inherits="SmartcatPlugin.sitecore_modules.shell.Smartcat.Basket.BasketModal" %>
                     dueDate: this.formatDeadline(),
                     projectTemplateId: null,
                     selectedItemIds: this.checkedNodes.map(node => node.id),
-                    selectedWorkflowStage: this.selectedWorkflowStage
+                    stage: this.selectedWorkflowStage
                 };
                 console.log(request);
                 axios.post('/api/basket/save-project', request)

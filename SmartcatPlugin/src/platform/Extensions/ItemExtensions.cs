@@ -12,7 +12,6 @@ using SmartcatPlugin.Constants;
 using SmartcatPlugin.Models;
 using SmartcatPlugin.Models.Smartcat;
 using SmartcatPlugin.Models.Smartcat.GetFolderList;
-using SmartcatPlugin.Models.Smartcat.GetItemContent;
 using SmartcatPlugin.Models.Smartcat.GetItemList;
 using SmartcatPlugin.Tools;
 

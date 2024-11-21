@@ -22,7 +22,6 @@ using SmartcatPlugin.Models.Smartcat;
 using SmartcatPlugin.Models.Smartcat.Authorization;
 using SmartcatPlugin.Models.Smartcat.GetFolderList;
 using SmartcatPlugin.Models.Smartcat.GetItemById;
-using SmartcatPlugin.Models.Smartcat.GetItemContent;
 using SmartcatPlugin.Models.Smartcat.GetItemList;
 using SmartcatPlugin.Models.Smartcat.GetParentDirectories;
 using SmartcatPlugin.Models.Smartcat.ImportTranslation;
@@ -167,7 +166,7 @@ namespace SmartcatPlugin.Controllers
             if (!item.IsHasContentFields())
             {
                 _logger.LogError($"Item {item.Name} with {item.ID} is not Item");
-                return Json(new Dictionary<string, LocJsonContent>());
+                return Json(new Dictionary<string, LocJson>());
             }
 
             var result = _itemService.GetItemContent(item, request.TargetLocales);

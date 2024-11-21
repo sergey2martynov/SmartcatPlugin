@@ -11,6 +11,6 @@ namespace SmartcatPlugin.Interfaces
         Task<List<ApiResponse<GetExportIdResponse>>> GetExportIds(string projectId, List<string> documentIds, string workSpaceId);
         Task<List<ApiResponse<GetItemTranslationResponse>>> GetTranslatedContent(List<string> exportIds,
             string workspaceId);
-        void AddNewItemLanguageVersions(LocJsonContent content);
+        void AddNewItemLanguageVersions(LocJson content);
     }
 }

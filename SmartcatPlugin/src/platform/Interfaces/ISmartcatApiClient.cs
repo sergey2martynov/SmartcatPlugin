@@ -5,14 +5,17 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 using SmartcatPlugin.Models.SmartcatApi.Base;
+using System;
+using Smartcat.IntegrationHub.Contracts.Dto.DataItems;
 
 namespace SmartcatPlugin.Interfaces
 {
     public interface ISmartcatApiClient
     {
         Task<ApiResponse<GetProjectListResponse>> GetProjects(GetProjectListRequest request);
-        Task<ApiResponse<ResponseData>> ValidateApiKeyAsync(ApiKeyDto dto);
-        Task<ApiResponse<CreateProjectResponse>> CreateProject(CreateProjectRequest request);
+        Task<bool> ValidateApiKeyAsync(ApiKeyDto dto);
+        Task<string> CreateProject(CreateProjectRequest request);
+        Task<DataItemInfo[]> CreateDocuments(List<CreateDocumentRequest> requests, string sourceLanguage);
         Task<ApiResponse<GetItemTranslationResponse>> GetItemTranslation(GetItemTranslationRequest request);
         Task<ApiResponse<GetTemplateResponse>> GetTemplates(GetTemplatesRequest request);
         Task<ApiResponse<GetDocumentsByProjectIdResponse>> GetDocumentsByProjectId(

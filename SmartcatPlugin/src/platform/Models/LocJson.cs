@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace SmartcatPlugin.Models
 {
-    public class LocJsonContent
+    public class LocJson
     {
         [JsonProperty("properties")]
         public Properties Properties { get; set; }

@@ -13,23 +13,195 @@ using System.Web;
 using SmartcatPlugin.Interfaces;
 using SmartcatPlugin.Models.SmartcatApi;
 using SmartcatPlugin.Models.SmartcatApi.Base;
-using System.Web.Helpers;
-using DocumentFormat.OpenXml.Wordprocessing;
+using Smartcat.IntegrationHub.ApiClient;
+using Sitecore.Data;
+using Smartcat.IntegrationHub.Contracts.Dto.General;
+using Smartcat.IntegrationHub.Contracts.Dto.Projects;
+using DeleteProjectRequest = SmartcatPlugin.Models.SmartcatApi.DeleteProjectRequest;
+using Smartcat.IntegrationHub.Contracts.Dto.Connections;
+using Smartcat.IntegrationHub.Contracts.Dto.Shared;
+using System.Dynamic;
+using Smartcat.IntegrationHub.Contracts.Dto.DataItems;
+using Smartcat.IntegrationHub.Contracts.Dto.DataDirectories;
+using static System.Net.WebRequestMethods;
 
 namespace SmartcatPlugin.Smartcat
 {
     public class SmartcatApiClient : ISmartcatApiClient
     {
-        private readonly HttpClient _httpClient;
         private readonly ISmartcatLoggingService _logger;
-        private readonly IAuthService _authService;
+        private const string Host = "https://ihub-us.smartcat.com/";
 
+        private static WorkspacesApiClient _workspacesApiClient = new(HttpClient);
+        private static DataItemApiClient _dataItemApiClient = new(HttpClient);
+        private static DataDirectoryApiClient _dataDirectoryApiClient = new(HttpClient);
+        private static ConnectionApiClient _connectionApiClient = new(HttpClient);
+        private static ProjectsApiClient _projectsApiClient = new(HttpClient);
+
+        private const string ConnectionName = "test connection sitecore";
+        private Guid _connectionId;
+        private static HttpClient HttpClient =>
+            _httpClient ??= GetHttpClient();
+
+        private static HttpClient _httpClient;
+        private readonly IAuthService _authService;
         public SmartcatApiClient(ISmartcatLoggingService logger, IAuthService authService)
         {
-            _httpClient = new HttpClient();
-            _httpClient.BaseAddress = new Uri("https://ihub-ea.smartcat.com");
             _logger = logger;
             _authService = authService;
+        }
+
+        private static HttpClient GetHttpClient()
+        {
+            var apiKey = GetApiKey();
+
+            var httpClient = new HttpClient();
+            httpClient.DefaultRequestHeaders.Add("Authorization", "Basic " 
+                                                                  + EncodeClientIdSecretToBase64(apiKey.WorkspaceId, apiKey.ApiKey));
+            httpClient.BaseAddress = new Uri(Host);
+            return httpClient;
+        }
+
+        public static ApiKeyDto GetApiKey()
+        {
+            var apiKeyItem = Database.GetDatabase("master").GetItem(ConstantIds.ApiKeyItem);
+
+            var apiKey = new ApiKeyDto
+            {
+                WorkspaceId = apiKeyItem.Fields[StringConstants.WorkSpaceId].Value,
+                ApiKey = apiKeyItem.Fields[StringConstants.ApiKey].Value
+            };
+            return apiKey;
+        }
+
+        private async Task EnsureConnection()
+        {
+            if (_connectionId != Guid.Empty)
+            {
+                return;
+            }
+
+            var apiKey = GetApiKey();
+            var connectionsClient = _connectionApiClient;
+
+            try
+            {
+                var connections2 = await connectionsClient.GetConnectionsAsync(apiKey.WorkspaceId, false);
+            }
+            catch (Exception ex)
+            {
+                var a = ex.Message;
+            }
+
+            var connections = await connectionsClient.GetConnectionsAsync(apiKey.WorkspaceId, false);
+
+            var connectionId = connections.Connections.FirstOrDefault(x =>
+                x.ConnectionTypeId == Hub20IntegrationTypes.LokaliseV2)?.Id;
+
+            if (connectionId == null)
+            {
+                IDictionary<string, object> properties = new ExpandoObject();
+                properties["ApiKey"] = "c34e98e24877961a27abed334e7d8c1301f385ed";
+                properties["Url"] = "https://sc10sc.dev.local/";
+                var createdConnection = await connectionsClient.CreateAsync(new CreateConnectionRequest
+                {
+                    ConnectionName = ConnectionName,
+                    IsHidden = true,
+                    ConnectionTypeId = Hub20IntegrationTypes.Sitecore,
+                    ScWorkspaceId = apiKey.WorkspaceId,
+                    Properties = (ExpandoObject)properties
+                });
+
+                connectionId = createdConnection.Id;
+            }
+
+            _connectionId = connectionId.Value;
+        }
+
+        public async Task<bool> ValidateApiKeyAsync(ApiKeyDto dto)
+        {
+            var httpClient = new HttpClient();
+            httpClient.DefaultRequestHeaders.Add("Authorization", "Basic "
+                                                                  + EncodeClientIdSecretToBase64(dto.WorkspaceId, dto.ApiKey));
+            httpClient.BaseAddress = new Uri(Host);
+            _workspacesApiClient = new (httpClient);
+            _dataItemApiClient = new (httpClient);
+            _dataDirectoryApiClient = new (httpClient);
+            _connectionApiClient = new (httpClient);
+            _projectsApiClient = new (httpClient);
+
+            var response = await _workspacesApiClient.ValidateApiKeyAsync(dto.WorkspaceId,
+                new ValidateApiKeyRequest { ApiKey = dto.ApiKey });
+            return response.IsValid;
+        }
+
+        public async Task<string> CreateProject(CreateProjectRequest request)
+        {
+            await EnsureConnection();
+            var createdProject = await _projectsApiClient.CreateProjectAsync(_connectionId,
+                new CreateProjectForConnectionRequest
+                {
+                    Name = request.Name,
+                    SourceLanguage = request.SourceLanguage,
+                    TargetLanguages = request.TargetLanguages.ToArray(),
+                    DueDate = request.DueDate == DateTime.MinValue ? null : request.DueDate,
+                    ProjectTemplateId = request.ProjectTemplateId,
+                    Stages = (ProjectStages)request.Stage
+
+                });
+            return createdProject.Id;
+        }
+
+        public async Task<DataItemInfo[]> CreateDocuments(List<CreateDocumentRequest> requests, string sourceLanguage)
+        {
+            var semaphore = new SemaphoreSlim(10);
+
+            var directoryId = new ExternalObjectId(Guid.NewGuid().ToString(), "lokalise-project");
+
+            await _dataDirectoryApiClient.CreateDataDirectoryAsync(_connectionId,
+                new CreateDataDirectoryRequest
+                {
+                    Title = "Test dir",
+                    ExternalDirectoryId = directoryId,
+                    ParentId = ExternalObjectId.Root,
+                });
+
+            var tasks = requests.Select(async request =>
+            {
+                await semaphore.WaitAsync();
+
+                try
+                {
+                    return await _dataItemApiClient.ImportDataItemAsync(
+                        _connectionId,
+                        new ImportDataItemRequest
+                        {
+                            ProjectId = Guid.Parse(request.ProjectId),
+                            ExternalItemId = request.ExternalObjectId,
+                            ParentIds = Array.Empty<ExternalObjectId>(),
+                            Title = request.Title,
+                            Content = request.Content,
+                            SourceLanguage = sourceLanguage,
+                            TargetLanguage = request.TargetLanguage,
+                        });
+                }
+                finally
+                {
+                    semaphore.Release();
+                }
+            });
+
+            try
+            {
+                var responses2 = await Task.WhenAll(tasks);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+            var responses = await Task.WhenAll(tasks);
+            return responses;
         }
 
         public async Task<ApiResponse<GetProjectListResponse>> GetProjects(GetProjectListRequest request)
@@ -57,17 +229,9 @@ namespace SmartcatPlugin.Smartcat
             return result;
         }
 
-        public async Task<ApiResponse<ResponseData>> ValidateApiKeyAsync(ApiKeyDto dto)
-        {
-            _httpClient.DefaultRequestHeaders.Authorization =
-                new System.Net.Http.Headers.AuthenticationHeaderValue("Basic",
-                    EncodeClientIdSecretToBase64(dto.WorkspaceId, dto.ApiKey));
-            var response = await _httpClient.PostAsync("/api/v1/workspaces/validate-api-key", CreateJsonContent(dto));
-            var result = await HandleResponse<ResponseData>(response);
-            return result;
-        }
+        
 
-        public async Task<ApiResponse<CreateProjectResponse>> CreateProject(CreateProjectRequest request)
+        /*public async Task<ApiResponse<CreateProjectResponse>> CreateProject(CreateProjectRequest request)
         {
             var apiKey = _authService.GetApiKey();
             request.WorkspaceId = apiKey.WorkspaceId;
@@ -91,7 +255,7 @@ namespace SmartcatPlugin.Smartcat
             var response = await _httpClient.PostAsync("/api/v1/projects", CreateJsonContent(tempRequest));
             var result = await HandleResponse<CreateProjectResponse>(response);
             return result;
-        }
+        }*/
 
         public async Task<ApiResponse<GetItemTranslationResponse>> GetItemTranslation(GetItemTranslationRequest request)
         {

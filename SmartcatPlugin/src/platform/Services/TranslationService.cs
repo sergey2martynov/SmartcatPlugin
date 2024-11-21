@@ -103,7 +103,7 @@ namespace SmartcatPlugin.Services
             return new ApiResponse<GetItemTranslationResponse> { IsSuccess = false, ErrorMessage = "Could not get response" };
         }
 
-        public void AddNewItemLanguageVersions(LocJsonContent content)      //todo: make retry logic
+        public void AddNewItemLanguageVersions(LocJson content)      //todo: make retry logic
         {
             if (content.Properties == null || content.Properties.TargetLanguage == null ||
                 content.Properties.ItemId == null)

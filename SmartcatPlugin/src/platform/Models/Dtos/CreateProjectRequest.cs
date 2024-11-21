@@ -25,12 +25,14 @@ namespace SmartcatPlugin.Models.Dtos
         public List<string> TargetLanguages { get; set; }
 
         [JsonProperty("dueDate")]
-        public string DueDate { get; set; }
+        public DateTime DueDate { get; set; }
 
         [JsonProperty("projectTemplateId")]
-        public string ProjectTemplateId { get; set; }
+        public Guid? ProjectTemplateId { get; set; }
 
         [JsonProperty("selectedItemIds")]
         public List<string> SelectedItemIds { get; set; }
+        [JsonProperty("stage")]
+        public int Stage { get; set; }
     }
 }

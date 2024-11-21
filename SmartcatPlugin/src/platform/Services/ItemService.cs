@@ -12,6 +12,8 @@ using SmartcatPlugin.Interfaces;
 using SmartcatPlugin.Models;
 using SmartcatPlugin.Tools;
 using System;
+using Newtonsoft.Json.Linq;
+using Smartcat.IntegrationHub.Contracts.Dto.LocJson;
 
 namespace SmartcatPlugin.Services
 {
@@ -266,21 +268,21 @@ namespace SmartcatPlugin.Services
 
             var locJsonDictionary = new Dictionary<string, LocJsonContent>();
 
-            var units = new List<Unit>();
+            var units = new List<LocJsonUnit>();
 
             var fields = parentPage.GetNonSystemFields();
 
             foreach (var field in fields)
             {
-                var unit = new Unit
+                var unit = new LocJsonUnit
                 {
                     Key = field.Key,
-                    Properties = new UnitProperties
+                    /*Properties = new Dictionary<string, JToken>
                     {
-                        SmartcatFormat = field.Type == ConstantItemFieldTypes.RichText ? "html" : ""
-                    },
-                    Source = StringSplitter.SplitStringWithNewlines(field.Value),
-                    Target = new List<string>()
+                        {"x-smartcat-format", new JValue(field.Type == ConstantItemFieldTypes.RichText ? "html" : "")}
+                    },*/
+                    Source = StringSplitter.SplitStringWithNewlines(field.Value).ToArray(),
+                    //Target = new string[targetLocales.Count],
                 };
 
                 units.Add(unit);
@@ -292,11 +294,10 @@ namespace SmartcatPlugin.Services
                 var locJsonContent = new LocJsonContent
                 {
                     Units = units,
-                    Properties = new Properties
+                    /*Properties = new Dictionary<string, JToken>
                     {
-                        ItemId = parentPage.ID.ToString(),
-                        TargetLanguage = targetLanguage.Name
-                    }
+                        {"targetLanguage", new JValue(targetLanguage.Name)}
+                    }*/
                 };
 
                 locJsonDictionary.Add(targetLanguage.Name, locJsonContent);
@@ -311,11 +312,11 @@ namespace SmartcatPlugin.Services
 
                 var targetVersionItem = _sitecoreDbService.GetItemByIdAndLanguage(parentPage.ID, targetLanguage);
 
-                foreach (var unit in locJsonContent.Units)
+                /*foreach (var unit in locJsonContent.Units)
                 {
                     var field = targetVersionItem.Fields[unit.Key];
-                    unit.Target = StringSplitter.SplitStringWithNewlines(field.Value);
-                }
+                    unit.Target = StringSplitter.SplitStringWithNewlines(field.Value).ToArray();
+                }*/
             }
 
             return locJsonDictionary;

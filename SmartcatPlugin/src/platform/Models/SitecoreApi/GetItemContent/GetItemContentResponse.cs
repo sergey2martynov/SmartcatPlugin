@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
+using Smartcat.IntegrationHub.Contracts.Dto.LocJson;
 
-namespace SmartcatPlugin.Models.Smartcat.GetItemContent
+namespace SmartcatPlugin.Models.SitecoreApi.GetItemContent
 {
     public class GetItemContentResponse
     {

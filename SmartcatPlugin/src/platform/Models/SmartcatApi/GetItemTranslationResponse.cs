@@ -7,7 +7,7 @@ namespace SmartcatPlugin.Models.SmartcatApi
     public class GetItemTranslationResponse : ResponseData
     {
         [JsonProperty("content")]
-        public LocJsonContent Content { get; set; }
+        public LocJson Content { get; set; }
         [JsonProperty("errorDetails")]
         public string ErrorDetails { get; set; }
 

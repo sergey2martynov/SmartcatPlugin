@@ -27,7 +27,7 @@ namespace SmartcatPlugin.Controllers
         [HttpPost]
         public async Task<IHttpActionResult> SaveCredentials(ApiKeyDto dto)
         {
-            var result = await _apiClient.ValidateApiKeyAsync(dto);
+            var isValid = await _apiClient.ValidateApiKeyAsync(dto);
 
             var apiKeyItem = _authService.GetApiKeyItem();
 
@@ -47,12 +47,12 @@ namespace SmartcatPlugin.Controllers
 
             _sitecoreDbService.UpdateFieldValues(apiKeyItem, itemFields);
 
-            if (!result.IsSuccess)
+            if (!isValid)
             {
                 return BadRequest("Authorization was failed");
             }
 
-            return Ok(result);
+            return Ok(true);
         }
 
         [Route("get-apikey")]

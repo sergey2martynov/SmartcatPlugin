@@ -28,5 +28,7 @@
     <PackageReference Update="Microsoft.Extensions.Http" Version="$(Net6x)" />
     <PackageReference Update="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="$(Net6x)" />
     <PackageReference Update="Sitecore.XmCloud.ExperienceEditor.Speak" Version="1.6.273"/>
+    <PackageReference Update="MongoDB.Bson" Version="2.25.0" />
+    <PackageReference Update="TSClientGen.Contract" Version="10.0.1"  />
   </ItemGroup>
 </Project>

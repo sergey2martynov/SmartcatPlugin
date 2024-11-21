@@ -8,7 +8,9 @@ using System.Web.Http;
 using Newtonsoft.Json;
 using SmartcatPlugin.Interfaces;
 using SmartcatPlugin.Models.Dtos;
+using SmartcatPlugin.Models.Smartcat;
 using SmartcatPlugin.Models.SmartcatApi;
+using ExternalObjectId = Smartcat.IntegrationHub.Contracts.Dto.Shared.ExternalObjectId;
 
 namespace SmartcatPlugin.Controllers
 {
@@ -80,40 +82,47 @@ namespace SmartcatPlugin.Controllers
         public async Task<IHttpActionResult> CreateSmartcatProject([FromBody] CreateProjectRequest request)
         {
             var userName = Sitecore.Context.User.Name;
-            var response = await _apiClient.CreateProject(request);
+            var projectId = await _apiClient.CreateProject(request).ConfigureAwait(false);
 
-            if (!response.IsSuccess)
+            /*if (!response.IsSuccess)
             {
                 return BadRequest("Project creating failed");
-            }
+            }*/
 
-            var documentDtos = new List<CreateDocumentRequest>();
+            var createDocumentRequests = new List<CreateDocumentRequest>();
             var items = _basketService.GetItemsByIds(request.SelectedItemIds, request.SourceLanguage);
 
             foreach (var item in items)
             {
                 var itemContent = _itemService.GetItemContent(item,  request.TargetLanguages );
 
-                var documentDto = new CreateDocumentRequest
+                foreach (var content in itemContent)
                 {
-                    WorkSpaceId = request.WorkspaceId,
-                    ProjectId = response.Data.ProjectId,
-                    Title = item.Name,
-                    Content = itemContent.Values.First()
-                };
+                    var createDocumentRequest = new CreateDocumentRequest
+                    {
+                        WorkSpaceId = request.WorkspaceId,
+                        ProjectId = projectId,
+                        Title = item.Name,
+                        Content = content.Value,
+                        ExternalObjectId = new ExternalObjectId(item.ID.ToString().Replace("{", "").Replace("}", ""), "lokalise-default-branch"),
+                        TargetLanguage = content.Key
+                    };
 
-                documentDtos.Add(documentDto);
+                    createDocumentRequests.Add(createDocumentRequest);
+                }
             }
 
-            var results = await _apiClient
-                .SendRequests<CreateDocumentRequest, CreateDocumentResponse>(documentDtos, "/api/v1/documents" ,
+            var documents = await _apiClient.CreateDocuments(createDocumentRequests, request.SourceLanguage)
+                .ConfigureAwait(false);
+            /*var results = await _apiClient
+                .SendRequests<CreateDocumentRequest, CreateDocumentResponse>(createDocumentRequests, "/api/v1/documents" ,
                     HttpMethod.Post).ConfigureAwait(false);
 
             if (results.Exists(r => !r.IsSuccess))
             {
                 var failedDocumentCount = results.Count(r => !r.IsSuccess);
                 return BadRequest($"{failedDocumentCount}th document was failed");
-            }
+            }*/
 
             return Ok();
         }

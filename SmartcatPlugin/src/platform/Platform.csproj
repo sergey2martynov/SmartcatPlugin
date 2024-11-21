@@ -15,6 +15,9 @@
     <AssemblyName>SmartcatPlugin</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <UseIISExpress>true</UseIISExpress>
+    <PlatformVersion>10.3.0</PlatformVersion>
+    <LangVersion>9.0</LangVersion>
+    <SitecoreAspNetVersion>21.0.*</SitecoreAspNetVersion>
     <IISExpressSSLPort />
     <IISExpressAnonymousAuthentication />
     <IISExpressWindowsAuthentication />
@@ -44,6 +47,12 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Smartcat.IntegrationHub.ApiClients">
+      <HintPath>Bin\Smartcat.IntegrationHub.ApiClients.dll</HintPath>
+    </Reference>
+    <Reference Include="Smartcat.IntegrationHub.Contracts">
+      <HintPath>Bin\Smartcat.IntegrationHub.Contracts.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -57,6 +66,7 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="MongoDB.Bson" />
     <PackageReference Include="Sitecore.Kernel" />
     <PackageReference Include="Sitecore.ContentSearch" />
     <PackageReference Include="Sitecore.ContentSearch.Linq" />
@@ -64,6 +74,7 @@
     <PackageReference Include="Sitecore.Assemblies.Platform" />
     <PackageReference Include="Sitecore.Assemblies.SitecoreHeadlessServicesServer" />
     <PackageReference Include="Sitecore.XmCloud.ExperienceEditor.Speak" />
+    <PackageReference Include="TSClientGen.Contract" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="App_Config\Include\Sitecore.LoadBalancing.config" />
@@ -230,7 +241,7 @@
     <Compile Include="Models\SitecoreApi\GetParentDirectories\GetParentFoldersResponse.cs" />
     <Compile Include="Models\SitecoreApi\GetParentDirectories\GetParentDirectoriesResponseItem.cs" />
     <Compile Include="Models\SitecoreApi\ImportTranslation\TranslationImportRequest.cs" />
-    <Compile Include="Models\LocJsonContent.cs" />
+    <Compile Include="Models\LocJson.cs" />
     <Compile Include="Panels\CustomPanel.cs" />
     <Compile Include="Controllers\SmartcatController.cs" />
     <Compile Include="Extensions\ItemExtensions.cs" />
